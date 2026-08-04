@@ -1,0 +1,495 @@
+{
+  "project": "Relatório Mensal AD Android",
+  "phase": "9 e 10 - Backup, portabilidade e prontidão final",
+  "version": "1.0.0",
+  "package_id": "com.mikeyphw.relatorio.android",
+  "devtool_target": "relatorio_android",
+  "base": "Phase 7/8 landed by user (commit c672363) over Phase 6 r2 commit fba9fbd",
+  "default_template": "AD_TIMOTEO_2026_V1",
+  "alternate_template": "RELATORIO_COMPLETO_V1",
+  "generated_at_utc": "2026-08-04T13:08:10.633906+00:00",
+  "validation": {
+    "phase9_10_structural_validator": "passed",
+    "prior_phase_promise_audit": "passed",
+    "core_model_kotlin_compile_werror": "passed",
+    "core_model_runtime_tests": "25 passed",
+    "backup_xml_round_trip_unicode": "passed",
+    "backup_sha256_corruption_detection": "passed",
+    "malicious_doctype_with_valid_checksum_rejection": "passed",
+    "unsupported_backup_preferences_rejection": "passed",
+    "duplicate_restore_planner": "passed",
+    "same_id_draft_replacement_planner": "passed",
+    "movement_id_collision_guard": "passed",
+    "persistence_contract_compile": "passed",
+    "viewmodel_contract_compile": "passed",
+    "backup_manager_contract_compile": "passed",
+    "print_adapter_contract_compile": "passed",
+    "compose_source_syntax_parse": "passed",
+    "xml_json_toml_python_shell_parse": "passed",
+    "full_android_gradle_build": "pending_user_environment",
+    "real_device_release_checklist": "pending_user_device",
+    "signed_release_apk": "requires_user_signing_key"
+  },
+  "files": [
+    {
+      "path": ".devtool.toml",
+      "bytes": 1265,
+      "sha256": "11b4340691a99d8bc06fed35ae85ac8f03ec2b550a85cd97c853ac5795582c93"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 89,
+      "sha256": "4a868ada2b76c676e23a89d245fb95f7191f0f3d0e4e2a255c1e21650eae64ba"
+    },
+    {
+      "path": "README.md",
+      "bytes": 2366,
+      "sha256": "9ad7eb4e04ecf7ca392cea86da89844edb3b022fec51e994a6fc25fb733819c3"
+    },
+    {
+      "path": "VALIDATION_REPORT.md",
+      "bytes": 1900,
+      "sha256": "eb6c9bf805d58590f67cf7ea6acb6e00ff0fc3d37bfccd4bcb149471072bb3b6"
+    },
+    {
+      "path": "VERSION",
+      "bytes": 6,
+      "sha256": "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03"
+    },
+    {
+      "path": "app/build.gradle.kts",
+      "bytes": 2446,
+      "sha256": "c2938a461093d360c1de056ff7746c24250a954fa26c7c8127801bb738449eed"
+    },
+    {
+      "path": "app/src/androidTest/kotlin/com/mikeyphw/relatorio/android/AppSmokeTest.kt",
+      "bytes": 1256,
+      "sha256": "66ea21cd71371f9539fbba419f2fafc7dc0e8f6db0aed71e6a84412e3a1a435f"
+    },
+    {
+      "path": "app/src/androidTest/kotlin/com/mikeyphw/relatorio/android/ReportPdfExporterTest.kt",
+      "bytes": 1495,
+      "sha256": "2d541c06024fe94035af77dfe6ad13a04dfd70226248450b4016dba44fe943cf"
+    },
+    {
+      "path": "app/src/main/AndroidManifest.xml",
+      "bytes": 1140,
+      "sha256": "77d46b094de19a29e2e1250490cfd5f2488e5debfa3b6721bcdd0a485bd2cddf"
+    },
+    {
+      "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/MainActivity.kt",
+      "bytes": 1388,
+      "sha256": "3443e270faf43912f0e00c28897fc651b1212389a8c0eb7eff2acc42dead53b6"
+    },
+    {
+      "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/MainViewModel.kt",
+      "bytes": 35554,
+      "sha256": "3881e1b69f00f1c6dbf3c5c06530a2faa48ff6b67a9283f4d624cbc8ba1b6659"
+    },
+    {
+      "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/RelatorioApplication.kt",
+      "bytes": 1086,
+      "sha256": "1140d012ec9edc4cab46855fe859de216b916d89e554b0ea562db852c7998d7d"
+    },
+    {
+      "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/backup/ReportBackupManager.kt",
+      "bytes": 5571,
+      "sha256": "323a0ba99139d9565e09d9194c2f29c3f5d39052c698e8f6e9964b22f4a56008"
+    },
+    {
+      "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/data/UserPreferencesStore.kt",
+      "bytes": 8368,
+      "sha256": "b0034a2fa72871de892f41b21eb12643f5c03b6bb2757509eb617846a6615750"
+    },
+    {
+      "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/pdf/ReportPdfDocumentWriter.kt",
+      "bytes": 22912,
+      "sha256": "eebdcd3c8345a206e9bee4c5bd8a045c8aed7845cc16d8e4dce82467e5419e47"
+    },
+    {
+      "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/pdf/ReportPdfExporter.kt",
+      "bytes": 3101,
+      "sha256": "eceed176f6931bb77b372d7ac9b4319a9082f8dc18453a71575a5f933a350c7e"
+    },
+    {
+      "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/pdf/ReportPrintAdapter.kt",
+      "bytes": 3012,
+      "sha256": "cdc601730df83010272797fbf08df7f7376757dbf34d8a8e08910b83509c7a73"
+    },
+    {
+      "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/AccessibilitySettingsScreen.kt",
+      "bytes": 7832,
+      "sha256": "f2f00fa12a80e9de4005dffca24579eb9a2d494ff0cca612ab504de8ff250930"
+    },
+    {
+      "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/BackupRestoreScreen.kt",
+      "bytes": 12830,
+      "sha256": "a964e710864b65b15d935e23be191bf6d87e9d4196658a4cbef95bd974992e04"
+    },
+    {
+      "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/MovementScreens.kt",
+      "bytes": 15765,
+      "sha256": "d41a69a0c4055264d0a929b3bfe86127eefe2bab17de513ced86afaf2a564493"
+    },
+    {
+      "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/PdfExportScreen.kt",
+      "bytes": 17398,
+      "sha256": "f1109255ac77ffd90c2320021fa69f163fba517f3e14d9b65ddb796e7b87f474"
+    },
+    {
+      "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/PrivacyInfoScreen.kt",
+      "bytes": 3690,
+      "sha256": "9e7e28a5cd8ad7331e3639a7844124c4f7d3e2f7e2a4c6f394f1dfd542f8076c"
+    },
+    {
+      "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/RelatorioApp.kt",
+      "bytes": 45248,
+      "sha256": "a1be3d70ed73fecbd89d2f9460cda10f3b76c1df34420eab07ef4c4414bfbdea"
+    },
+    {
+      "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/ReviewScreen.kt",
+      "bytes": 12499,
+      "sha256": "63cd53e08f32540f7756da31fddbcd5545177c9951f66e1545a6e724f9a0f872"
+    },
+    {
+      "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/Theme.kt",
+      "bytes": 6370,
+      "sha256": "a1ff81da216c7f0549d665a9735594bc2edea18418972b0ef2fa4461335728cc"
+    },
+    {
+      "path": "app/src/main/res/drawable/ic_launcher_foreground.xml",
+      "bytes": 620,
+      "sha256": "fc365dc308d978e246e3cd46964588bb842b350488560c57f3999d58ac54bcd2"
+    },
+    {
+      "path": "app/src/main/res/drawable/ic_launcher_monochrome.xml",
+      "bytes": 376,
+      "sha256": "71685e228f93b696d7053521355222eacfffb09c7ad0e82e0998b8e050e293ed"
+    },
+    {
+      "path": "app/src/main/res/mipmap-anydpi/ic_launcher.xml",
+      "bytes": 299,
+      "sha256": "72ad104952968a4d812ccb2bde15532dede04df6e2c0b09802de327a4132e009"
+    },
+    {
+      "path": "app/src/main/res/mipmap-anydpi/ic_launcher_round.xml",
+      "bytes": 299,
+      "sha256": "72ad104952968a4d812ccb2bde15532dede04df6e2c0b09802de327a4132e009"
+    },
+    {
+      "path": "app/src/main/res/values/colors.xml",
+      "bytes": 79,
+      "sha256": "ca6b279fa7c8aaee593321a32285097c0b9ecc1952ae3d156085e90e844b8aaf"
+    },
+    {
+      "path": "app/src/main/res/values/strings.xml",
+      "bytes": 83,
+      "sha256": "7b8c4e78503e069905215bbf9909a10d68051e21c37a3e57c5d000b69cd45fac"
+    },
+    {
+      "path": "app/src/main/res/values/styles.xml",
+      "bytes": 438,
+      "sha256": "e25be0fc530f641410af05ddbb6b86216166e7ed9b924f9e91de6a90b75d1de3"
+    },
+    {
+      "path": "app/src/main/res/values-v31/styles.xml",
+      "bytes": 693,
+      "sha256": "23e5d1528d9fa978641e5062d4b344abace487d54c21321a34ba8a05b77983eb"
+    },
+    {
+      "path": "app/src/main/res/xml/file_paths.xml",
+      "bytes": 189,
+      "sha256": "88f0988a89209a963bc3c9832c4d6ecedb6d6208c6446dbdb7a5a82ce91a50aa"
+    },
+    {
+      "path": "app/src/test/kotlin/com/mikeyphw/relatorio/android/IdentityFormTest.kt",
+      "bytes": 593,
+      "sha256": "140c4ceeaaa938466ecaa22ed8627bdd4cf731fc413afd4706c59e2bee0217cb"
+    },
+    {
+      "path": "build-android-app.sh",
+      "bytes": 281,
+      "sha256": "c2124cddda9a6274b2f5e4382f2a098522b098483f42f5a32ac68628d95f31bc"
+    },
+    {
+      "path": "build.gradle.kts",
+      "bytes": 299,
+      "sha256": "3cca30f8e2e0a1aaab4fae459d28bb13ffa2d1d72c2d80822b2ba6d3a4bbb44f"
+    },
+    {
+      "path": "core-model/build.gradle.kts",
+      "bytes": 148,
+      "sha256": "d3a8a60baa1ce90e76d5a5b0de7afaf4c1123b775ce28d1e6a86d1e48b8c6ce2"
+    },
+    {
+      "path": "core-model/src/main/kotlin/com/mikeyphw/relatorio/model/MemberMovementEditor.kt",
+      "bytes": 3865,
+      "sha256": "b1c592035ff0f97145d1f3678015ea3ae9b7bb31cffe6213bb183acceb508097"
+    },
+    {
+      "path": "core-model/src/main/kotlin/com/mikeyphw/relatorio/model/MovementReasonCatalog.kt",
+      "bytes": 638,
+      "sha256": "5b18957b189fe6078a47b418e898a04edff38f1841adbd6032a61f5bb682106c"
+    },
+    {
+      "path": "core-model/src/main/kotlin/com/mikeyphw/relatorio/model/ReportBackup.kt",
+      "bytes": 27326,
+      "sha256": "5ba8622b5ad7875d47ed55fb89b3e15cb90f5d6997b176d1ce32e4fe79774432"
+    },
+    {
+      "path": "core-model/src/main/kotlin/com/mikeyphw/relatorio/model/ReportDraftFactory.kt",
+      "bytes": 1510,
+      "sha256": "4089da1d8b8c8b41977c85cd5598816b1768618a8bc4b6e8046834213c9b0cab"
+    },
+    {
+      "path": "core-model/src/main/kotlin/com/mikeyphw/relatorio/model/ReportHistory.kt",
+      "bytes": 2245,
+      "sha256": "3ce131a229a84bb1b53fc9f91ff86fb6539379a81b9c9798e3e5a5b266ff5310"
+    },
+    {
+      "path": "core-model/src/main/kotlin/com/mikeyphw/relatorio/model/ReportModels.kt",
+      "bytes": 2911,
+      "sha256": "92a91e18f14a938b320768c7915378c20d43ce888bc7d6644ce20a8c16127cea"
+    },
+    {
+      "path": "core-model/src/main/kotlin/com/mikeyphw/relatorio/model/ReportPdfContent.kt",
+      "bytes": 5862,
+      "sha256": "772b9e9f694f15e63ccfbeae89e21ab11b8e679b351922f9d490588cef76f61e"
+    },
+    {
+      "path": "core-model/src/main/kotlin/com/mikeyphw/relatorio/model/ReportReview.kt",
+      "bytes": 12487,
+      "sha256": "36bff601d9a36bfb7723e1679e6fd0968a3a614fdc69375e90ce4bb2d6503de0"
+    },
+    {
+      "path": "core-model/src/main/kotlin/com/mikeyphw/relatorio/model/ReportTemplateCatalog.kt",
+      "bytes": 7571,
+      "sha256": "2465a987dd5b0c734dfc60b6d23252e27cac85d3d8b7de4dc93af718e7e9e6c9"
+    },
+    {
+      "path": "core-model/src/test/kotlin/com/mikeyphw/relatorio/model/MemberMovementEditorTest.kt",
+      "bytes": 1909,
+      "sha256": "75ff0df0cd5367eb41640ee80121a01bf9a6ec9150d750099bed80aa5f8420a9"
+    },
+    {
+      "path": "core-model/src/test/kotlin/com/mikeyphw/relatorio/model/ReportBackupTest.kt",
+      "bytes": 8372,
+      "sha256": "11be565a73e93d56fe9619596b2e5e8d0e6cd6eefc69a5a8c4d543ac36fe0ec7"
+    },
+    {
+      "path": "core-model/src/test/kotlin/com/mikeyphw/relatorio/model/ReportDraftFactoryTest.kt",
+      "bytes": 1042,
+      "sha256": "64991ba6779030866d861d8765e504a702f93ea5fd050007d05b72cd1445133a"
+    },
+    {
+      "path": "core-model/src/test/kotlin/com/mikeyphw/relatorio/model/ReportHistoryTest.kt",
+      "bytes": 2575,
+      "sha256": "496f98d0425004e92284c62c96f560f29f75f0283e5ff965b9cb5110eabe6f0b"
+    },
+    {
+      "path": "core-model/src/test/kotlin/com/mikeyphw/relatorio/model/ReportPdfContentFactoryTest.kt",
+      "bytes": 3394,
+      "sha256": "0f761201d14a7acae870041c434662f258ed19ecefb6870b698612d05054efef"
+    },
+    {
+      "path": "core-model/src/test/kotlin/com/mikeyphw/relatorio/model/ReportReviewEngineTest.kt",
+      "bytes": 3343,
+      "sha256": "4b63055f999b52705004bd1c783c97124783e2e401747150f2aa2269de1a4110"
+    },
+    {
+      "path": "core-model/src/test/kotlin/com/mikeyphw/relatorio/model/ReportTemplateCatalogTest.kt",
+      "bytes": 1180,
+      "sha256": "35e7b9a98be0b1b13770fb303010ed4561b5854f3cd106ab63d8250afaa65a85"
+    },
+    {
+      "path": "docs/MANUAL_RAPIDO_PT_BR.md",
+      "bytes": 1943,
+      "sha256": "923ba00fa078b221d4fbef68d6de231559683a7208b1094e3430bc509bcafd88"
+    },
+    {
+      "path": "docs/PHASE_10_RELEASE_READINESS.md",
+      "bytes": 1003,
+      "sha256": "5b87d8cbe1ea461cadcd8d21084394a519a7fb82538a640b2b2714dae4c88462"
+    },
+    {
+      "path": "docs/PHASE_2_IMPLEMENTATION.md",
+      "bytes": 2684,
+      "sha256": "b7adca1089c5a5f0a8dc190db9322de0c4a589f56bc1979980c4c3dfa39a7226"
+    },
+    {
+      "path": "docs/PHASE_3_GUIDED_NUMERIC_FORM.md",
+      "bytes": 2504,
+      "sha256": "2b2ff063f380ecac322d80d6f20b42b224531253b2143db3a896504d49dd6cee"
+    },
+    {
+      "path": "docs/PHASE_4_MOVEMENTS_AND_NOTES.md",
+      "bytes": 2904,
+      "sha256": "a8d082609d7b5bebb1238a7cd707ad9336b3bcaeb719eb66d45b1485859ca5b2"
+    },
+    {
+      "path": "docs/PHASE_5_REVIEW_AND_COMPLETION.md",
+      "bytes": 2351,
+      "sha256": "0de97b1af3254864ea20b658071218edd51beaebaa9497d1b467223b8f9e0f52"
+    },
+    {
+      "path": "docs/PHASE_6_PDF_EXPORT.md",
+      "bytes": 3070,
+      "sha256": "7de01e799074ae04049353d211d36b1d8250ffae3e7c3e5e04143da0a4b4e630"
+    },
+    {
+      "path": "docs/PHASE_7_ACCESSIBILITY_USABILITY.md",
+      "bytes": 1260,
+      "sha256": "7e1179552a8f77d19ff7b4b776a8dc67c62155b85a65df9be7509131dd5e0c3e"
+    },
+    {
+      "path": "docs/PHASE_8_HISTORY_MAINTENANCE.md",
+      "bytes": 1551,
+      "sha256": "3c225c779c001e9b0c26e95270241fd274d3b8c44db5df97076727b4a4d356c8"
+    },
+    {
+      "path": "docs/PHASE_9_BACKUP_PORTABILITY.md",
+      "bytes": 1291,
+      "sha256": "c6dde94ee58e9e553b75d40b357ff87d06aca4b6c940d9bbb1392b4b94edc2c8"
+    },
+    {
+      "path": "docs/PRIVACY_NOTICE_PT_BR.md",
+      "bytes": 580,
+      "sha256": "777e35a25f6db98a3aa5ab7873b00a76d78a4c3c143a3afd573cf2a3389615fc"
+    },
+    {
+      "path": "docs/RELEASE_CHECKLIST.md",
+      "bytes": 1271,
+      "sha256": "fc83d95a9b4f8775d982c453a58fd61fb1abf48ec6178314f791ccc0e741964c"
+    },
+    {
+      "path": "gradle/libs.versions.toml",
+      "bytes": 3021,
+      "sha256": "a80eef0c520de96e22ebf14a42cdac2c36308276c5aecdcaabbd046e1f6809d5"
+    },
+    {
+      "path": "gradle/wrapper/gradle-wrapper.jar",
+      "bytes": 48966,
+      "sha256": "55243ef57851f12b070ad14f7f5bb8302daceeebc5bce5ece5fa6edb23e1145c"
+    },
+    {
+      "path": "gradle/wrapper/gradle-wrapper.properties",
+      "bytes": 339,
+      "sha256": "032a71c92fc7f3c1cadf8880f0554b71aa6beb411f97ac253aa93932cb3784d5"
+    },
+    {
+      "path": "gradle.properties",
+      "bytes": 311,
+      "sha256": "946ef6a70ff2eed5158e253ec54a981adbefa5bd7b2f5fb5ac896884144a0ac6"
+    },
+    {
+      "path": "gradlew",
+      "bytes": 349,
+      "sha256": "0808f19919eeb2a70522008da5b2acdb5ef49c15a42d9c4584d9bb8e8f436e49"
+    },
+    {
+      "path": "gradlew.bat",
+      "bytes": 2803,
+      "sha256": "9ca26d733ada3a45f27b2151288f54e75c9f95b287d1f82ef942ec5cc2d4f006"
+    },
+    {
+      "path": "persistence/build.gradle.kts",
+      "bytes": 1182,
+      "sha256": "386e696dee0fd62c91a3a025eca470d94377fb8a33a9a3211f20fb6dda6ac8fe"
+    },
+    {
+      "path": "persistence/schemas/.gitkeep",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "persistence/schemas/com.mikeyphw.relatorio.persistence.ReportDatabase/1.json",
+      "bytes": 8347,
+      "sha256": "8a19566569cc3a8102194ba95c7fc4a3a1f1b274d7b83576cb6aeedf947e0d19"
+    },
+    {
+      "path": "persistence/src/androidTest/kotlin/com/mikeyphw/relatorio/persistence/ReportRepositoryPersistenceTest.kt",
+      "bytes": 13604,
+      "sha256": "dcfe591d808fc5f4de2fb36743106ea319d96dc927129bea4a8251cb268cd87e"
+    },
+    {
+      "path": "persistence/src/main/AndroidManifest.xml",
+      "bytes": 72,
+      "sha256": "343d5be1ac17cdd45d1a2f2ddc616c509290e655869125a9422a96d88aa66066"
+    },
+    {
+      "path": "persistence/src/main/kotlin/com/mikeyphw/relatorio/persistence/Entities.kt",
+      "bytes": 2135,
+      "sha256": "a5d4e11606fb72c24b73021b7f12aecd5cb8d84248eeddb8c37139cad7cddb6e"
+    },
+    {
+      "path": "persistence/src/main/kotlin/com/mikeyphw/relatorio/persistence/ReportDao.kt",
+      "bytes": 7986,
+      "sha256": "475ab97c0affd77671cfc958d0ade9d5140afb8b2f3e97fa17d9c8cd0c2d0cce"
+    },
+    {
+      "path": "persistence/src/main/kotlin/com/mikeyphw/relatorio/persistence/ReportDatabase.kt",
+      "bytes": 379,
+      "sha256": "35195ff69b2a009683c3ca3696c46631aa70adc10c36445615779a62a189833b"
+    },
+    {
+      "path": "persistence/src/main/kotlin/com/mikeyphw/relatorio/persistence/ReportMappers.kt",
+      "bytes": 3176,
+      "sha256": "6797dfc1c1c7aca0563dbe818db228c9e3e1a0ae95ca2c0199da5543f0a7ae6b"
+    },
+    {
+      "path": "persistence/src/main/kotlin/com/mikeyphw/relatorio/persistence/ReportRepository.kt",
+      "bytes": 7233,
+      "sha256": "28680933ee54ce35d4623f77b2d7314ebbc9d720b10630c1f0596c6a57808b89"
+    },
+    {
+      "path": "persistence/src/test/kotlin/com/mikeyphw/relatorio/persistence/ReportMappersTest.kt",
+      "bytes": 1577,
+      "sha256": "717fcc3b2ebbebffb39ef2e8ee73e3dd54e68642b5265b843cf2d7c7ff483759"
+    },
+    {
+      "path": "settings.gradle.kts",
+      "bytes": 384,
+      "sha256": "2678c2ce2066adf0488751d52b2334dddfd018f69a3961fddd194d4032cfc405"
+    },
+    {
+      "path": "tools/build_signed_release.sh",
+      "bytes": 1215,
+      "sha256": "3bc3f7696eeeabc3cc0ba5fc191d44f8ceb0a87c13f7957a73961e6949ba3d92"
+    },
+    {
+      "path": "tools/validate_phase2.py",
+      "bytes": 2805,
+      "sha256": "6c476866f9ed6826e32d522c146036c8d636221fc6546a5d5af9a0bd86ae9619"
+    },
+    {
+      "path": "tools/validate_phase3.py",
+      "bytes": 4535,
+      "sha256": "f3734f03b883297cf331bdfb1b9cb1806296c2064402f643506372821a252d82"
+    },
+    {
+      "path": "tools/validate_phase4.py",
+      "bytes": 4763,
+      "sha256": "f857d1fb67166f8d3fe101ea988fcf440e78bcb1ed0a3f3d743f16e369b1ae50"
+    },
+    {
+      "path": "tools/validate_phase5.py",
+      "bytes": 4306,
+      "sha256": "22bdcdaea7d50431e77daea64f3d086d6a80fc0969d7c33877cd21b514369a36"
+    },
+    {
+      "path": "tools/validate_phase6.py",
+      "bytes": 5183,
+      "sha256": "3a2263fb22da627630035d8f174f853e6cb5c64676032063f683717c9eb3fe0d"
+    },
+    {
+      "path": "tools/validate_phase7_8.py",
+      "bytes": 5309,
+      "sha256": "9800b7e5ce9245845af6714b2ee36d79bd0fb06705292c9404e216243c2d2d20"
+    },
+    {
+      "path": "tools/validate_phase9_10.py",
+      "bytes": 5958,
+      "sha256": "4905f74264f192c3a79b2bcb33dea972b9177e620a10fe6d0b4c83a563dec00f"
+    }
+  ]
+}

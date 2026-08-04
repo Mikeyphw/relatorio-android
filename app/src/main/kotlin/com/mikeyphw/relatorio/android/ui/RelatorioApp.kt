@@ -30,7 +30,7 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.HelpOutline
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.automirrored.filled.NavigateNext
 import androidx.compose.material.icons.filled.Remove
@@ -134,7 +134,7 @@ fun RelatorioApp(
                 },
                 actions = {
                     TextButton(onClick = { showContextualHelp = true }) {
-                        Icon(Icons.Default.HelpOutline, contentDescription = null)
+                        Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = null)
                         Spacer(Modifier.width(4.dp))
                         Text("Ajuda")
                     }

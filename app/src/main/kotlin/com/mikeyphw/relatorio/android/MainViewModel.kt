@@ -1,14 +1,18 @@
 package com.mikeyphw.relatorio.android
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.mikeyphw.relatorio.android.backup.ReportBackupManager
 import com.mikeyphw.relatorio.android.data.UserPreferences
 import com.mikeyphw.relatorio.android.data.TextSizePreference
 import com.mikeyphw.relatorio.android.data.UserPreferencesStore
+import com.mikeyphw.relatorio.model.BackupRestorePreview
 import com.mikeyphw.relatorio.model.MemberMovementInput
 import com.mikeyphw.relatorio.model.MemberMovementValidator
 import com.mikeyphw.relatorio.model.MonthlyReport
+import com.mikeyphw.relatorio.model.ReportBackupArchive
 import com.mikeyphw.relatorio.model.ReportIdentity
 import com.mikeyphw.relatorio.model.ReportIdentityValidator
 import com.mikeyphw.relatorio.model.ReportReviewEngine
@@ -42,6 +46,8 @@ enum class AppRoute {
     CompletedReports,
     CompletedReportDetail,
     AccessibilitySettings,
+    BackupRestore,
+    PrivacyInfo,
 }
 
 enum class IdentityMode { Create, Edit }
@@ -112,6 +118,11 @@ data class MainUiState(
     val saving: Boolean = false,
     val textSizePreference: TextSizePreference = TextSizePreference.Large,
     val highContrast: Boolean = false,
+    val backupBusy: Boolean = false,
+    val backupMessage: String? = null,
+    val backupMessageIsError: Boolean = false,
+    val backupPreview: BackupRestorePreview? = null,
+    val backupReplaceCurrentDraft: Boolean = false,
 )
 
 interface AppActions {
@@ -120,6 +131,14 @@ interface AppActions {
     fun openCompletedReports()
     fun openCompletedReport(reportId: String)
     fun openAccessibilitySettings()
+    fun openBackupRestore()
+    fun openPrivacyInfo()
+    fun exportBackup(destination: Uri, includePdfs: Boolean)
+    fun loadBackup(source: Uri)
+    fun setBackupReplaceCurrentDraft(enabled: Boolean)
+    fun restoreLoadedBackup()
+    fun dismissBackupPreview()
+    fun clearBackupMessage()
     fun setTextSizePreference(value: TextSizePreference)
     fun setHighContrast(enabled: Boolean)
     fun duplicateCompletedReport()
@@ -152,6 +171,7 @@ interface AppActions {
 class MainViewModel(
     private val repository: ReportRepository,
     private val preferences: UserPreferencesStore,
+    private val backupManager: ReportBackupManager,
 ) : ViewModel(), AppActions {
     private val route = MutableStateFlow(AppRoute.Home)
     private val selectedTemplate = MutableStateFlow(ReportTemplateId.AdTimoteo2026)
@@ -165,6 +185,8 @@ class MainViewModel(
     private val notesSaving = MutableStateFlow(false)
     private val saving = MutableStateFlow(false)
     private val selectedCompletedReport = MutableStateFlow<MonthlyReport?>(null)
+    private val backupUi = MutableStateFlow(BackupUiState())
+    private var pendingBackupArchive: ReportBackupArchive? = null
     private var notesSaveJob: Job? = null
 
     private val navigationCore = combine(
@@ -208,13 +230,17 @@ class MainViewModel(
         EditorState(form, movementId, notes, isNotesSaving)
     }
 
+    private val workspaceState = combine(editorState, backupUi) { editor, backup ->
+        WorkspaceState(editor = editor, backup = backup)
+    }
+
     val uiState: StateFlow<MainUiState> = combine(
         navigationState,
         repositoryState,
-        editorState,
+        workspaceState,
         selectedCompletedReport,
         saving,
-    ) { navigation, stored, editor, completedReport, isSaving ->
+    ) { navigation, stored, workspace, completedReport, isSaving ->
         val totalSections = stored.draft
             ?.let { ReportTemplateCatalog.definition(it.templateId).sections.size }
             ?: 0
@@ -275,15 +301,20 @@ class MainViewModel(
                 ?.completedSectionCount
                 ?.coerceIn(0, totalSections)
                 ?: 0,
-            movementForm = editor.movementForm,
-            editingMovementId = editor.editingMovementId,
-            notesText = editor.notesText,
-            notesSaving = editor.notesSaving,
+            movementForm = workspace.editor.movementForm,
+            editingMovementId = workspace.editor.editingMovementId,
+            notesText = workspace.editor.notesText,
+            notesSaving = workspace.editor.notesSaving,
             reviewIssues = reviewIssues,
             canComplete = stored.draft != null && reviewIssues.none { it.severity == ReportReviewSeverity.Blocking },
             saving = isSaving,
             textSizePreference = stored.userPreferences.textSizePreference,
             highContrast = stored.userPreferences.highContrast,
+            backupBusy = workspace.backup.busy,
+            backupMessage = workspace.backup.message,
+            backupMessageIsError = workspace.backup.messageIsError,
+            backupPreview = workspace.backup.preview,
+            backupReplaceCurrentDraft = workspace.backup.replaceCurrentDraft,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -336,6 +367,134 @@ class MainViewModel(
 
     override fun openAccessibilitySettings() {
         route.value = AppRoute.AccessibilitySettings
+    }
+
+    override fun openBackupRestore() {
+        backupUi.value = BackupUiState()
+        pendingBackupArchive = null
+        route.value = AppRoute.BackupRestore
+    }
+
+    override fun openPrivacyInfo() {
+        route.value = AppRoute.PrivacyInfo
+    }
+
+    override fun exportBackup(destination: Uri, includePdfs: Boolean) {
+        if (backupUi.value.busy) return
+        viewModelScope.launch {
+            backupUi.value = BackupUiState(busy = true)
+            runCatching {
+                val archive = ReportBackupArchive(
+                    createdAtEpochMillis = System.currentTimeMillis(),
+                    appVersion = BuildConfig.VERSION_NAME,
+                    reports = repository.snapshotAllReports(),
+                    preferences = preferences.backupSnapshot(),
+                )
+                if (includePdfs) {
+                    val pdfCount = backupManager.writeBundle(destination, archive)
+                    "Pacote salvo com os dados e $pdfCount PDF(s)."
+                } else {
+                    backupManager.writeBackup(destination, archive)
+                    "Backup dos dados salvo com sucesso."
+                }
+            }.onSuccess { message ->
+                backupUi.value = BackupUiState(message = message)
+            }.onFailure { error ->
+                backupUi.value = BackupUiState(
+                    message = error.userMessage("Não foi possível salvar o backup."),
+                    messageIsError = true,
+                )
+            }
+        }
+    }
+
+    override fun loadBackup(source: Uri) {
+        if (backupUi.value.busy) return
+        viewModelScope.launch {
+            backupUi.value = BackupUiState(busy = true)
+            runCatching {
+                val archive = backupManager.readBackup(source)
+                val preview = repository.previewRestore(archive, replaceCurrentDraft = false)
+                pendingBackupArchive = archive
+                preview
+            }.onSuccess { preview ->
+                backupUi.value = BackupUiState(preview = preview)
+            }.onFailure { error ->
+                pendingBackupArchive = null
+                backupUi.value = BackupUiState(
+                    message = error.userMessage("O arquivo não pôde ser lido como backup."),
+                    messageIsError = true,
+                )
+            }
+        }
+    }
+
+    override fun setBackupReplaceCurrentDraft(enabled: Boolean) {
+        val archive = pendingBackupArchive ?: return
+        if (backupUi.value.busy) return
+        viewModelScope.launch {
+            backupUi.value = backupUi.value.copy(busy = true, replaceCurrentDraft = enabled)
+            runCatching { repository.previewRestore(archive, enabled) }
+                .onSuccess { preview ->
+                    backupUi.value = BackupUiState(
+                        preview = preview,
+                        replaceCurrentDraft = enabled,
+                    )
+                }
+                .onFailure { error ->
+                    backupUi.value = BackupUiState(
+                        message = error.userMessage("Não foi possível preparar a restauração."),
+                        messageIsError = true,
+                    )
+                }
+        }
+    }
+
+    override fun restoreLoadedBackup() {
+        val archive = pendingBackupArchive ?: return
+        val currentState = backupUi.value
+        if (currentState.busy || currentState.preview?.canRestore != true) return
+        viewModelScope.launch {
+            backupUi.value = currentState.copy(busy = true)
+            runCatching {
+                val hadDraftBeforeRestore = uiState.value.draft != null
+                val result = repository.restoreBackup(archive, currentState.replaceCurrentDraft)
+                preferences.restoreBackupSnapshot(
+                    snapshot = archive.preferences,
+                    restoredDraftId = result.restoredDraftId,
+                    preserveCurrentDraftProgress = hadDraftBeforeRestore && result.restoredDraftId == null,
+                )
+                result
+            }.onSuccess { result ->
+                pendingBackupArchive = null
+                backupUi.value = BackupUiState(
+                    message = buildString {
+                        append(result.restoredReportCount)
+                        append(" relatório(s) restaurado(s).")
+                        if (result.skippedDuplicateCount > 0) {
+                            append(" ")
+                            append(result.skippedDuplicateCount)
+                            append(" repetido(s) foram ignorados.")
+                        }
+                    },
+                )
+            }.onFailure { error ->
+                backupUi.value = currentState.copy(
+                    busy = false,
+                    message = error.userMessage("Não foi possível restaurar o backup."),
+                    messageIsError = true,
+                )
+            }
+        }
+    }
+
+    override fun dismissBackupPreview() {
+        pendingBackupArchive = null
+        backupUi.value = BackupUiState()
+    }
+
+    override fun clearBackupMessage() {
+        backupUi.value = backupUi.value.copy(message = null, messageIsError = false)
     }
 
     override fun setTextSizePreference(value: TextSizePreference) {
@@ -691,6 +850,12 @@ class MainViewModel(
                 route.value = AppRoute.CompletedReports
             }
             AppRoute.AccessibilitySettings -> route.value = AppRoute.Home
+            AppRoute.BackupRestore -> {
+                pendingBackupArchive = null
+                backupUi.value = BackupUiState()
+                route.value = AppRoute.Home
+            }
+            AppRoute.PrivacyInfo -> route.value = AppRoute.Home
         }
     }
 
@@ -731,6 +896,19 @@ class MainViewModel(
         val notesSaving: Boolean,
     )
 
+    private data class BackupUiState(
+        val busy: Boolean = false,
+        val message: String? = null,
+        val messageIsError: Boolean = false,
+        val preview: BackupRestorePreview? = null,
+        val replaceCurrentDraft: Boolean = false,
+    )
+
+    private data class WorkspaceState(
+        val editor: EditorState,
+        val backup: BackupUiState,
+    )
+
     class Factory(private val container: AppContainer) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -738,6 +916,7 @@ class MainViewModel(
             return MainViewModel(
                 repository = container.repository,
                 preferences = container.preferences,
+                backupManager = container.backupManager,
             ) as T
         }
     }
@@ -748,3 +927,7 @@ class MainViewModel(
         const val NotesSaveDelayMillis = 350L
     }
 }
+
+
+private fun Throwable.userMessage(fallback: String): String =
+    message?.takeIf { it.isNotBlank() } ?: fallback

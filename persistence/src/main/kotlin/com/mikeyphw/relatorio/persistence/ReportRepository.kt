@@ -2,6 +2,10 @@ package com.mikeyphw.relatorio.persistence
 
 import com.mikeyphw.relatorio.model.MemberMovement
 import com.mikeyphw.relatorio.model.MonthlyReport
+import com.mikeyphw.relatorio.model.ReportBackupArchive
+import com.mikeyphw.relatorio.model.BackupRestorePreview
+import com.mikeyphw.relatorio.model.BackupRestoreResult
+import com.mikeyphw.relatorio.model.ReportBackupPlanner
 import com.mikeyphw.relatorio.model.ReportDraftFactory
 import com.mikeyphw.relatorio.model.ReportHistory
 import com.mikeyphw.relatorio.model.ReportIdentity
@@ -24,6 +28,40 @@ class ReportRepository(
 
     suspend fun getReport(reportId: String): MonthlyReport? =
         dao.getReport(reportId)?.toModel()
+
+    suspend fun snapshotAllReports(): List<MonthlyReport> =
+        dao.getAllReports().map { it.toModel() }
+
+    suspend fun previewRestore(
+        archive: ReportBackupArchive,
+        replaceCurrentDraft: Boolean,
+    ): BackupRestorePreview = ReportBackupPlanner.preview(
+        archive = archive,
+        existingReports = snapshotAllReports(),
+        replaceCurrentDraft = replaceCurrentDraft,
+    )
+
+    suspend fun restoreBackup(
+        archive: ReportBackupArchive,
+        replaceCurrentDraft: Boolean,
+    ): BackupRestoreResult {
+        val preview = previewRestore(archive, replaceCurrentDraft)
+        check(preview.blockingErrors.isEmpty()) { preview.blockingErrors.joinToString(" ") }
+        check(preview.importableReports.isNotEmpty()) { "Não há relatórios novos para restaurar." }
+        val reports = preview.importableReports
+        dao.restoreReports(
+            reports = reports.map { it.toEntity() },
+            values = reports.flatMap { it.valueEntities() },
+            movements = reports.flatMap { it.movementEntities() },
+            replaceCurrentDraft = preview.willReplaceCurrentDraft,
+            draftStatus = ReportStatus.Draft.storageValue,
+        )
+        return BackupRestoreResult(
+            restoredReportCount = reports.size,
+            skippedDuplicateCount = preview.skippedDuplicateCount,
+            restoredDraftId = reports.singleOrNull { it.status == ReportStatus.Draft }?.id,
+        )
+    }
 
     suspend fun createDraft(
         templateId: ReportTemplateId,

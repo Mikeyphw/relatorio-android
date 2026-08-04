@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.PictureAsPdf
+import androidx.compose.material.icons.filled.Print
 import androidx.compose.material.icons.filled.SaveAlt
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Visibility
@@ -54,6 +55,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mikeyphw.relatorio.android.pdf.ReportPdfExporter
+import com.mikeyphw.relatorio.android.pdf.printPdf
 import com.mikeyphw.relatorio.model.MonthlyReport
 import com.mikeyphw.relatorio.model.ReportPdfContentFactory
 import java.io.File
@@ -239,6 +241,33 @@ internal fun CompletedReportDetailScreen(
             Text("Compartilhar PDF")
         }
 
+        OutlinedButton(
+            onClick = {
+                generateAnd { file ->
+                    runCatching {
+                        printPdf(
+                            context = context,
+                            file = file,
+                            jobName = "Relatório ${report.identity.congregation} ${report.identity.month}-${report.identity.year}",
+                        )
+                    }.onSuccess {
+                        message = "Relatório enviado para a tela de impressão."
+                        messageIsError = false
+                    }.onFailure { error ->
+                        message = error.userMessage("Não foi possível abrir a impressão.")
+                        messageIsError = true
+                    }
+                }
+            },
+            enabled = !busy,
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = ExportActionHeight),
+        ) {
+            Icon(Icons.Default.Print, contentDescription = null)
+            Spacer(Modifier.width(12.dp))
+            Text("Imprimir")
+        }
 
         OutlinedCard(modifier = Modifier.fillMaxWidth()) {
             Column(

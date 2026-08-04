@@ -7,9 +7,11 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.mikeyphw.relatorio.model.BackupPreferencesSnapshot
 import com.mikeyphw.relatorio.model.ReportIdentity
 import com.mikeyphw.relatorio.model.ReportTemplateId
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 private val Context.reportPreferencesDataStore by preferencesDataStore(name = "report_preferences")
@@ -48,6 +50,51 @@ class UserPreferencesStore(private val context: Context) {
     suspend fun setDefaultTemplate(templateId: ReportTemplateId) {
         context.reportPreferencesDataStore.edit { preferences ->
             preferences[Keys.DefaultTemplate] = templateId.stableId
+        }
+    }
+
+    suspend fun backupSnapshot(): BackupPreferencesSnapshot {
+        val current = values.first()
+        return BackupPreferencesSnapshot(
+            defaultTemplateId = current.defaultTemplateId.stableId,
+            regional = current.regional,
+            congregation = current.congregation,
+            leadPastor = current.leadPastor,
+            ministry = current.ministry,
+            presidentPastor = current.presidentPastor,
+            textSizePreferenceId = current.textSizePreference.stableId,
+            highContrast = current.highContrast,
+            draftProgressReportId = current.draftProgress.reportId,
+            draftProgressCurrentSection = current.draftProgress.currentSectionIndex,
+            draftProgressCompletedSections = current.draftProgress.completedSectionCount,
+        )
+    }
+
+    suspend fun restoreBackupSnapshot(
+        snapshot: BackupPreferencesSnapshot,
+        restoredDraftId: String?,
+        preserveCurrentDraftProgress: Boolean,
+    ) {
+        context.reportPreferencesDataStore.edit { preferences ->
+            val template = ReportTemplateId.entries.firstOrNull { it.stableId == snapshot.defaultTemplateId }
+                ?: ReportTemplateId.AdTimoteo2026
+            preferences[Keys.DefaultTemplate] = template.stableId
+            preferences[Keys.Regional] = snapshot.regional.take(120)
+            preferences[Keys.Congregation] = snapshot.congregation.take(160)
+            preferences[Keys.LeadPastor] = snapshot.leadPastor.take(160)
+            preferences[Keys.Ministry] = snapshot.ministry.take(160)
+            preferences[Keys.PresidentPastor] = snapshot.presidentPastor.take(160)
+            preferences[Keys.TextSize] = TextSizePreference.fromStableId(snapshot.textSizePreferenceId).stableId
+            preferences[Keys.HighContrast] = snapshot.highContrast
+            if (restoredDraftId != null && restoredDraftId == snapshot.draftProgressReportId) {
+                preferences[Keys.DraftProgressReportId] = restoredDraftId
+                preferences[Keys.DraftProgressCurrentSection] = snapshot.draftProgressCurrentSection.coerceAtLeast(0)
+                preferences[Keys.DraftProgressCompletedSections] = snapshot.draftProgressCompletedSections.coerceAtLeast(0)
+            } else if (!preserveCurrentDraftProgress) {
+                preferences.remove(Keys.DraftProgressReportId)
+                preferences.remove(Keys.DraftProgressCurrentSection)
+                preferences.remove(Keys.DraftProgressCompletedSections)
+            }
         }
     }
 

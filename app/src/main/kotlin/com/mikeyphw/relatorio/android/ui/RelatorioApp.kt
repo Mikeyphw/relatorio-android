@@ -119,6 +119,8 @@ fun RelatorioApp(
                                 AppRoute.CompletedReports -> "Relatórios prontos"
                                 AppRoute.CompletedReportDetail -> "PDF do relatório"
                                 AppRoute.AccessibilitySettings -> "Leitura e ajuda"
+                                AppRoute.BackupRestore -> "Backup e restauração"
+                                AppRoute.PrivacyInfo -> "Privacidade"
                                 AppRoute.Home -> "Relatório Mensal AD"
                             },
                         )
@@ -149,6 +151,8 @@ fun RelatorioApp(
                     onContinue = actions::continueDraft,
                     onCompleted = actions::openCompletedReports,
                     onAccessibility = actions::openAccessibilitySettings,
+                    onBackup = actions::openBackupRestore,
+                    onPrivacy = actions::openPrivacyInfo,
                     modifier = Modifier.padding(contentPadding),
                 )
                 AppRoute.TemplatePicker -> TemplatePickerScreen(
@@ -243,6 +247,24 @@ fun RelatorioApp(
                     onHighContrastChange = actions::setHighContrast,
                     modifier = Modifier.padding(contentPadding),
                 )
+                AppRoute.BackupRestore -> BackupRestoreScreen(
+                    hasCurrentDraft = state.draft != null,
+                    busy = state.backupBusy,
+                    message = state.backupMessage,
+                    messageIsError = state.backupMessageIsError,
+                    preview = state.backupPreview,
+                    replaceCurrentDraft = state.backupReplaceCurrentDraft,
+                    onExport = actions::exportBackup,
+                    onLoad = actions::loadBackup,
+                    onReplaceCurrentDraftChange = actions::setBackupReplaceCurrentDraft,
+                    onRestore = actions::restoreLoadedBackup,
+                    onDismissPreview = actions::dismissBackupPreview,
+                    onClearMessage = actions::clearBackupMessage,
+                    modifier = Modifier.padding(contentPadding),
+                )
+                AppRoute.PrivacyInfo -> PrivacyInfoScreen(
+                    modifier = Modifier.padding(contentPadding),
+                )
             }
         }
     }
@@ -256,6 +278,8 @@ private fun HomeScreen(
     onContinue: () -> Unit,
     onCompleted: () -> Unit,
     onAccessibility: () -> Unit,
+    onBackup: () -> Unit,
+    onPrivacy: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var showReplaceDraftConfirmation by remember(hasDraft) { mutableStateOf(false) }
@@ -334,6 +358,20 @@ private fun HomeScreen(
             supportingText = "Aumentar letras, reforçar contraste e ver instruções",
             icon = Icons.Default.AccessibilityNew,
             onClick = onAccessibility,
+            outlined = true,
+        )
+        LargeActionButton(
+            text = "Backup e restauração",
+            supportingText = "Guardar os dados ou levar para outro celular",
+            icon = Icons.Default.FolderOpen,
+            onClick = onBackup,
+            outlined = true,
+        )
+        LargeActionButton(
+            text = "Privacidade e informações",
+            supportingText = "Como os dados são guardados e guia rápido",
+            icon = Icons.Default.Article,
+            onClick = onPrivacy,
             outlined = true,
         )
 

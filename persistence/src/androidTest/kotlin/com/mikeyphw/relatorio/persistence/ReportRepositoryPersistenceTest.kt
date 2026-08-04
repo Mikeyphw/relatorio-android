@@ -4,7 +4,9 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.mikeyphw.relatorio.model.BackupPreferencesSnapshot
 import com.mikeyphw.relatorio.model.MemberMovement
+import com.mikeyphw.relatorio.model.ReportBackupArchive
 import com.mikeyphw.relatorio.model.ReportIdentity
 import com.mikeyphw.relatorio.model.ReportTemplateId
 import kotlinx.coroutines.flow.first
@@ -272,6 +274,86 @@ class ReportRepositoryPersistenceTest {
 
         assertNull(repository.getReport(completed.id))
         assertEquals(0, repository.observeCompletedReports().first().size)
+    }
+
+    @Test
+    fun backupRestoreMergesNewReportsAndSkipsEquivalentCompletedReport() = runTest {
+        val existing = repository.createDraft(
+            templateId = ReportTemplateId.AdTimoteo2026,
+            identity = ReportIdentity(month = 8, year = 2026, congregation = "São José"),
+        )
+        repository.complete(existing.id)
+        val duplicate = existing.copy(id = "backup-duplicate")
+        val newReport = existing.copy(
+            id = "backup-new",
+            identity = existing.identity.copy(month = 9),
+            createdAtEpochMillis = 2_000L,
+            updatedAtEpochMillis = 2_000L,
+        )
+        val archive = ReportBackupArchive(
+            createdAtEpochMillis = 2_000L,
+            appVersion = "1.0.0",
+            reports = listOf(duplicate, newReport),
+            preferences = BackupPreferencesSnapshot(),
+        )
+
+        val result = repository.restoreBackup(archive, replaceCurrentDraft = false)
+
+        assertEquals(1, result.restoredReportCount)
+        assertEquals(1, result.skippedDuplicateCount)
+        assertNotNull(repository.getReport("backup-new"))
+        assertNull(repository.getReport("backup-duplicate"))
+    }
+
+    @Test
+    fun backupDraftOnlyReplacesCurrentDraftWhenConfirmed() = runTest {
+        val current = repository.createDraft(
+            templateId = ReportTemplateId.AdTimoteo2026,
+            identity = ReportIdentity(month = 8, year = 2026, congregation = "Atual"),
+        )
+        val backupDraft = current.copy(
+            id = "restored-draft",
+            identity = current.identity.copy(congregation = "Restaurada"),
+        )
+        val archive = ReportBackupArchive(
+            createdAtEpochMillis = 2_000L,
+            appVersion = "1.0.0",
+            reports = listOf(backupDraft),
+            preferences = BackupPreferencesSnapshot(),
+        )
+
+        val protected = repository.previewRestore(archive, replaceCurrentDraft = false)
+        assertEquals(0, protected.importableReports.size)
+        assertEquals(current.id, repository.observeDraft().first()?.id)
+
+        val result = repository.restoreBackup(archive, replaceCurrentDraft = true)
+        assertEquals("restored-draft", result.restoredDraftId)
+        assertEquals("Restaurada", repository.observeDraft().first()?.identity?.congregation)
+        assertNull(repository.getReport(current.id))
+    }
+
+
+    @Test
+    fun backupCanReplaceCurrentDraftUsingTheSameIdentifier() = runTest {
+        val current = repository.createDraft(
+            templateId = ReportTemplateId.AdTimoteo2026,
+            identity = ReportIdentity(month = 8, year = 2026, congregation = "Atual"),
+        )
+        val backupDraft = current.copy(
+            identity = current.identity.copy(congregation = "Restaurada"),
+            updatedAtEpochMillis = 3_000L,
+        )
+        val archive = ReportBackupArchive(
+            createdAtEpochMillis = 3_000L,
+            appVersion = "1.0.0",
+            reports = listOf(backupDraft),
+            preferences = BackupPreferencesSnapshot(),
+        )
+
+        val result = repository.restoreBackup(archive, replaceCurrentDraft = true)
+
+        assertEquals(current.id, result.restoredDraftId)
+        assertEquals("Restaurada", repository.observeDraft().first()?.identity?.congregation)
     }
 
 }

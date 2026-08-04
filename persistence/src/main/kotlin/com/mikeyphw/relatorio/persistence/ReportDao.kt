@@ -33,6 +33,10 @@ abstract class ReportDao {
     @Query("SELECT * FROM reports WHERE id = :reportId LIMIT 1")
     abstract suspend fun getReport(reportId: String): ReportAggregate?
 
+    @Transaction
+    @Query("SELECT * FROM reports ORDER BY createdAtEpochMillis ASC")
+    abstract suspend fun getAllReports(): List<ReportAggregate>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insertReport(report: ReportEntity)
 
@@ -252,6 +256,22 @@ abstract class ReportDao {
                 updatedAtEpochMillis = updatedAtEpochMillis,
             ) == 1,
         ) { "Relatório concluído não encontrado: $reportId" }
+    }
+
+    @Transaction
+    open suspend fun restoreReports(
+        reports: List<ReportEntity>,
+        values: List<ReportValueEntity>,
+        movements: List<MemberMovementEntity>,
+        replaceCurrentDraft: Boolean,
+        draftStatus: String,
+    ) {
+        if (replaceCurrentDraft && reports.any { it.status == draftStatus }) {
+            deleteReportsByStatus(draftStatus)
+        }
+        reports.forEach { insertReport(it) }
+        if (values.isNotEmpty()) insertValues(values)
+        if (movements.isNotEmpty()) insertMovements(movements)
     }
 
 }

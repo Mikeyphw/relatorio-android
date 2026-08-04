@@ -2,6 +2,7 @@ package com.mikeyphw.relatorio.android
 
 import android.app.Application
 import androidx.room.Room
+import com.mikeyphw.relatorio.android.backup.ReportBackupManager
 import com.mikeyphw.relatorio.android.data.UserPreferencesStore
 import com.mikeyphw.relatorio.persistence.ReportDatabase
 import com.mikeyphw.relatorio.persistence.ReportRepository
@@ -21,6 +22,7 @@ class RelatorioApplication : Application() {
         container = AppContainer(
             repository = ReportRepository(database.reportDao()),
             preferences = UserPreferencesStore(applicationContext),
+            backupManager = ReportBackupManager(applicationContext),
         )
     }
 }
@@ -28,4 +30,5 @@ class RelatorioApplication : Application() {
 data class AppContainer(
     val repository: ReportRepository,
     val preferences: UserPreferencesStore,
+    val backupManager: ReportBackupManager,
 )

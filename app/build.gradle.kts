@@ -11,8 +11,8 @@ android {
         applicationId = "com.mikeyphw.relatorio.android"
         minSdk = 26
         targetSdk = 36
-        versionCode = 7
-        versionName = "0.8.0-phase7-8"
+        versionCode = 10
+        versionName = "1.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -26,7 +26,10 @@ android {
         }
     }
 
-    buildFeatures { compose = true }
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

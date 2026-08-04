@@ -1,0 +1,62 @@
+{
+  "applied_at": "2026-08-04T00:14:37.278040Z",
+  "artifact": "/storage/emulated/0/Download/relatorio_android_phase2_compose_compile_hotfix_overlay_r4_final.zip",
+  "artifact_name": "relatorio_android_phase2_compose_compile_hotfix_overlay_r4_final.zip",
+  "type": "overlay",
+  "sha256": "85facbd5db2a3acaf97df9878f9ab75e07e140be7819c14a2fb8415e4b0cd7ca",
+  "status": "failed",
+  "validation_status": "not-run",
+  "commit_message": "Fix Phase 2 Compose imports",
+  "commit_hash": "",
+  "file_count": 1,
+  "change_counts": {
+    "modify": 1
+  },
+  "manifest": {
+    "schema_version": 2,
+    "type": "overlay",
+    "name": "Relatório Android Phase 2 Compose compile hotfix r4",
+    "description": "Corrige os imports Compose que impedem :app:compileDebugKotlin.",
+    "target": "relatorio_android",
+    "inventory": {
+      "format": 1,
+      "entries": [
+        {
+          "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/RelatorioApp.kt",
+          "action": "modify",
+          "sha256": "f0d5d46252c282f7161307d44782e9061c572da9d77984c577461027718bbfda",
+          "size": 26563,
+          "source_sha256": "d7d69e0c40d2eefb79cc311b5cc71c9ce18a1044868a5dde70456bfb1d0cfe17"
+        }
+      ]
+    },
+    "apply": {
+      "atomic": true,
+      "conflict_policy": "fail",
+      "path_policy": "repository-relative",
+      "requires_clean_worktree": false,
+      "commit": {
+        "enabled": true,
+        "strategy": "single",
+        "message": "Fix Phase 2 Compose imports"
+      }
+    },
+    "validation": {
+      "required": false,
+      "mode": "disabled",
+      "restore": false,
+      "build": false,
+      "test": false,
+      "rollback_on_failure": true,
+      "allow_deferred": false
+    },
+    "notes": [
+      "Substitui integralmente r1, r2 e r3.",
+      "Importa KeyboardOptions de androidx.compose.foundation.text.",
+      "Remove o import de topo inválido androidx.compose.foundation.layout.weight.",
+      "A validação do projeto deve ser executada separadamente após a aplicação.",
+      "O manifesto inclui mensagem de commit; a CLI também pode sobrescrevê-la com --commit MESSAGE."
+    ]
+  },
+  "history_id": "95534e1f69d74bebb18a5ba295b2371a"
+}

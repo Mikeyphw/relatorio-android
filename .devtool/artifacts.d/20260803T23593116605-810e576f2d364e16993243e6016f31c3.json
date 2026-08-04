@@ -1,0 +1,54 @@
+{
+  "applied_at": "2026-08-03T23:59:31.166056Z",
+  "artifact": "/storage/emulated/0/Download/relatorio_android_phase2_compose_compile_hotfix_overlay_r3.zip",
+  "artifact_name": "relatorio_android_phase2_compose_compile_hotfix_overlay_r3.zip",
+  "type": "overlay",
+  "sha256": "27b8ab43bd050aa7d164784fe02614d7a0397f5a5ee1439f57fbad5431348f2a",
+  "status": "failed",
+  "validation_status": "not-run",
+  "commit_message": "",
+  "commit_hash": "",
+  "file_count": 1,
+  "change_counts": {
+    "modify": 1
+  },
+  "manifest": {
+    "schema_version": 2,
+    "type": "overlay",
+    "name": "Relatório Android Phase 2 Compose compile hotfix r3",
+    "description": "Apply-only replacement overlay for the Phase 2 Compose compilation fix. Validation is explicitly disabled so it can be applied with --no-validate and validated separately afterward.",
+    "repository": {
+      "name": "relatorio-android"
+    },
+    "workspace": {
+      "name": "Relatório Mensal AD Android",
+      "root": "."
+    },
+    "target": "relatorio_android",
+    "inventory": {
+      "format": 1,
+      "entries": [
+        {
+          "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/RelatorioApp.kt",
+          "action": "modify",
+          "sha256": "f0d5d46252c282f7161307d44782e9061c572da9d77984c577461027718bbfda",
+          "size": 26563,
+          "source_sha256": "d7d69e0c40d2eefb79cc311b5cc71c9ce18a1044868a5dde70456bfb1d0cfe17"
+        }
+      ]
+    },
+    "validation": {
+      "mode": "disabled",
+      "commands": []
+    },
+    "notes": [
+      "Supersedes both earlier Compose compile hotfix overlays.",
+      "Apply with --no-validate.",
+      "Then run a separate targeted validation from the repository.",
+      "Imports KeyboardOptions from androidx.compose.foundation.text.",
+      "Removes the invalid top-level androidx.compose.foundation.layout.weight import.",
+      "No UI behavior, persistence schema, model fields, or report templates are changed."
+    ]
+  },
+  "history_id": "810e576f2d364e16993243e6016f31c3"
+}

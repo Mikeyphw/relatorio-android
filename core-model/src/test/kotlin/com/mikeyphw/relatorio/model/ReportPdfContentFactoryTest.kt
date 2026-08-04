@@ -47,7 +47,7 @@ class ReportPdfContentFactoryTest {
         assertEquals("Batismo nas águas", content.movements.single().occurrence)
         assertEquals("03/08/2026", content.movements.single().eventDatePtBr)
         assertEquals("10/05/1966", content.movements.single().birthDatePtBr)
-        assertTrue(content.suggestedFileName.endsWith("_2026-08.pdf"))
+        assertTrue(content.suggestedFileName.endsWith("_2026-08.PDF"))
         assertFalse(content.suggestedFileName.contains(' '))
     }
 
@@ -83,6 +83,6 @@ class ReportPdfContentFactoryTest {
         assertEquals(74, content.sections.sumOf { it.rows.size })
         assertEquals(4, customRow.value)
         assertFalse(content.movementIncludesBirthDate)
-        assertTrue(content.suggestedFileName.contains("Congregacao_Sao_Jose"))
+        assertTrue(content.suggestedFileName.contains("CONGREGACAO_SAO_JOSE"))
     }
 }

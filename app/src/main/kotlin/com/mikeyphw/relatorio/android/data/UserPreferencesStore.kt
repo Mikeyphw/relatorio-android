@@ -41,6 +41,8 @@ data class UserPreferences(
     val presidentPastor: String = "Carmo Matias Gonçalves",
     val textSizePreference: TextSizePreference = TextSizePreference.Large,
     val highContrast: Boolean = false,
+    val pdfAllTextBold: Boolean = false,
+    val pdfOfficialFormLayout: Boolean = false,
     val draftProgress: DraftProgress = DraftProgress(),
 )
 
@@ -64,6 +66,8 @@ class UserPreferencesStore(private val context: Context) {
             presidentPastor = current.presidentPastor,
             textSizePreferenceId = current.textSizePreference.stableId,
             highContrast = current.highContrast,
+            pdfAllTextBold = current.pdfAllTextBold,
+            pdfOfficialFormLayout = current.pdfOfficialFormLayout,
             draftProgressReportId = current.draftProgress.reportId,
             draftProgressCurrentSection = current.draftProgress.currentSectionIndex,
             draftProgressCompletedSections = current.draftProgress.completedSectionCount,
@@ -86,6 +90,8 @@ class UserPreferencesStore(private val context: Context) {
             preferences[Keys.PresidentPastor] = snapshot.presidentPastor.take(160)
             preferences[Keys.TextSize] = TextSizePreference.fromStableId(snapshot.textSizePreferenceId).stableId
             preferences[Keys.HighContrast] = snapshot.highContrast
+            preferences[Keys.PdfAllTextBold] = snapshot.pdfAllTextBold
+            preferences[Keys.PdfOfficialFormLayout] = snapshot.pdfOfficialFormLayout
             if (restoredDraftId != null && restoredDraftId == snapshot.draftProgressReportId) {
                 preferences[Keys.DraftProgressReportId] = restoredDraftId
                 preferences[Keys.DraftProgressCurrentSection] = snapshot.draftProgressCurrentSection.coerceAtLeast(0)
@@ -142,6 +148,18 @@ class UserPreferencesStore(private val context: Context) {
         }
     }
 
+    suspend fun setPdfAllTextBold(enabled: Boolean) {
+        context.reportPreferencesDataStore.edit { preferences ->
+            preferences[Keys.PdfAllTextBold] = enabled
+        }
+    }
+
+    suspend fun setPdfOfficialFormLayout(enabled: Boolean) {
+        context.reportPreferencesDataStore.edit { preferences ->
+            preferences[Keys.PdfOfficialFormLayout] = enabled
+        }
+    }
+
     suspend fun resetDraftProgress(reportId: String) {
         saveDraftProgress(
             reportId = reportId,
@@ -181,6 +199,8 @@ class UserPreferencesStore(private val context: Context) {
         presidentPastor = preferences[Keys.PresidentPastor] ?: "Carmo Matias Gonçalves",
         textSizePreference = TextSizePreference.fromStableId(preferences[Keys.TextSize]),
         highContrast = preferences[Keys.HighContrast] ?: false,
+        pdfAllTextBold = preferences[Keys.PdfAllTextBold] ?: false,
+        pdfOfficialFormLayout = preferences[Keys.PdfOfficialFormLayout] ?: false,
         draftProgress = DraftProgress(
             reportId = preferences[Keys.DraftProgressReportId].orEmpty(),
             currentSectionIndex = preferences[Keys.DraftProgressCurrentSection] ?: 0,
@@ -197,6 +217,8 @@ class UserPreferencesStore(private val context: Context) {
         val PresidentPastor = stringPreferencesKey("president_pastor")
         val TextSize = stringPreferencesKey("text_size")
         val HighContrast = booleanPreferencesKey("high_contrast")
+        val PdfAllTextBold = booleanPreferencesKey("pdf_all_text_bold")
+        val PdfOfficialFormLayout = booleanPreferencesKey("pdf_official_form_layout")
         val DraftProgressReportId = stringPreferencesKey("draft_progress_report_id")
         val DraftProgressCurrentSection = intPreferencesKey("draft_progress_current_section")
         val DraftProgressCompletedSections = intPreferencesKey("draft_progress_completed_sections")

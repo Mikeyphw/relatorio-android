@@ -3,6 +3,7 @@ package com.mikeyphw.relatorio.android.backup
 import android.content.Context
 import android.net.Uri
 import com.mikeyphw.relatorio.android.pdf.ReportPdfDocumentWriter
+import com.mikeyphw.relatorio.android.pdf.ReportPdfOptions
 import com.mikeyphw.relatorio.model.MonthlyReport
 import com.mikeyphw.relatorio.model.ReportBackupArchive
 import com.mikeyphw.relatorio.model.ReportBackupXmlCodec
@@ -37,11 +38,15 @@ class ReportBackupManager(private val context: Context) {
             zip.closeEntry()
 
             val usedNames = mutableSetOf<String>()
+            val pdfOptions = ReportPdfOptions(
+                allTextBold = archive.preferences.pdfAllTextBold,
+                officialFormLayout = archive.preferences.pdfOfficialFormLayout,
+            )
             completedReports.forEach { report ->
                 val content = ReportPdfContentFactory.create(report)
                 val fileName = uniquePdfName(content.suggestedFileName, report, usedNames)
                 zip.putNextEntry(ZipEntry("pdf/$fileName"))
-                ReportPdfDocumentWriter.write(content, zip)
+                ReportPdfDocumentWriter.write(content, zip, pdfOptions)
                 zip.closeEntry()
             }
             zip.putNextEntry(ZipEntry("LEIA-ME.txt"))
@@ -112,9 +117,10 @@ class ReportBackupManager(private val context: Context) {
         report: MonthlyReport,
         usedNames: MutableSet<String>,
     ): String {
-        val safe = sanitizeFileName(suggested).ifBlank { "Relatorio.pdf" }
+        val safe = sanitizeFileName(suggested).ifBlank { "RELATORIO.PDF" }
         if (usedNames.add(safe)) return safe
-        val withId = safe.removeSuffix(".pdf") + "_${report.id.take(8)}.pdf"
+        val base = safe.removeSuffix(".PDF").removeSuffix(".pdf")
+        val withId = "${base}_${report.id.take(8)}.PDF"
         usedNames += withId
         return withId
     }

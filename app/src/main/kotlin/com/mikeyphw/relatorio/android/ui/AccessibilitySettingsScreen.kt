@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.FormatSize
+import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -53,6 +54,8 @@ internal fun AccessibilitySettingsScreen(
     settingsMessageIsError: Boolean,
     onTextSizeChange: (TextSizePreference) -> Unit,
     onHighContrastChange: (Boolean) -> Unit,
+    pdfOfficialFormLayout: Boolean,
+    onPdfOfficialFormLayoutChange: (Boolean) -> Unit,
     onSaveHeaderDefaults: (HeaderDefaultsForm) -> Unit,
     onClearSettingsMessage: () -> Unit,
     modifier: Modifier = Modifier,
@@ -209,6 +212,34 @@ internal fun AccessibilitySettingsScreen(
                 }
                 Switch(
                     checked = highContrast,
+                    onCheckedChange = null,
+                )
+            }
+        }
+
+        OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .selectable(
+                        selected = pdfOfficialFormLayout,
+                        role = Role.Switch,
+                        onClick = { onPdfOfficialFormLayoutChange(!pdfOfficialFormLayout) },
+                    )
+                    .padding(18.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+            ) {
+                Icon(Icons.Default.PictureAsPdf, contentDescription = null)
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Layout oficial do formulário", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "Gera o PDF padrão AD Timóteo no formato do formulário impresso.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Switch(
+                    checked = pdfOfficialFormLayout,
                     onCheckedChange = null,
                 )
             }

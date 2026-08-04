@@ -37,12 +37,34 @@ class ReportBackupTest {
             preferences = BackupPreferencesSnapshot(
                 congregation = "São José & Filhos",
                 highContrast = true,
+                pdfAllTextBold = true,
+                pdfOfficialFormLayout = true,
             ),
         )
 
         val restored = ReportBackupXmlCodec.decode(ReportBackupXmlCodec.encode(source))
 
         assertEquals(source, restored)
+    }
+
+    @Test
+    fun oldBackupWithoutPdfBoldPreferenceRestoresTheDefaultValue() {
+        val archive = ReportBackupArchive(
+            createdAtEpochMillis = 20L,
+            appVersion = "1.0.0",
+            reports = emptyList(),
+            preferences = BackupPreferencesSnapshot(highContrast = true),
+        )
+        val oldXml = ReportBackupXmlCodec.encode(archive)
+            .replace(" pdf-all-text-bold=\"false\"", "")
+            .replace(" pdf-official-form-layout=\"false\"", "")
+            .withUpdatedChecksum()
+
+        val restored = ReportBackupXmlCodec.decode(oldXml)
+
+        assertFalse(restored.preferences.pdfAllTextBold)
+        assertFalse(restored.preferences.pdfOfficialFormLayout)
+        assertTrue(restored.preferences.highContrast)
     }
 
     @Test

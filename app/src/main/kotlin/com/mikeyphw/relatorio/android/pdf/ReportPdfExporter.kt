@@ -10,8 +10,17 @@ import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+data class ReportPdfOptions(
+    val allTextBold: Boolean = false,
+    val uppercaseText: Boolean = true,
+    val officialFormLayout: Boolean = false,
+)
+
 class ReportPdfExporter(private val context: Context) {
-    suspend fun generate(report: MonthlyReport): File = withContext(Dispatchers.IO) {
+    suspend fun generate(
+        report: MonthlyReport,
+        options: ReportPdfOptions = ReportPdfOptions(),
+    ): File = withContext(Dispatchers.IO) {
         val content = ReportPdfContentFactory.create(report)
         val directory = File(context.cacheDir, ExportDirectoryName).apply {
             check(exists() || mkdirs()) { "Não foi possível preparar a pasta temporária do PDF." }
@@ -23,7 +32,7 @@ class ReportPdfExporter(private val context: Context) {
         val temporary = File(directory, ".${content.suggestedFileName}.${System.nanoTime()}.tmp")
         runCatching {
             temporary.outputStream().buffered().use { output ->
-                ReportPdfDocumentWriter.write(content, output)
+                ReportPdfDocumentWriter.write(content, output, options)
             }
             check(temporary.isFile && temporary.length() > 0L) { "O arquivo PDF não foi criado." }
             if (destination.exists() && !destination.delete()) {

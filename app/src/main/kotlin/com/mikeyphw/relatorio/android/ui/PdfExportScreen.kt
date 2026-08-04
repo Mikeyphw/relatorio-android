@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
@@ -26,6 +27,7 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.FormatBold
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.Print
 import androidx.compose.material.icons.filled.SaveAlt
@@ -39,6 +41,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -50,11 +53,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mikeyphw.relatorio.android.pdf.ReportPdfExporter
+import com.mikeyphw.relatorio.android.pdf.ReportPdfOptions
 import com.mikeyphw.relatorio.android.pdf.printPdf
 import com.mikeyphw.relatorio.model.MonthlyReport
 import com.mikeyphw.relatorio.model.ReportPdfContentFactory
@@ -74,6 +79,9 @@ internal fun CompletedReportDetailScreen(
     report: MonthlyReport?,
     hasDraft: Boolean,
     saving: Boolean,
+    pdfAllTextBold: Boolean,
+    pdfOfficialFormLayout: Boolean,
+    onPdfAllTextBoldChange: (Boolean) -> Unit,
     onDuplicate: () -> Unit,
     onReopen: () -> Unit,
     onDelete: () -> Unit,
@@ -136,10 +144,14 @@ internal fun CompletedReportDetailScreen(
 
     fun generateAnd(action: (File) -> Unit) {
         val selectedReport = report ?: return
+        val options = ReportPdfOptions(
+            allTextBold = pdfAllTextBold,
+            officialFormLayout = pdfOfficialFormLayout,
+        )
         scope.launch {
             busy = true
             message = null
-            runCatching { exporter.generate(selectedReport) }
+            runCatching { exporter.generate(selectedReport, options) }
                 .onSuccess(action)
                 .onFailure { error ->
                     message = error.userMessage("Não foi possível gerar o PDF.")
@@ -175,6 +187,34 @@ internal fun CompletedReportDetailScreen(
         }
 
         ReportExportSummary(report)
+
+        OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .selectable(
+                        selected = pdfAllTextBold,
+                        role = Role.Switch,
+                        onClick = { onPdfAllTextBoldChange(!pdfAllTextBold) },
+                    )
+                    .padding(18.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+            ) {
+                Icon(Icons.Default.FormatBold, contentDescription = null)
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Texto todo em negrito", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "Aplica negrito em todo o texto do PDF.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Switch(
+                    checked = pdfAllTextBold,
+                    onCheckedChange = null,
+                )
+            }
+        }
 
         Button(
             onClick = {

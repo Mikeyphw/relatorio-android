@@ -22,6 +22,8 @@ data class BackupPreferencesSnapshot(
     val presidentPastor: String = "Carmo Matias Gonçalves",
     val textSizePreferenceId: String = "large",
     val highContrast: Boolean = false,
+    val pdfAllTextBold: Boolean = false,
+    val pdfOfficialFormLayout: Boolean = false,
     val draftProgressReportId: String = "",
     val draftProgressCurrentSection: Int = 0,
     val draftProgressCompletedSections: Int = 0,
@@ -246,7 +248,7 @@ object ReportBackupPlanner {
             .forEach { report ->
                 val replacesSameDraftId = willReplaceExistingDraft &&
                     report.status == ReportStatus.Draft &&
-                    report.id == currentDraft?.id
+                    report.id == currentDraft.id
                 if ((report.id in existingIds && !replacesSameDraftId) || !acceptedIds.add(report.id)) {
                     duplicates += 1
                     return@forEach
@@ -380,6 +382,8 @@ object ReportBackupXmlCodec {
         appendAttribute("president-pastor", snapshot.presidentPastor)
         appendAttribute("text-size", snapshot.textSizePreferenceId)
         appendAttribute("high-contrast", snapshot.highContrast.toString())
+        appendAttribute("pdf-all-text-bold", snapshot.pdfAllTextBold.toString())
+        appendAttribute("pdf-official-form-layout", snapshot.pdfOfficialFormLayout.toString())
         appendAttribute("draft-progress-report-id", snapshot.draftProgressReportId)
         appendAttribute("draft-progress-current-section", snapshot.draftProgressCurrentSection.toString())
         appendAttribute("draft-progress-completed-sections", snapshot.draftProgressCompletedSections.toString())
@@ -441,6 +445,8 @@ object ReportBackupXmlCodec {
             textSizePreferenceId = requiredAttribute("text-size"),
             highContrast = highContrastText.toBooleanStrictOrNull()
                 ?: error("Valor booleano inválido no atributo high-contrast"),
+            pdfAllTextBold = optionalBooleanAttribute("pdf-all-text-bold"),
+            pdfOfficialFormLayout = optionalBooleanAttribute("pdf-official-form-layout"),
             draftProgressReportId = getAttribute("draft-progress-report-id"),
             draftProgressCurrentSection = optionalIntAttribute("draft-progress-current-section"),
             draftProgressCompletedSections = optionalIntAttribute("draft-progress-completed-sections"),
@@ -518,6 +524,12 @@ object ReportBackupXmlCodec {
         val raw = getAttribute(name)
         if (raw.isBlank()) return 0
         return raw.toIntOrNull() ?: error("Número inválido no atributo $name")
+    }
+
+    private fun Element.optionalBooleanAttribute(name: String): Boolean {
+        val raw = getAttribute(name)
+        if (raw.isBlank()) return false
+        return raw.toBooleanStrictOrNull() ?: error("Valor booleano inválido no atributo $name")
     }
 
     private fun StringBuilder.appendAttribute(name: String, value: String) {

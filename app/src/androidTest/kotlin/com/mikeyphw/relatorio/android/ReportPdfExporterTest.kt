@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mikeyphw.relatorio.android.pdf.ReportPdfExporter
+import com.mikeyphw.relatorio.android.pdf.ReportPdfOptions
 import com.mikeyphw.relatorio.model.ReportDraftFactory
 import com.mikeyphw.relatorio.model.ReportIdentity
 import com.mikeyphw.relatorio.model.ReportTemplateId
@@ -29,7 +30,13 @@ class ReportPdfExporterTest {
         )
         val exporter = ReportPdfExporter(context)
 
-        val file = exporter.generate(report)
+        val file = exporter.generate(
+            report,
+            ReportPdfOptions(
+                allTextBold = true,
+                officialFormLayout = true,
+            ),
+        )
         val header = file.inputStream().use { input ->
             ByteArray(4).also { bytes -> assertEquals(4, input.read(bytes)) }
         }

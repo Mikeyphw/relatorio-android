@@ -108,7 +108,9 @@ object ReportPdfContentFactory {
         }
         val congregation = sanitizeFilePart(report.identity.congregation).ifBlank { "Congregacao" }
         val month = report.identity.month.coerceIn(1, 12).toString().padStart(2, '0')
-        return "Relatorio_${model}_${congregation}_${report.identity.year}-$month.pdf".take(120)
+        return "Relatorio_${model}_${congregation}_${report.identity.year}-$month.pdf"
+            .uppercase()
+            .take(120)
     }
 
     private fun splitCombinedStandardSection(

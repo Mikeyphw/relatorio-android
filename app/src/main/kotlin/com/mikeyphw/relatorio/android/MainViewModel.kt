@@ -150,6 +150,8 @@ data class MainUiState(
     val saving: Boolean = false,
     val textSizePreference: TextSizePreference = TextSizePreference.Large,
     val highContrast: Boolean = false,
+    val pdfAllTextBold: Boolean = false,
+    val pdfOfficialFormLayout: Boolean = false,
     val headerDefaults: HeaderDefaultsForm = HeaderDefaultsForm(),
     val settingsSaving: Boolean = false,
     val settingsMessage: String? = null,
@@ -179,6 +181,8 @@ interface AppActions {
     fun clearBackupMessage()
     fun setTextSizePreference(value: TextSizePreference)
     fun setHighContrast(enabled: Boolean)
+    fun setPdfAllTextBold(enabled: Boolean)
+    fun setPdfOfficialFormLayout(enabled: Boolean)
     fun saveHeaderDefaults(defaults: HeaderDefaultsForm)
     fun clearSettingsMessage()
     fun duplicateCompletedReport()
@@ -351,6 +355,8 @@ class MainViewModel(
             saving = isSaving,
             textSizePreference = stored.userPreferences.textSizePreference,
             highContrast = stored.userPreferences.highContrast,
+            pdfAllTextBold = stored.userPreferences.pdfAllTextBold,
+            pdfOfficialFormLayout = stored.userPreferences.pdfOfficialFormLayout,
             headerDefaults = HeaderDefaultsForm.fromPreferences(stored.userPreferences),
             settingsSaving = workspace.settings.saving,
             settingsMessage = workspace.settings.message,
@@ -585,6 +591,14 @@ class MainViewModel(
 
     override fun setHighContrast(enabled: Boolean) {
         viewModelScope.launch { preferences.setHighContrast(enabled) }
+    }
+
+    override fun setPdfAllTextBold(enabled: Boolean) {
+        viewModelScope.launch { preferences.setPdfAllTextBold(enabled) }
+    }
+
+    override fun setPdfOfficialFormLayout(enabled: Boolean) {
+        viewModelScope.launch { preferences.setPdfOfficialFormLayout(enabled) }
     }
 
     override fun saveHeaderDefaults(defaults: HeaderDefaultsForm) {

@@ -12,6 +12,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -170,4 +171,19 @@ class ReportRepositoryPersistenceTest {
         val members = restored?.values?.single { it.fieldId == "members.members" }
         assertEquals(0, members?.value)
     }
+    @Test
+    fun completingReportMovesItOutOfDrafts() = runTest {
+        val draft = repository.createDraft(
+            templateId = ReportTemplateId.AdTimoteo2026,
+            identity = ReportIdentity(month = 8, year = 2026, congregation = "Central"),
+        )
+
+        repository.complete(draft.id)
+
+        assertNull(repository.observeDraft().first())
+        val completed = repository.observeCompletedReports().first()
+        assertEquals(1, completed.size)
+        assertEquals(draft.id, completed.single().id)
+    }
+
 }

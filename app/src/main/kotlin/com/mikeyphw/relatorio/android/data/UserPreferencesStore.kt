@@ -56,6 +56,14 @@ class UserPreferencesStore(private val context: Context) {
         )
     }
 
+    suspend fun clearDraftProgress() {
+        context.reportPreferencesDataStore.edit { preferences ->
+            preferences.remove(Keys.DraftProgressReportId)
+            preferences.remove(Keys.DraftProgressCurrentSection)
+            preferences.remove(Keys.DraftProgressCompletedSections)
+        }
+    }
+
     suspend fun saveDraftProgress(
         reportId: String,
         currentSectionIndex: Int,

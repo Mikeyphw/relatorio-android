@@ -111,6 +111,7 @@ fun RelatorioApp(
                                 AppRoute.Movements -> "Movimentações"
                                 AppRoute.MovementEditor -> "Dados da pessoa"
                                 AppRoute.Notes -> "Anotações"
+                                AppRoute.Review -> "Revisão final"
                                 AppRoute.CompletedReports -> "Relatórios prontos"
                                 AppRoute.Home -> "Relatório Mensal AD"
                             },
@@ -165,6 +166,7 @@ fun RelatorioApp(
                     onStartFilling = actions::startNumericForm,
                     onMovements = actions::openMovements,
                     onNotes = actions::openNotes,
+                    onReview = actions::openReview,
                     onHome = actions::goHome,
                     modifier = Modifier.padding(contentPadding),
                 )
@@ -201,6 +203,15 @@ fun RelatorioApp(
                     notes = state.notesText,
                     saving = state.notesSaving,
                     onNotesChange = actions::updateNotes,
+                    modifier = Modifier.padding(contentPadding),
+                )
+                AppRoute.Review -> ReviewScreen(
+                    draft = state.draft,
+                    completedSectionCount = state.completedSectionCount,
+                    issues = state.reviewIssues,
+                    canComplete = state.canComplete,
+                    saving = state.saving,
+                    onComplete = actions::completeReport,
                     modifier = Modifier.padding(contentPadding),
                 )
                 AppRoute.CompletedReports -> CompletedReportsScreen(
@@ -575,6 +586,7 @@ private fun DraftSummaryScreen(
     onStartFilling: () -> Unit,
     onMovements: () -> Unit,
     onNotes: () -> Unit,
+    onReview: () -> Unit,
     onHome: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -687,6 +699,16 @@ private fun DraftSummaryScreen(
             supportingText = if (draft.notes.isBlank()) "Opcional" else "Texto salvo",
             icon = Icons.Default.Article,
             onClick = onNotes,
+        )
+        LargeActionButton(
+            text = "Revisar e concluir",
+            supportingText = if (numericWorkFinished) {
+                "Confira avisos e conclua o relatório"
+            } else {
+                "Ainda faltam seções numéricas para revisar"
+            },
+            icon = Icons.Default.CheckCircle,
+            onClick = onReview,
         )
         LargeActionButton(
             text = "Editar identificação",

@@ -1,25 +1,26 @@
-# Relatório de validação — Fase 4
+# Relatório de validação — Fase 5
 
 ## Concluído neste ambiente
 
-- validadores estruturais das Fases 2, 3 e 4: aprovados;
+- validadores estruturais das Fases 2, 3, 4 e 5: aprovados;
 - catálogo do modelo padrão: 33 campos em 5 seções;
 - catálogo do modelo completo: 74 campos em 10 seções;
 - compilação Kotlin do `core-model`: aprovada;
-- compilação Kotlin da persistência com stubs Room: aprovada;
-- compilação Kotlin do ViewModel com stubs Android: aprovada;
-- parser de datas brasileiras e conversão ISO: verificados;
-- validação de nome, motivo e datas: verificada;
-- CRUD de movimentações no DAO e repositório: contrato verificado;
-- salvamento automático das anotações: contrato verificado;
-- separação dos campos por modelo: verificada;
-- XML, JSON, TOML e Python: analisados sem erro;
+- verificações em execução do motor de revisão: aprovadas;
+- regras de bloqueio e aviso: verificadas;
+- conferência de EBD e Santa Ceia: verificada;
+- conferência de cartas e datas de movimentação: verificada;
+- rota de revisão e confirmação de conclusão: verificadas;
+- mudança de `DRAFT` para `COMPLETED`: contrato verificado;
+- limpeza do progresso no DataStore: contrato verificado;
+- esquema Room mantido na versão 1;
 - manifesto Android sem permissão de internet: confirmado;
+- XML, JSON, TOML e Python: analisados sem erro;
 - inventário do overlay e hashes de origem/destino: verificados.
 
 ## Limitação deste ambiente
 
-O Gradle tentou obter a distribuição 9.4.1, mas o ambiente de geração não possui acesso à internet. A compilação Android completa deve ser confirmada pelo Devtool no ambiente do usuário, que já possui o SDK e os caches necessários.
+O wrapper tentou obter a distribuição Gradle 9.4.1, mas o ambiente de geração não possui acesso à internet. A compilação Android completa deve ser confirmada pelo Devtool no ambiente do usuário, que já possui SDK e caches necessários.
 
 ## Validação no ambiente Android do usuário
 

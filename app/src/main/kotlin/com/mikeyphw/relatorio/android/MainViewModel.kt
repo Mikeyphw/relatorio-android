@@ -10,6 +10,9 @@ import com.mikeyphw.relatorio.model.MemberMovementValidator
 import com.mikeyphw.relatorio.model.MonthlyReport
 import com.mikeyphw.relatorio.model.ReportIdentity
 import com.mikeyphw.relatorio.model.ReportIdentityValidator
+import com.mikeyphw.relatorio.model.ReportReviewEngine
+import com.mikeyphw.relatorio.model.ReportReviewIssue
+import com.mikeyphw.relatorio.model.ReportReviewSeverity
 import com.mikeyphw.relatorio.model.ReportSummary
 import com.mikeyphw.relatorio.model.ReportTemplateCatalog
 import com.mikeyphw.relatorio.model.ReportTemplateId
@@ -34,6 +37,7 @@ enum class AppRoute {
     Movements,
     MovementEditor,
     Notes,
+    Review,
     CompletedReports,
 }
 
@@ -99,6 +103,8 @@ data class MainUiState(
     val editingMovementId: String? = null,
     val notesText: String = "",
     val notesSaving: Boolean = false,
+    val reviewIssues: List<ReportReviewIssue> = emptyList(),
+    val canComplete: Boolean = false,
     val saving: Boolean = false,
 )
 
@@ -124,6 +130,8 @@ interface AppActions {
     fun deleteMovement(movementId: String)
     fun openNotes()
     fun updateNotes(notes: String)
+    fun openReview()
+    fun completeReport()
     fun goHome()
     fun goBack()
 }
@@ -198,6 +206,42 @@ class MainViewModel(
         val storedProgress = stored.userPreferences.draftProgress.takeIf { progress ->
             stored.draft != null && progress.reportId == stored.draft.id
         }
+        val reviewIssues = stored.draft?.let { draft ->
+            buildList {
+                addAll(ReportReviewEngine.review(draft).issues)
+                if ((storedProgress?.completedSectionCount ?: 0) < totalSections) {
+                    add(
+                        ReportReviewIssue(
+                            id = "progress.numeric_sections",
+                            severity = ReportReviewSeverity.Blocking,
+                            titlePtBr = "Revise todas as seções numéricas",
+                            messagePtBr = "Abra o preenchimento e avance por todas as $totalSections seções antes de concluir.",
+                            sectionId = "numeric",
+                        ),
+                    )
+                }
+                val duplicateExists = stored.completed.any { completed ->
+                    completed.templateId == draft.templateId &&
+                        completed.month == draft.identity.month &&
+                        completed.year == draft.identity.year &&
+                        completed.congregation.trim().equals(
+                            draft.identity.congregation.trim(),
+                            ignoreCase = true,
+                        )
+                }
+                if (duplicateExists) {
+                    add(
+                        ReportReviewIssue(
+                            id = "duplicate.completed_report",
+                            severity = ReportReviewSeverity.Warning,
+                            titlePtBr = "Já existe um relatório deste mês",
+                            messagePtBr = "Há outro relatório concluído para o mesmo formulário, mês e congregação. Confira antes de continuar.",
+                            sectionId = "identity",
+                        ),
+                    )
+                }
+            }.distinctBy(ReportReviewIssue::id)
+        }.orEmpty()
         MainUiState(
             route = navigation.route,
             selectedTemplate = navigation.template,
@@ -219,6 +263,8 @@ class MainViewModel(
             editingMovementId = editor.editingMovementId,
             notesText = editor.notesText,
             notesSaving = editor.notesSaving,
+            reviewIssues = reviewIssues,
+            canComplete = stored.draft != null && reviewIssues.none { it.severity == ReportReviewSeverity.Blocking },
             saving = isSaving,
         )
     }.stateIn(
@@ -486,6 +532,28 @@ class MainViewModel(
         }
     }
 
+    override fun openReview() {
+        persistNotesImmediatelyIfNeeded()
+        validationMessages.value = emptyList()
+        route.value = AppRoute.Review
+    }
+
+    override fun completeReport() {
+        val draft = uiState.value.draft ?: return
+        if (!uiState.value.canComplete || saving.value) return
+        viewModelScope.launch {
+            saving.value = true
+            try {
+                repository.complete(draft.id)
+                preferences.clearDraftProgress()
+                validationMessages.value = emptyList()
+                route.value = AppRoute.CompletedReports
+            } finally {
+                saving.value = false
+            }
+        }
+    }
+
     override fun goHome() {
         persistNotesImmediatelyIfNeeded()
         route.value = AppRoute.Home
@@ -513,6 +581,7 @@ class MainViewModel(
                 persistNotesImmediatelyIfNeeded()
                 route.value = AppRoute.DraftSummary
             }
+            AppRoute.Review -> route.value = AppRoute.DraftSummary
             AppRoute.CompletedReports -> route.value = AppRoute.Home
         }
     }

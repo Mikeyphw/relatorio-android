@@ -658,6 +658,166 @@
         ]
       },
       "history_id": "4fd7b2f8df6a43e385cfe5a076a5c415"
+    },
+    {
+      "applied_at": "2026-08-04T01:41:03.262896Z",
+      "artifact": "/storage/emulated/0/Download/relatorio_android_phase5_review_completion_overlay.zip",
+      "artifact_name": "relatorio_android_phase5_review_completion_overlay.zip",
+      "type": "overlay",
+      "sha256": "75fb264921225bea527c5ea13f97f41c452e618957c69c05998cc12a91b3e556",
+      "status": "ok",
+      "validation_status": "not-run",
+      "commit_message": "Implement Phase 5 review and completion",
+      "commit_hash": "",
+      "file_count": 15,
+      "change_counts": {
+        "add": 5,
+        "modify": 10
+      },
+      "manifest": {
+        "schema_version": 2,
+        "type": "overlay",
+        "name": "Relat\u00f3rio Android Phase 5 review and completion",
+        "description": "Adiciona revis\u00e3o final em pt-BR, valida\u00e7\u00f5es bloqueantes e avisos, confirma\u00e7\u00e3o de conclus\u00e3o e transi\u00e7\u00e3o segura de rascunho para relat\u00f3rio pronto.",
+        "target": "relatorio_android",
+        "inventory": {
+          "format": 1,
+          "entries": [
+            {
+              "path": "PROJECT_MANIFEST.json",
+              "action": "modify",
+              "sha256": "aa235a5a97213cc5ad42e899afe0315cd8862b54719ee6fd1386aaf59bb27667",
+              "size": 12470,
+              "source_sha256": "70e440922a96d0f90751a9e0a1525edea7114c1efff52e0f9b15edda26256d67"
+            },
+            {
+              "path": "README.md",
+              "action": "modify",
+              "sha256": "cd3cb67d3a63f4f94e43f85827515bbff834c8a09fc510c0dfa4165bdf2abe4e",
+              "size": 2231,
+              "source_sha256": "190f02d3ae6ee90d4194514ff5a510fb61aaa37af70e9bc43e0b3c5e8a2415d3"
+            },
+            {
+              "path": "VALIDATION_REPORT.md",
+              "action": "modify",
+              "sha256": "4f80d04c54bbd90d3e7cb83ba7656af632a5fd78bef792999ce318b4dec35b26",
+              "size": 1725,
+              "source_sha256": "031c97156d9a96aaafc7e8898ee92c1bdab098fc719375923dac4c3d9249e6f4"
+            },
+            {
+              "path": "VERSION",
+              "action": "modify",
+              "sha256": "8065631afa56f7f281d1e2256dd8eed0b8356300d0ab43b66a0eb428a5c134e5",
+              "size": 13,
+              "source_sha256": "dca00cc3588bec9f596bbc13f0b838a7a7cc6ac8bb03c673016994d3596d9cb4"
+            },
+            {
+              "path": "app/build.gradle.kts",
+              "action": "modify",
+              "sha256": "f9810e04a954bba49f8799c3dde4944dfb6416ac1b76668478aab0701792f4e2",
+              "size": 2413,
+              "source_sha256": "44b2ba408419c4c5cf7b7bf736138a5b3fa32abb9430aff5d527ff4f740ff80d"
+            },
+            {
+              "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/MainViewModel.kt",
+              "action": "modify",
+              "sha256": "49015267988054ad52e890dde9bdabd9d1f4e18d2eb9b679ba6f7e2fe803c329",
+              "size": 23897,
+              "source_sha256": "47b2ceb5c1dfb7fec79bc6978c08e79c064cc53d4a079cc399e94ddcff1ca1c7"
+            },
+            {
+              "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/data/UserPreferencesStore.kt",
+              "action": "modify",
+              "sha256": "405c10dfec38d85294ac159558b86c9bff3aa5139fff5c64abcc2007c57f59cc",
+              "size": 4614,
+              "source_sha256": "2f2cd80f025ab7c96b31ac0bf93055776a72ca950ed14dd1a173bfd3a138feb3"
+            },
+            {
+              "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/RelatorioApp.kt",
+              "action": "modify",
+              "sha256": "d67318c42061e4df950bcf0e10d86531181871671dc588aa655e005a3f18164b",
+              "size": 39685,
+              "source_sha256": "129d6747bbb85eff3f742e6b94490c92fad2556e7a2b7e177f0994997ba10a87"
+            },
+            {
+              "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/ReviewScreen.kt",
+              "action": "add",
+              "sha256": "ce3a15108b5ad87a74b7e12d8c193125ce14a3add8c4377ba52d6a24e7154d55",
+              "size": 12440
+            },
+            {
+              "path": "core-model/src/main/kotlin/com/mikeyphw/relatorio/model/ReportReview.kt",
+              "action": "add",
+              "sha256": "36bff601d9a36bfb7723e1679e6fd0968a3a614fdc69375e90ce4bb2d6503de0",
+              "size": 12487
+            },
+            {
+              "path": "core-model/src/test/kotlin/com/mikeyphw/relatorio/model/ReportReviewEngineTest.kt",
+              "action": "add",
+              "sha256": "4b63055f999b52705004bd1c783c97124783e2e401747150f2aa2269de1a4110",
+              "size": 3343
+            },
+            {
+              "path": "docs/PHASE_5_REVIEW_AND_COMPLETION.md",
+              "action": "add",
+              "sha256": "0de97b1af3254864ea20b658071218edd51beaebaa9497d1b467223b8f9e0f52",
+              "size": 2351
+            },
+            {
+              "path": "persistence/src/androidTest/kotlin/com/mikeyphw/relatorio/persistence/ReportRepositoryPersistenceTest.kt",
+              "action": "modify",
+              "sha256": "fb4b14027a4b8f1c4da011aea29c0a0f3b29593911a10bc37839597d420686e6",
+              "size": 6615,
+              "source_sha256": "33bc6586a290921956361fd4dd7f33eea63fa8ccca3df32bbd9f09d513d4900c"
+            },
+            {
+              "path": "tools/validate_phase4.py",
+              "action": "modify",
+              "sha256": "afcc862fe371734109732d70787c43a1fd08db190c8785b1ae41adfb1f0bc82a",
+              "size": 4730,
+              "source_sha256": "92c28280904435ad054586009dabe578e24c27dffe1c0e1abcdffbb267d24041"
+            },
+            {
+              "path": "tools/validate_phase5.py",
+              "action": "add",
+              "sha256": "bf7953772ff3c786b67a42b906f68a60feebbf6787e722b5ba3f22604eba45c5",
+              "size": 4240
+            }
+          ]
+        },
+        "apply": {
+          "atomic": true,
+          "conflict_policy": "fail",
+          "path_policy": "repository-relative",
+          "requires_clean_worktree": false,
+          "commit": {
+            "enabled": true,
+            "strategy": "single",
+            "message": "Implement Phase 5 review and completion"
+          }
+        },
+        "validation": {
+          "required": false,
+          "mode": "disabled",
+          "restore": false,
+          "build": false,
+          "test": false,
+          "rollback_on_failure": true,
+          "allow_deferred": false
+        },
+        "notes": [
+          "Requer a Fase 4 movements and notes j\u00e1 aplicada.",
+          "Adiciona motor puro de revis\u00e3o no core-model com erros bloqueantes e avisos n\u00e3o bloqueantes.",
+          "Exige que todas as se\u00e7\u00f5es num\u00e9ricas tenham sido revisadas antes da conclus\u00e3o.",
+          "Confere EBD, Santa Ceia, cartas de mudan\u00e7a, datas e integridade das movimenta\u00e7\u00f5es.",
+          "Detecta relat\u00f3rio j\u00e1 conclu\u00eddo para o mesmo modelo, m\u00eas e congrega\u00e7\u00e3o como aviso.",
+          "Concluir muda o status Room de DRAFT para COMPLETED e limpa o progresso do DataStore.",
+          "Mant\u00e9m o esquema Room na vers\u00e3o 1; nenhuma migra\u00e7\u00e3o \u00e9 necess\u00e1ria.",
+          "Gera\u00e7\u00e3o, compartilhamento e impress\u00e3o de PDF permanecem para a pr\u00f3xima fase.",
+          "Aplique com --no-validate e execute a valida\u00e7\u00e3o Android separadamente."
+        ]
+      },
+      "history_id": "0d61574128724c3e95f0802eeea228d1"
     }
   ]
 }

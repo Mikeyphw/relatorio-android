@@ -1,22 +1,23 @@
 {
   "project": "Relatório Mensal AD Android",
-  "phase": "4 - Movimentações e anotações",
-  "version": "0.4.0-phase4",
+  "phase": "5 - Revisão final e conclusão",
+  "version": "0.5.0-phase5",
   "package_id": "com.mikeyphw.relatorio.android",
   "devtool_target": "relatorio_android",
-  "base": "Phase 3 guided numeric form landed by user at commit e66d775",
+  "base": "Phase 4 movements and notes landed by user at commit 680a798",
   "default_template": "AD_TIMOTEO_2026_V1",
   "alternate_template": "RELATORIO_COMPLETO_V1",
-  "generated_at_utc": "2026-08-04T01:20:37.009436+00:00",
+  "generated_at_utc": "2026-08-04T01:35:58.302305+00:00",
   "validation": {
     "phase2_structural_validator": "passed",
     "phase3_structural_validator": "passed",
     "phase4_structural_validator": "passed",
+    "phase5_structural_validator": "passed",
     "core_model_kotlin_compile": "passed",
-    "core_model_runtime_checks": "passed",
-    "persistence_room_stub_compile": "passed",
+    "core_model_review_runtime_checks": "passed",
+    "review_unit_test_kotlin_compile": "passed",
     "viewmodel_android_stub_compile": "passed",
-    "compose_ui_stub_compile": "passed",
+    "review_compose_ui_stub_compile": "passed",
     "xml_json_toml_python_parse": "passed",
     "whitespace_check": "passed",
     "full_android_gradle_build": "pending_user_environment: Gradle distribution download unavailable in generation sandbox"
@@ -34,23 +35,23 @@
     },
     {
       "path": "README.md",
-      "bytes": 1982,
-      "sha256": "190f02d3ae6ee90d4194514ff5a510fb61aaa37af70e9bc43e0b3c5e8a2415d3"
+      "bytes": 2231,
+      "sha256": "cd3cb67d3a63f4f94e43f85827515bbff834c8a09fc510c0dfa4165bdf2abe4e"
     },
     {
       "path": "VALIDATION_REPORT.md",
-      "bytes": 1704,
-      "sha256": "031c97156d9a96aaafc7e8898ee92c1bdab098fc719375923dac4c3d9249e6f4"
+      "bytes": 1725,
+      "sha256": "4f80d04c54bbd90d3e7cb83ba7656af632a5fd78bef792999ce318b4dec35b26"
     },
     {
       "path": "VERSION",
       "bytes": 13,
-      "sha256": "dca00cc3588bec9f596bbc13f0b838a7a7cc6ac8bb03c673016994d3596d9cb4"
+      "sha256": "8065631afa56f7f281d1e2256dd8eed0b8356300d0ab43b66a0eb428a5c134e5"
     },
     {
       "path": "app/build.gradle.kts",
       "bytes": 2413,
-      "sha256": "44b2ba408419c4c5cf7b7bf736138a5b3fa32abb9430aff5d527ff4f740ff80d"
+      "sha256": "f9810e04a954bba49f8799c3dde4944dfb6416ac1b76668478aab0701792f4e2"
     },
     {
       "path": "app/src/androidTest/kotlin/com/mikeyphw/relatorio/android/AppSmokeTest.kt",
@@ -69,8 +70,8 @@
     },
     {
       "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/MainViewModel.kt",
-      "bytes": 20752,
-      "sha256": "47b2ceb5c1dfb7fec79bc6978c08e79c064cc53d4a079cc399e94ddcff1ca1c7"
+      "bytes": 23897,
+      "sha256": "49015267988054ad52e890dde9bdabd9d1f4e18d2eb9b679ba6f7e2fe803c329"
     },
     {
       "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/RelatorioApplication.kt",
@@ -79,8 +80,8 @@
     },
     {
       "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/data/UserPreferencesStore.kt",
-      "bytes": 4301,
-      "sha256": "2f2cd80f025ab7c96b31ac0bf93055776a72ca950ed14dd1a173bfd3a138feb3"
+      "bytes": 4614,
+      "sha256": "405c10dfec38d85294ac159558b86c9bff3aa5139fff5c64abcc2007c57f59cc"
     },
     {
       "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/MovementScreens.kt",
@@ -89,8 +90,13 @@
     },
     {
       "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/RelatorioApp.kt",
-      "bytes": 38722,
-      "sha256": "129d6747bbb85eff3f742e6b94490c92fad2556e7a2b7e177f0994997ba10a87"
+      "bytes": 39685,
+      "sha256": "d67318c42061e4df950bcf0e10d86531181871671dc588aa655e005a3f18164b"
+    },
+    {
+      "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/ReviewScreen.kt",
+      "bytes": 12440,
+      "sha256": "ce3a15108b5ad87a74b7e12d8c193125ce14a3add8c4377ba52d6a24e7154d55"
     },
     {
       "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/Theme.kt",
@@ -173,6 +179,11 @@
       "sha256": "92a91e18f14a938b320768c7915378c20d43ce888bc7d6644ce20a8c16127cea"
     },
     {
+      "path": "core-model/src/main/kotlin/com/mikeyphw/relatorio/model/ReportReview.kt",
+      "bytes": 12487,
+      "sha256": "36bff601d9a36bfb7723e1679e6fd0968a3a614fdc69375e90ce4bb2d6503de0"
+    },
+    {
       "path": "core-model/src/main/kotlin/com/mikeyphw/relatorio/model/ReportTemplateCatalog.kt",
       "bytes": 7571,
       "sha256": "2465a987dd5b0c734dfc60b6d23252e27cac85d3d8b7de4dc93af718e7e9e6c9"
@@ -186,6 +197,11 @@
       "path": "core-model/src/test/kotlin/com/mikeyphw/relatorio/model/ReportDraftFactoryTest.kt",
       "bytes": 1042,
       "sha256": "64991ba6779030866d861d8765e504a702f93ea5fd050007d05b72cd1445133a"
+    },
+    {
+      "path": "core-model/src/test/kotlin/com/mikeyphw/relatorio/model/ReportReviewEngineTest.kt",
+      "bytes": 3343,
+      "sha256": "4b63055f999b52705004bd1c783c97124783e2e401747150f2aa2269de1a4110"
     },
     {
       "path": "core-model/src/test/kotlin/com/mikeyphw/relatorio/model/ReportTemplateCatalogTest.kt",
@@ -206,6 +222,11 @@
       "path": "docs/PHASE_4_MOVEMENTS_AND_NOTES.md",
       "bytes": 2904,
       "sha256": "a8d082609d7b5bebb1238a7cd707ad9336b3bcaeb719eb66d45b1485859ca5b2"
+    },
+    {
+      "path": "docs/PHASE_5_REVIEW_AND_COMPLETION.md",
+      "bytes": 2351,
+      "sha256": "0de97b1af3254864ea20b658071218edd51beaebaa9497d1b467223b8f9e0f52"
     },
     {
       "path": "gradle/libs.versions.toml",
@@ -249,8 +270,8 @@
     },
     {
       "path": "persistence/src/androidTest/kotlin/com/mikeyphw/relatorio/persistence/ReportRepositoryPersistenceTest.kt",
-      "bytes": 6049,
-      "sha256": "33bc6586a290921956361fd4dd7f33eea63fa8ccca3df32bbd9f09d513d4900c"
+      "bytes": 6615,
+      "sha256": "fb4b14027a4b8f1c4da011aea29c0a0f3b29593911a10bc37839597d420686e6"
     },
     {
       "path": "persistence/src/main/AndroidManifest.xml",
@@ -304,8 +325,13 @@
     },
     {
       "path": "tools/validate_phase4.py",
-      "bytes": 4697,
-      "sha256": "92c28280904435ad054586009dabe578e24c27dffe1c0e1abcdffbb267d24041"
+      "bytes": 4730,
+      "sha256": "afcc862fe371734109732d70787c43a1fd08db190c8785b1ae41adfb1f0bc82a"
+    },
+    {
+      "path": "tools/validate_phase5.py",
+      "bytes": 4240,
+      "sha256": "bf7953772ff3c786b67a42b906f68a60feebbf6787e722b5ba3f22604eba45c5"
     }
   ]
 }

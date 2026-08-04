@@ -39,6 +39,7 @@ enum class AppRoute {
     Notes,
     Review,
     CompletedReports,
+    CompletedReportDetail,
 }
 
 enum class IdentityMode { Create, Edit }
@@ -96,6 +97,7 @@ data class MainUiState(
     val validationMessages: List<String> = emptyList(),
     val draft: MonthlyReport? = null,
     val completedReports: List<ReportSummary> = emptyList(),
+    val selectedCompletedReport: MonthlyReport? = null,
     val defaultTemplate: ReportTemplateId = ReportTemplateId.AdTimoteo2026,
     val currentSectionIndex: Int = 0,
     val completedSectionCount: Int = 0,
@@ -112,6 +114,7 @@ interface AppActions {
     fun startNewReport()
     fun continueDraft()
     fun openCompletedReports()
+    fun openCompletedReport(reportId: String)
     fun chooseTemplate(templateId: ReportTemplateId)
     fun continueFromTemplatePicker()
     fun updateIdentity(transform: (IdentityForm) -> IdentityForm)
@@ -151,6 +154,7 @@ class MainViewModel(
     private val notesText = MutableStateFlow("")
     private val notesSaving = MutableStateFlow(false)
     private val saving = MutableStateFlow(false)
+    private val selectedCompletedReport = MutableStateFlow<MonthlyReport?>(null)
     private var notesSaveJob: Job? = null
 
     private val navigationCore = combine(
@@ -198,8 +202,9 @@ class MainViewModel(
         navigationState,
         repositoryState,
         editorState,
+        selectedCompletedReport,
         saving,
-    ) { navigation, stored, editor, isSaving ->
+    ) { navigation, stored, editor, completedReport, isSaving ->
         val totalSections = stored.draft
             ?.let { ReportTemplateCatalog.definition(it.templateId).sections.size }
             ?: 0
@@ -250,6 +255,7 @@ class MainViewModel(
             validationMessages = navigation.messages,
             draft = stored.draft,
             completedReports = stored.completed,
+            selectedCompletedReport = completedReport,
             defaultTemplate = stored.userPreferences.defaultTemplateId,
             currentSectionIndex = navigation.sectionIndex.coerceIn(
                 minimumValue = 0,
@@ -297,7 +303,22 @@ class MainViewModel(
     }
 
     override fun openCompletedReports() {
+        selectedCompletedReport.value = null
         route.value = AppRoute.CompletedReports
+    }
+
+    override fun openCompletedReport(reportId: String) {
+        if (saving.value) return
+        viewModelScope.launch {
+            saving.value = true
+            try {
+                val report = repository.getReport(reportId) ?: return@launch
+                selectedCompletedReport.value = report
+                route.value = AppRoute.CompletedReportDetail
+            } finally {
+                saving.value = false
+            }
+        }
     }
 
     override fun chooseTemplate(templateId: ReportTemplateId) {
@@ -546,8 +567,9 @@ class MainViewModel(
             try {
                 repository.complete(draft.id)
                 preferences.clearDraftProgress()
+                selectedCompletedReport.value = repository.getReport(draft.id)
                 validationMessages.value = emptyList()
-                route.value = AppRoute.CompletedReports
+                route.value = AppRoute.CompletedReportDetail
             } finally {
                 saving.value = false
             }
@@ -583,6 +605,10 @@ class MainViewModel(
             }
             AppRoute.Review -> route.value = AppRoute.DraftSummary
             AppRoute.CompletedReports -> route.value = AppRoute.Home
+            AppRoute.CompletedReportDetail -> {
+                selectedCompletedReport.value = null
+                route.value = AppRoute.CompletedReports
+            }
         }
     }
 

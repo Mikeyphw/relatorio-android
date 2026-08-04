@@ -172,6 +172,31 @@ class ReportRepositoryPersistenceTest {
         assertEquals(0, members?.value)
     }
     @Test
+    fun completedReportCanBeLoadedWithValuesAndMovementsForPdf() = runTest {
+        val draft = repository.createDraft(
+            templateId = ReportTemplateId.AdTimoteo2026,
+            identity = ReportIdentity(month = 8, year = 2026, congregation = "Central"),
+        )
+        repository.updateDraftValue(draft.id, "ministers.pastors", 2)
+        repository.saveDraftMovement(
+            draft.id,
+            MemberMovement(
+                id = "pdf-movement",
+                memberName = "Ana",
+                eventDateIso = "2026-08-05",
+                reasonCode = "BNA",
+            ),
+        )
+        repository.complete(draft.id)
+
+        val completed = repository.getReport(draft.id)
+
+        assertNotNull(completed)
+        assertEquals(2, completed?.values?.single { it.fieldId == "ministers.pastors" }?.value)
+        assertEquals("Ana", completed?.movements?.single()?.memberName)
+    }
+
+    @Test
     fun completingReportMovesItOutOfDrafts() = runTest {
         val draft = repository.createDraft(
             templateId = ReportTemplateId.AdTimoteo2026,

@@ -1,16 +1,16 @@
 # Relatório Mensal AD — Android
 
-Aplicativo Android em pt-BR para preencher relatórios mensais, manter rascunhos offline, revisar inconsistências e concluir relatórios.
+Aplicativo Android em pt-BR para preencher relatórios mensais, manter rascunhos offline, revisar inconsistências e gerar o PDF oficial.
 
 ## Estado atual
 
-Esta entrega implementa a **Fase 5 — Revisão final e conclusão**.
+Esta entrega implementa a **Fase 6 — PDF oficial, salvamento e compartilhamento**.
 
 - modelo padrão: `AD_TIMOTEO_2026_V1`;
 - modelo alternativo: `RELATORIO_COMPLETO_V1`;
 - package ID: `com.mikeyphw.relatorio.android`;
 - target Devtool: `relatorio_android`;
-- versão: `0.5.0-phase5`.
+- versão: `0.6.0-phase6`.
 
 ## O que já funciona
 
@@ -30,14 +30,18 @@ Esta entrega implementa a **Fase 5 — Revisão final e conclusão**.
 - revisão final com erros bloqueantes e avisos não bloqueantes;
 - conferência de EBD, Santa Ceia, cartas e datas de movimentação;
 - confirmação antes de concluir;
-- transferência do relatório concluído para **Relatórios prontos**;
+- histórico de relatórios concluídos;
+- PDF A4 próprio para cada modelo;
+- visualização do PDF em aplicativo instalado;
+- salvamento pelo seletor de documentos do Android;
+- compartilhamento seguro por `content://`;
 - funcionamento sem internet.
 
 ## Estrutura
 
 ```text
-app/          Interface Compose, ViewModel, DataStore e composição do aplicativo
-core-model/   Modelos, catálogos, datas e motor de revisão
+app/          Interface Compose, ViewModel, DataStore, PDF Android e composição do aplicativo
+core-model/   Modelos, catálogos, datas, revisão e conteúdo de impressão
 persistence/  Banco Room, DAO, mapeadores e repositório
 docs/         Escopo e critérios das fases
 ```
@@ -80,4 +84,4 @@ devtool --yes --copy -r "$HOME/Code/relatorio-android" \
   --target relatorio_android validate
 ```
 
-Consulte `docs/PHASE_5_REVIEW_AND_COMPLETION.md` para o escopo completo.
+Consulte `docs/PHASE_6_PDF_EXPORT.md` para o escopo completo.

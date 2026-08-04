@@ -21,6 +21,9 @@ class ReportRepository(
         dao.observeCompletedReports(ReportStatus.Completed.storageValue)
             .map { reports -> reports.map { it.toSummary() } }
 
+    suspend fun getReport(reportId: String): MonthlyReport? =
+        dao.getReport(reportId)?.toModel()
+
     suspend fun createDraft(
         templateId: ReportTemplateId,
         identity: ReportIdentity,

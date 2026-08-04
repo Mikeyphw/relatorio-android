@@ -29,6 +29,10 @@ abstract class ReportDao {
     )
     abstract fun observeCompletedReports(completedStatus: String): Flow<List<ReportEntity>>
 
+    @Transaction
+    @Query("SELECT * FROM reports WHERE id = :reportId LIMIT 1")
+    abstract suspend fun getReport(reportId: String): ReportAggregate?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insertReport(report: ReportEntity)
 

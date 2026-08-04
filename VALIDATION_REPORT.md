@@ -1,28 +1,24 @@
-# Relatório de validação — Fase 5
+# Relatório de validação — Fase 6
 
 ## Concluído neste ambiente
 
-- validadores estruturais das Fases 2, 3, 4 e 5: aprovados;
-- catálogo do modelo padrão: 33 campos em 5 seções;
-- catálogo do modelo completo: 74 campos em 10 seções;
+- validadores estruturais das Fases 2, 3, 4, 5 e 6: aprovados;
+- catálogo do modelo padrão: 33 campos convertidos em seis blocos de PDF;
+- catálogo do modelo completo: 74 campos preservados;
 - compilação Kotlin do `core-model`: aprovada;
-- verificações em execução do motor de revisão: aprovadas;
-- regras de bloqueio e aviso: verificadas;
-- conferência de EBD e Santa Ceia: verificada;
-- conferência de cartas e datas de movimentação: verificada;
-- rota de revisão e confirmação de conclusão: verificadas;
-- mudança de `DRAFT` para `COMPLETED`: contrato verificado;
-- limpeza do progresso no DataStore: contrato verificado;
+- fábrica pura de conteúdo PDF: compilada e exercitada;
+- nomes de arquivo sem caracteres inseguros: verificados;
+- datas ISO convertidas para `DD/MM/AAAA`: verificadas;
+- consulta Room de relatório completo por ID: contrato verificado;
+- rota de detalhes e ações de PDF: verificadas;
+- `PdfDocument`, `CreateDocument` e `FileProvider`: integrados;
+- `FileProvider` limitado a `cache/pdf_exports`;
+- manifesto Android sem permissão de internet ou armazenamento: confirmado;
 - esquema Room mantido na versão 1;
-- manifesto Android sem permissão de internet: confirmado;
 - XML, JSON, TOML e Python: analisados sem erro;
 - inventário do overlay e hashes de origem/destino: verificados.
 
-## Limitação deste ambiente
-
-O wrapper tentou obter a distribuição Gradle 9.4.1, mas o ambiente de geração não possui acesso à internet. A compilação Android completa deve ser confirmada pelo Devtool no ambiente do usuário, que já possui SDK e caches necessários.
-
-## Validação no ambiente Android do usuário
+## Validação Android necessária no ambiente do usuário
 
 Executar:
 
@@ -36,7 +32,8 @@ devtool --yes --copy \
   --task :persistence:testDebugUnitTest \
   --task :persistence:compileDebugAndroidTestKotlin \
   --task :app:testDebugUnitTest \
+  --task :app:compileDebugAndroidTestKotlin \
   --task :app:lintDebug
 ```
 
-Os testes instrumentados de persistência exigem dispositivo ou emulador para execução, mas sua compilação está incluída nas tarefas acima.
+O teste instrumental de exportação confirma em dispositivo ou emulador que o arquivo gerado possui assinatura `%PDF` e URI `content://`.

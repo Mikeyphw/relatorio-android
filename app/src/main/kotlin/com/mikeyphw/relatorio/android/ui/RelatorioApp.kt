@@ -113,6 +113,7 @@ fun RelatorioApp(
                                 AppRoute.Notes -> "Anotações"
                                 AppRoute.Review -> "Revisão final"
                                 AppRoute.CompletedReports -> "Relatórios prontos"
+                                AppRoute.CompletedReportDetail -> "PDF do relatório"
                                 AppRoute.Home -> "Relatório Mensal AD"
                             },
                         )
@@ -216,7 +217,12 @@ fun RelatorioApp(
                 )
                 AppRoute.CompletedReports -> CompletedReportsScreen(
                     reports = state.completedReports,
+                    onOpenReport = actions::openCompletedReport,
                     onHome = actions::goHome,
+                    modifier = Modifier.padding(contentPadding),
+                )
+                AppRoute.CompletedReportDetail -> CompletedReportDetailScreen(
+                    report = state.selectedCompletedReport,
                     modifier = Modifier.padding(contentPadding),
                 )
             }
@@ -923,6 +929,7 @@ private fun NumericCounterField(
 @Composable
 private fun CompletedReportsScreen(
     reports: List<ReportSummary>,
+    onOpenReport: (String) -> Unit,
     onHome: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -962,6 +969,16 @@ private fun CompletedReportsScreen(
                             report.templateId.displayNamePtBr,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
+                        OutlinedButton(
+                            onClick = { onOpenReport(report.id) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(MinimumActionHeight),
+                        ) {
+                            Icon(Icons.Default.Description, contentDescription = null)
+                            Spacer(Modifier.width(10.dp))
+                            Text("Abrir e gerar PDF")
+                        }
                     }
                 }
             }

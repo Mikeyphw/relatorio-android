@@ -1,22 +1,25 @@
 {
   "project": "Relatório Mensal AD Android",
-  "phase": "2 - Fundação Android",
-  "version": "0.2.0-phase2",
+  "phase": "3 - Formulário numérico guiado",
+  "version": "0.3.0-phase3",
   "package_id": "com.mikeyphw.relatorio.android",
   "devtool_target": "relatorio_android",
-  "base_archive": "xdm-20260802-155157.tar.gz",
+  "base": "Phase 2 foundation + Compose compile hotfix + RedundantLabel hotfix",
   "default_template": "AD_TIMOTEO_2026_V1",
   "alternate_template": "RELATORIO_COMPLETO_V1",
-  "generated_at_utc": "2026-08-03T21:32:19.354449+00:00",
+  "generated_at_utc": "2026-08-04T00:47:33.500235+00:00",
   "validation": {
     "phase2_structural_validator": "passed",
+    "phase3_structural_validator": "passed",
     "core_model_kotlin_compile": "passed",
-    "core_model_runtime_verification": "passed",
     "persistence_stub_compile": "passed",
     "viewmodel_stub_compile": "passed",
+    "compose_ui_stub_compile": "passed",
+    "unit_test_source_compile": "passed",
+    "instrumented_persistence_test_source_compile": "passed",
     "xml_toml_parse": "passed",
     "whitespace_check": "passed",
-    "full_android_gradle_build": "not_run_environment_missing_sdk_and_network"
+    "full_android_gradle_build": "pending_user_environment"
   },
   "files": [
     {
@@ -26,28 +29,28 @@
     },
     {
       "path": ".gitignore",
-      "bytes": 69,
-      "sha256": "6a8018d71f0cdc8be5e8e3087f11bdbb21c15dc5d1db9606994e0b61abaf79f8"
+      "bytes": 89,
+      "sha256": "4a868ada2b76c676e23a89d245fb95f7191f0f3d0e4e2a255c1e21650eae64ba"
     },
     {
       "path": "README.md",
-      "bytes": 1378,
-      "sha256": "4144699ca1e074fd40b7c52f69ced4c434cde0149feaf4956dcd19c1ac5cf9a1"
+      "bytes": 1796,
+      "sha256": "af91256bbf92617b496614a8db42fae598eb77f4fdc3557b92b29ab257c80dab"
     },
     {
       "path": "VALIDATION_REPORT.md",
-      "bytes": 1065,
-      "sha256": "3c997dcea969970de9d3f12f03ce4c45b303d17d64b1b483176e7711214e6fd1"
+      "bytes": 1197,
+      "sha256": "2e531e5d531ff3bf624839c1a77f1e8f8cd84a5bb4d8867f5ef5f6e2c26f67ba"
     },
     {
       "path": "VERSION",
       "bytes": 13,
-      "sha256": "78e70f936df5b234034edb5ab71cdd99b19910740bf9e7f0032e936e4a041d93"
+      "sha256": "2410d24eb2422bf8083d8304255b0839e3e57dc6581f382c92eb93c326249201"
     },
     {
       "path": "app/build.gradle.kts",
       "bytes": 2413,
-      "sha256": "55bd1700818ec67c1dcca559618a543651d7f316a89040174d3ea3a9d5859b3c"
+      "sha256": "dc74235cbae9b0d3f4ddcf5aa4168e5a5929891bf03dba1e2ec229609c4bfeee"
     },
     {
       "path": "app/src/androidTest/kotlin/com/mikeyphw/relatorio/android/AppSmokeTest.kt",
@@ -56,8 +59,8 @@
     },
     {
       "path": "app/src/main/AndroidManifest.xml",
-      "bytes": 792,
-      "sha256": "beaacb61f79d43f624f65060a3c019d93c650764c9e49b23487915d6c1b9fc0f"
+      "bytes": 747,
+      "sha256": "86be73423eb1cde0a129e64c2c94df3a459e76380e3660e2a963ea36357a3900"
     },
     {
       "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/MainActivity.kt",
@@ -66,8 +69,8 @@
     },
     {
       "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/MainViewModel.kt",
-      "bytes": 9394,
-      "sha256": "cc4b7162611c4cb3456b6628d9f1d642f0ecb55d4b7e0c42af75f72736218cfb"
+      "bytes": 14729,
+      "sha256": "476700773a27de390b6cbec31e83795f23bd7de9eb213dc19d16bd23c7fef94f"
     },
     {
       "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/RelatorioApplication.kt",
@@ -76,13 +79,13 @@
     },
     {
       "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/data/UserPreferencesStore.kt",
-      "bytes": 2775,
-      "sha256": "54a17d132c334f7d61fddfaf24ef5aef97e7e4d509b9c3ca42b89ffb5fdb5310"
+      "bytes": 4301,
+      "sha256": "2f2cd80f025ab7c96b31ac0bf93055776a72ca950ed14dd1a173bfd3a138feb3"
     },
     {
       "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/RelatorioApp.kt",
-      "bytes": 26610,
-      "sha256": "d7d69e0c40d2eefb79cc311b5cc71c9ce18a1044868a5dde70456bfb1d0cfe17"
+      "bytes": 36466,
+      "sha256": "43e2570129c9734e7eb1fdc404500eea774acc68c800ec1dc3269e4236804d2d"
     },
     {
       "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/Theme.kt",
@@ -180,6 +183,11 @@
       "sha256": "b7adca1089c5a5f0a8dc190db9322de0c4a589f56bc1979980c4c3dfa39a7226"
     },
     {
+      "path": "docs/PHASE_3_GUIDED_NUMERIC_FORM.md",
+      "bytes": 2504,
+      "sha256": "2b2ff063f380ecac322d80d6f20b42b224531253b2143db3a896504d49dd6cee"
+    },
+    {
       "path": "gradle/libs.versions.toml",
       "bytes": 3021,
       "sha256": "a80eef0c520de96e22ebf14a42cdac2c36308276c5aecdcaabbd046e1f6809d5"
@@ -221,8 +229,8 @@
     },
     {
       "path": "persistence/src/androidTest/kotlin/com/mikeyphw/relatorio/persistence/ReportRepositoryPersistenceTest.kt",
-      "bytes": 2290,
-      "sha256": "ba2105ba799c7a1ff20fc0daf4e34c4a4d9f59ea30b4a3fa9964ced72f32cd9a"
+      "bytes": 4172,
+      "sha256": "901a587a0b4dfcfc5b55772d96c27da94244403e3e51746067a01225742470ba"
     },
     {
       "path": "persistence/src/main/AndroidManifest.xml",
@@ -236,8 +244,8 @@
     },
     {
       "path": "persistence/src/main/kotlin/com/mikeyphw/relatorio/persistence/ReportDao.kt",
-      "bytes": 2800,
-      "sha256": "690ede42ad3c83f392c37abfbacefe171dcdcf96f4f7a88468e0526fde6fe67e"
+      "bytes": 4367,
+      "sha256": "145c3985bed2bb93defb9f64d1a63911b49aa3db4380877ee895a7a2e168f967"
     },
     {
       "path": "persistence/src/main/kotlin/com/mikeyphw/relatorio/persistence/ReportDatabase.kt",
@@ -251,8 +259,8 @@
     },
     {
       "path": "persistence/src/main/kotlin/com/mikeyphw/relatorio/persistence/ReportRepository.kt",
-      "bytes": 2272,
-      "sha256": "7e56c9c3855027ee53371fac7a2d877b3d2901ebdfe12538dcdec81f2802dba7"
+      "bytes": 2963,
+      "sha256": "52932612ee1c665f2ec9fddcfd3302d31145d61b4e9c41222893f7199628365f"
     },
     {
       "path": "persistence/src/test/kotlin/com/mikeyphw/relatorio/persistence/ReportMappersTest.kt",
@@ -268,6 +276,11 @@
       "path": "tools/validate_phase2.py",
       "bytes": 2805,
       "sha256": "6c476866f9ed6826e32d522c146036c8d636221fc6546a5d5af9a0bd86ae9619"
+    },
+    {
+      "path": "tools/validate_phase3.py",
+      "bytes": 4425,
+      "sha256": "99e5ff9d9a002047aa8bc8f1722fc468f87b08cac522700531110c333ebf39af"
     }
   ]
 }

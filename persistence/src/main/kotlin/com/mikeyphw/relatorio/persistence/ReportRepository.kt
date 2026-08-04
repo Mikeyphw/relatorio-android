@@ -52,6 +52,32 @@ class ReportRepository(
         )
     }
 
+    suspend fun updateDraftValue(
+        reportId: String,
+        fieldId: String,
+        value: Int,
+    ) {
+        dao.updateDraftValue(
+            reportId = reportId,
+            fieldId = fieldId,
+            value = value.coerceAtLeast(0),
+            updatedAtEpochMillis = nowEpochMillis(),
+        )
+    }
+
+    suspend fun updateDraftCustomLabel(
+        reportId: String,
+        fieldId: String,
+        customLabel: String,
+    ) {
+        dao.updateDraftCustomLabel(
+            reportId = reportId,
+            fieldId = fieldId,
+            customLabel = customLabel.trim().take(80).ifBlank { null },
+            updatedAtEpochMillis = nowEpochMillis(),
+        )
+    }
+
     suspend fun complete(reportId: String) {
         dao.updateStatus(
             reportId = reportId,

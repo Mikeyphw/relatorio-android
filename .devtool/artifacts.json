@@ -323,6 +323,161 @@
         ]
       },
       "history_id": "04ac7e76dbdd49ceb8cfe891d9d435eb"
+    },
+    {
+      "applied_at": "2026-08-04T01:08:37.542971Z",
+      "artifact": "/storage/emulated/0/Download/relatorio_android_phase3_guided_numeric_form_overlay.zip",
+      "artifact_name": "relatorio_android_phase3_guided_numeric_form_overlay.zip",
+      "type": "overlay",
+      "sha256": "ac1be99a897d89808fc3cf395b0b2fc9fbb44fc059a57efda515dbe019e99e38",
+      "status": "ok",
+      "validation_status": "not-run",
+      "commit_message": "Implement Phase 3 guided numeric form",
+      "commit_hash": "",
+      "file_count": 14,
+      "change_counts": {
+        "add": 2,
+        "modify": 12
+      },
+      "manifest": {
+        "schema_version": 2,
+        "type": "overlay",
+        "name": "Relat\u00f3rio Android Phase 3 guided numeric form",
+        "description": "Implementa o formul\u00e1rio num\u00e9rico guiado dos modelos AD Tim\u00f3teo e Relat\u00f3rio Completo, com controles acess\u00edveis e persist\u00eancia autom\u00e1tica.",
+        "target": "relatorio_android",
+        "inventory": {
+          "format": 1,
+          "entries": [
+            {
+              "path": ".gitignore",
+              "action": "modify",
+              "sha256": "4a868ada2b76c676e23a89d245fb95f7191f0f3d0e4e2a255c1e21650eae64ba",
+              "size": 89,
+              "source_sha256": "6a8018d71f0cdc8be5e8e3087f11bdbb21c15dc5d1db9606994e0b61abaf79f8"
+            },
+            {
+              "path": "PROJECT_MANIFEST.json",
+              "action": "modify",
+              "sha256": "6b3086b97f8986f26b31d6c6d5724dde00b2ccf474cc8195238641e6de7ae14c",
+              "size": 10415,
+              "source_sha256": "3a2563f2e4dd326017c87987b7b192a79b7f07ad89addc172f6747c50d8b6b7e"
+            },
+            {
+              "path": "README.md",
+              "action": "modify",
+              "sha256": "af91256bbf92617b496614a8db42fae598eb77f4fdc3557b92b29ab257c80dab",
+              "size": 1796,
+              "source_sha256": "4144699ca1e074fd40b7c52f69ced4c434cde0149feaf4956dcd19c1ac5cf9a1"
+            },
+            {
+              "path": "VALIDATION_REPORT.md",
+              "action": "modify",
+              "sha256": "2e531e5d531ff3bf624839c1a77f1e8f8cd84a5bb4d8867f5ef5f6e2c26f67ba",
+              "size": 1197,
+              "source_sha256": "3c997dcea969970de9d3f12f03ce4c45b303d17d64b1b483176e7711214e6fd1"
+            },
+            {
+              "path": "VERSION",
+              "action": "modify",
+              "sha256": "2410d24eb2422bf8083d8304255b0839e3e57dc6581f382c92eb93c326249201",
+              "size": 13,
+              "source_sha256": "78e70f936df5b234034edb5ab71cdd99b19910740bf9e7f0032e936e4a041d93"
+            },
+            {
+              "path": "app/build.gradle.kts",
+              "action": "modify",
+              "sha256": "dc74235cbae9b0d3f4ddcf5aa4168e5a5929891bf03dba1e2ec229609c4bfeee",
+              "size": 2413,
+              "source_sha256": "55bd1700818ec67c1dcca559618a543651d7f316a89040174d3ea3a9d5859b3c"
+            },
+            {
+              "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/MainViewModel.kt",
+              "action": "modify",
+              "sha256": "476700773a27de390b6cbec31e83795f23bd7de9eb213dc19d16bd23c7fef94f",
+              "size": 14729,
+              "source_sha256": "cc4b7162611c4cb3456b6628d9f1d642f0ecb55d4b7e0c42af75f72736218cfb"
+            },
+            {
+              "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/data/UserPreferencesStore.kt",
+              "action": "modify",
+              "sha256": "2f2cd80f025ab7c96b31ac0bf93055776a72ca950ed14dd1a173bfd3a138feb3",
+              "size": 4301,
+              "source_sha256": "54a17d132c334f7d61fddfaf24ef5aef97e7e4d509b9c3ca42b89ffb5fdb5310"
+            },
+            {
+              "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/RelatorioApp.kt",
+              "action": "modify",
+              "sha256": "43e2570129c9734e7eb1fdc404500eea774acc68c800ec1dc3269e4236804d2d",
+              "size": 36466,
+              "source_sha256": "f0d5d46252c282f7161307d44782e9061c572da9d77984c577461027718bbfda"
+            },
+            {
+              "path": "docs/PHASE_3_GUIDED_NUMERIC_FORM.md",
+              "action": "add",
+              "sha256": "2b2ff063f380ecac322d80d6f20b42b224531253b2143db3a896504d49dd6cee",
+              "size": 2504
+            },
+            {
+              "path": "persistence/src/androidTest/kotlin/com/mikeyphw/relatorio/persistence/ReportRepositoryPersistenceTest.kt",
+              "action": "modify",
+              "sha256": "901a587a0b4dfcfc5b55772d96c27da94244403e3e51746067a01225742470ba",
+              "size": 4172,
+              "source_sha256": "ba2105ba799c7a1ff20fc0daf4e34c4a4d9f59ea30b4a3fa9964ced72f32cd9a"
+            },
+            {
+              "path": "persistence/src/main/kotlin/com/mikeyphw/relatorio/persistence/ReportDao.kt",
+              "action": "modify",
+              "sha256": "145c3985bed2bb93defb9f64d1a63911b49aa3db4380877ee895a7a2e168f967",
+              "size": 4367,
+              "source_sha256": "690ede42ad3c83f392c37abfbacefe171dcdcf96f4f7a88468e0526fde6fe67e"
+            },
+            {
+              "path": "persistence/src/main/kotlin/com/mikeyphw/relatorio/persistence/ReportRepository.kt",
+              "action": "modify",
+              "sha256": "52932612ee1c665f2ec9fddcfd3302d31145d61b4e9c41222893f7199628365f",
+              "size": 2963,
+              "source_sha256": "7e56c9c3855027ee53371fac7a2d877b3d2901ebdfe12538dcdec81f2802dba7"
+            },
+            {
+              "path": "tools/validate_phase3.py",
+              "action": "add",
+              "sha256": "99e5ff9d9a002047aa8bc8f1722fc468f87b08cac522700531110c333ebf39af",
+              "size": 4425
+            }
+          ]
+        },
+        "apply": {
+          "atomic": true,
+          "conflict_policy": "fail",
+          "path_policy": "repository-relative",
+          "requires_clean_worktree": false,
+          "commit": {
+            "enabled": true,
+            "strategy": "single",
+            "message": "Implement Phase 3 guided numeric form"
+          }
+        },
+        "validation": {
+          "required": false,
+          "mode": "disabled",
+          "restore": false,
+          "build": false,
+          "test": false,
+          "rollback_on_failure": true,
+          "allow_deferred": false
+        },
+        "notes": [
+          "Requer a Fase 2 com os hotfixes de imports Compose e RedundantLabel aplicados.",
+          "Modelo padr\u00e3o: 33 campos em 5 se\u00e7\u00f5es.",
+          "Modelo completo: 74 campos em 10 se\u00e7\u00f5es.",
+          "Cada altera\u00e7\u00e3o num\u00e9rica \u00e9 persistida imediatamente no Room.",
+          "O progresso da se\u00e7\u00e3o \u00e9 preservado no DataStore.",
+          "N\u00e3o altera o esquema do banco de dados.",
+          "Movimenta\u00e7\u00f5es, anota\u00e7\u00f5es, revis\u00e3o final e PDF permanecem para fases posteriores.",
+          "Aplique com --no-validate e execute a valida\u00e7\u00e3o Android separadamente."
+        ]
+      },
+      "history_id": "6c76a37fcf3d42f699440a5fc95bb90a"
     }
   ]
 }

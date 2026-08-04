@@ -22,6 +22,7 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Article
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Description
@@ -30,6 +31,7 @@ import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.NavigateNext
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -72,7 +74,10 @@ import com.mikeyphw.relatorio.android.IdentityForm
 import com.mikeyphw.relatorio.android.IdentityMode
 import com.mikeyphw.relatorio.android.MainUiState
 import com.mikeyphw.relatorio.model.MonthlyReport
+import com.mikeyphw.relatorio.model.ReportFieldDefinition
+import com.mikeyphw.relatorio.model.ReportSectionDefinition
 import com.mikeyphw.relatorio.model.ReportSummary
+import com.mikeyphw.relatorio.model.ReportValue
 import com.mikeyphw.relatorio.model.ReportTemplateCatalog
 import com.mikeyphw.relatorio.model.ReportTemplateId
 
@@ -102,6 +107,7 @@ fun RelatorioApp(
                                 AppRoute.TemplatePicker -> "Novo relatório"
                                 AppRoute.Identity -> "Identificação"
                                 AppRoute.DraftSummary -> "Relatório em andamento"
+                                AppRoute.NumericSection -> "Preenchimento"
                                 AppRoute.CompletedReports -> "Relatórios prontos"
                                 AppRoute.Home -> "Relatório Mensal AD"
                             },
@@ -151,8 +157,20 @@ fun RelatorioApp(
                 )
                 AppRoute.DraftSummary -> DraftSummaryScreen(
                     draft = state.draft,
+                    completedSectionCount = state.completedSectionCount,
                     onEditIdentity = actions::editDraftIdentity,
+                    onStartFilling = actions::startNumericForm,
                     onHome = actions::goHome,
+                    modifier = Modifier.padding(contentPadding),
+                )
+                AppRoute.NumericSection -> NumericSectionScreen(
+                    draft = state.draft,
+                    sectionIndex = state.currentSectionIndex,
+                    completedSectionCount = state.completedSectionCount,
+                    onValueChange = actions::updateDraftValue,
+                    onCustomLabelChange = actions::updateDraftCustomLabel,
+                    onPrevious = actions::previousNumericSection,
+                    onNext = actions::nextNumericSection,
                     modifier = Modifier.padding(contentPadding),
                 )
                 AppRoute.CompletedReports -> CompletedReportsScreen(
@@ -522,7 +540,9 @@ private fun MonthPicker(
 @Composable
 private fun DraftSummaryScreen(
     draft: MonthlyReport?,
+    completedSectionCount: Int,
     onEditIdentity: () -> Unit,
+    onStartFilling: () -> Unit,
     onHome: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -539,6 +559,11 @@ private fun DraftSummaryScreen(
             return@Column
         }
 
+        val definition = ReportTemplateCatalog.definition(draft.templateId)
+        val totalSections = definition.sections.size
+        val completed = completedSectionCount.coerceIn(0, totalSections)
+        val numericWorkFinished = completed == totalSections
+
         Icon(
             Icons.Default.CheckCircle,
             contentDescription = null,
@@ -546,12 +571,12 @@ private fun DraftSummaryScreen(
             modifier = Modifier.size(58.dp),
         )
         Text(
-            "Rascunho salvo",
+            if (numericWorkFinished) "Números preenchidos" else "Relatório em andamento",
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.semantics { heading() },
         )
         Text(
-            "Você pode fechar o aplicativo e continuar depois.",
+            "Você pode fechar o aplicativo. Cada alteração fica salva automaticamente.",
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
@@ -565,30 +590,59 @@ private fun DraftSummaryScreen(
                 SummaryLine("Congregação", draft.identity.congregation)
                 SummaryLine("Regional", draft.identity.regional.ifBlank { "Não informada" })
                 SummaryLine("Pastor dirigente", draft.identity.leadPastor.ifBlank { "Não informado" })
-                SummaryLine("Campos preparados", draft.values.size.toString())
             }
         }
 
         Card(
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                containerColor = if (numericWorkFinished) {
+                    MaterialTheme.colorScheme.secondaryContainer
+                } else {
+                    MaterialTheme.colorScheme.primaryContainer
+                },
             ),
         ) {
             Column(
                 modifier = Modifier.padding(18.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Text("Fundação concluída", style = MaterialTheme.typography.titleMedium)
                 Text(
-                    "A próxima fase adicionará o preenchimento dos números e o avanço por seções.",
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    if (numericWorkFinished) "Etapa numérica concluída" else "Progresso do preenchimento",
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Text(
+                    "$completed de $totalSections seções revisadas",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    if (numericWorkFinished) {
+                        "Você pode revisar qualquer seção. Movimentações, revisão final e PDF serão adicionados nas próximas fases."
+                    } else {
+                        "Os valores podem permanecer em zero quando não houve atividade no mês."
+                    },
+                    color = if (numericWorkFinished) {
+                        MaterialTheme.colorScheme.onSecondaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    },
                 )
             }
         }
 
         LargeActionButton(
-            text = "Editar identificação",
+            text = when {
+                numericWorkFinished -> "Revisar números"
+                completed == 0 -> "Começar preenchimento"
+                else -> "Continuar preenchimento"
+            },
+            supportingText = "${definition.fieldCount} campos em $totalSections seções",
             icon = Icons.Default.Edit,
+            onClick = onStartFilling,
+        )
+        LargeActionButton(
+            text = "Editar identificação",
+            icon = Icons.Default.Description,
             onClick = onEditIdentity,
             outlined = true,
         )
@@ -596,7 +650,203 @@ private fun DraftSummaryScreen(
             text = "Voltar ao início",
             icon = Icons.Default.History,
             onClick = onHome,
+            outlined = true,
         )
+    }
+}
+
+@Composable
+private fun NumericSectionScreen(
+    draft: MonthlyReport?,
+    sectionIndex: Int,
+    completedSectionCount: Int,
+    onValueChange: (String, Int) -> Unit,
+    onCustomLabelChange: (String, String) -> Unit,
+    onPrevious: () -> Unit,
+    onNext: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (draft == null) {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(ScreenPadding),
+        ) {
+            Text("Carregando o rascunho...", style = MaterialTheme.typography.titleLarge)
+        }
+        return
+    }
+
+    val definition = ReportTemplateCatalog.definition(draft.templateId)
+    val safeIndex = sectionIndex.coerceIn(0, definition.sections.lastIndex)
+    val section = definition.sections[safeIndex]
+    val values = draft.values.associateBy(ReportValue::fieldId)
+    val isLastSection = safeIndex == definition.sections.lastIndex
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(ScreenPadding)
+            .imePadding()
+            .navigationBarsPadding(),
+        verticalArrangement = Arrangement.spacedBy(18.dp),
+    ) {
+        Text(
+            section.titlePtBr,
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.semantics { heading() },
+        )
+        Text(
+            "Seção ${safeIndex + 1} de ${definition.sections.size}",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.primary,
+        )
+        Text(
+            "Use os botões ou toque no número para digitar. Zero também é uma resposta válida.",
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = "${completedSectionCount.coerceIn(0, definition.sections.size)} seções já revisadas",
+                modifier = Modifier.padding(16.dp),
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
+
+        section.fields.forEach { field ->
+            val fieldId = "${section.id}.${field.id}"
+            val value = values[fieldId]
+            NumericCounterField(
+                fieldId = fieldId,
+                field = field,
+                reportValue = value,
+                onValueChange = onValueChange,
+                onCustomLabelChange = onCustomLabelChange,
+            )
+        }
+
+        HorizontalDivider()
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            OutlinedButton(
+                onClick = onPrevious,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(MinimumActionHeight),
+            ) {
+                Text("Voltar")
+            }
+            Button(
+                onClick = onNext,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(MinimumActionHeight),
+            ) {
+                Text(if (isLastSection) "Concluir números" else "Próxima seção")
+            }
+        }
+    }
+}
+
+@Composable
+private fun NumericCounterField(
+    fieldId: String,
+    field: ReportFieldDefinition,
+    reportValue: ReportValue?,
+    onValueChange: (String, Int) -> Unit,
+    onCustomLabelChange: (String, String) -> Unit,
+) {
+    val persistedValue = reportValue?.value ?: 0
+    var valueText by remember(fieldId, persistedValue) {
+        mutableStateOf(persistedValue.toString())
+    }
+    val persistedCustomLabel = reportValue?.customLabel
+    var customLabel by remember(fieldId, persistedCustomLabel) {
+        mutableStateOf(persistedCustomLabel ?: field.labelPtBr)
+    }
+
+    OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            if (field.allowsCustomLabel) {
+                OutlinedTextField(
+                    value = customLabel,
+                    onValueChange = { value ->
+                        customLabel = value.take(80)
+                        onCustomLabelChange(fieldId, customLabel)
+                    },
+                    label = { Text("Nome desta reunião") },
+                    supportingText = { Text("Você pode trocar o nome usado no formulário antigo.") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Text("Quantidade", style = MaterialTheme.typography.titleMedium)
+            } else {
+                Text(
+                    field.labelPtBr,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                OutlinedButton(
+                    onClick = {
+                        val current = valueText.toIntOrNull() ?: persistedValue
+                        val next = (current - 1).coerceAtLeast(0)
+                        valueText = next.toString()
+                        onValueChange(fieldId, next)
+                    },
+                    modifier = Modifier.size(MinimumActionHeight),
+                    contentPadding = PaddingValues(0.dp),
+                ) {
+                    Icon(
+                        Icons.Default.Remove,
+                        contentDescription = "Diminuir ${field.labelPtBr}",
+                    )
+                }
+
+                OutlinedTextField(
+                    value = valueText,
+                    onValueChange = { rawValue ->
+                        val digits = rawValue.filter(Char::isDigit).take(6)
+                        valueText = digits
+                        onValueChange(fieldId, digits.toIntOrNull() ?: 0)
+                    },
+                    label = { Text("Quantidade") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true,
+                    modifier = Modifier.weight(1f),
+                )
+
+                OutlinedButton(
+                    onClick = {
+                        val current = valueText.toIntOrNull() ?: persistedValue
+                        val next = (current + 1).coerceAtMost(999_999)
+                        valueText = next.toString()
+                        onValueChange(fieldId, next)
+                    },
+                    modifier = Modifier.size(MinimumActionHeight),
+                    contentPadding = PaddingValues(0.dp),
+                ) {
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = "Aumentar ${field.labelPtBr}",
+                    )
+                }
+            }
+        }
     }
 }
 

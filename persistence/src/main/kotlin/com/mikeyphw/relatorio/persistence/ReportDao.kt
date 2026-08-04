@@ -84,6 +84,41 @@ abstract class ReportDao {
         updatedAtEpochMillis: Long,
     )
 
+    @Query(
+        """
+        UPDATE report_values SET value = :value
+        WHERE reportId = :reportId AND fieldId = :fieldId
+        """,
+    )
+    abstract suspend fun updateValue(
+        reportId: String,
+        fieldId: String,
+        value: Int,
+    ): Int
+
+    @Query(
+        """
+        UPDATE report_values SET customLabel = :customLabel
+        WHERE reportId = :reportId AND fieldId = :fieldId
+        """,
+    )
+    abstract suspend fun updateCustomLabel(
+        reportId: String,
+        fieldId: String,
+        customLabel: String?,
+    ): Int
+
+    @Query(
+        """
+        UPDATE reports SET updatedAtEpochMillis = :updatedAtEpochMillis
+        WHERE id = :reportId
+        """,
+    )
+    abstract suspend fun touchReport(
+        reportId: String,
+        updatedAtEpochMillis: Long,
+    )
+
     @Transaction
     open suspend fun replaceDraft(
         draftStatus: String,
@@ -95,5 +130,31 @@ abstract class ReportDao {
         insertReport(report)
         insertValues(values)
         if (movements.isNotEmpty()) insertMovements(movements)
+    }
+
+    @Transaction
+    open suspend fun updateDraftValue(
+        reportId: String,
+        fieldId: String,
+        value: Int,
+        updatedAtEpochMillis: Long,
+    ) {
+        check(updateValue(reportId, fieldId, value) == 1) {
+            "Campo de relatório não encontrado: $fieldId"
+        }
+        touchReport(reportId, updatedAtEpochMillis)
+    }
+
+    @Transaction
+    open suspend fun updateDraftCustomLabel(
+        reportId: String,
+        fieldId: String,
+        customLabel: String?,
+        updatedAtEpochMillis: Long,
+    ) {
+        check(updateCustomLabel(reportId, fieldId, customLabel) == 1) {
+            "Campo de relatório não encontrado: $fieldId"
+        }
+        touchReport(reportId, updatedAtEpochMillis)
     }
 }

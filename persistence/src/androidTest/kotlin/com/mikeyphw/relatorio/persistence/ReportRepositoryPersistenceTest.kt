@@ -68,4 +68,58 @@ class ReportRepositoryPersistenceTest {
         assertEquals("Central II", restored?.identity?.congregation)
         assertEquals(74, restored?.values?.size)
     }
+
+    @Test
+    fun guidedFormValueIsSavedImmediately() = runTest {
+        val draft = repository.createDraft(
+            templateId = ReportTemplateId.AdTimoteo2026,
+            identity = ReportIdentity(month = 8, year = 2026, congregation = "Central"),
+        )
+
+        repository.updateDraftValue(
+            reportId = draft.id,
+            fieldId = "ministers.pastors",
+            value = 4,
+        )
+
+        val restored = repository.observeDraft().first()
+        val pastors = restored?.values?.single { it.fieldId == "ministers.pastors" }
+        assertEquals(4, pastors?.value)
+    }
+
+    @Test
+    fun customMeetingLabelIsSavedForCompleteTemplate() = runTest {
+        val draft = repository.createDraft(
+            templateId = ReportTemplateId.Complete,
+            identity = ReportIdentity(month = 8, year = 2026, congregation = "Central"),
+        )
+
+        repository.updateDraftCustomLabel(
+            reportId = draft.id,
+            fieldId = "meetings.custom_1",
+            customLabel = "Reunião de famílias",
+        )
+
+        val restored = repository.observeDraft().first()
+        val customMeeting = restored?.values?.single { it.fieldId == "meetings.custom_1" }
+        assertEquals("Reunião de famílias", customMeeting?.customLabel)
+    }
+
+    @Test
+    fun negativeValuesAreStoredAsZero() = runTest {
+        val draft = repository.createDraft(
+            templateId = ReportTemplateId.AdTimoteo2026,
+            identity = ReportIdentity(month = 8, year = 2026, congregation = "Central"),
+        )
+
+        repository.updateDraftValue(
+            reportId = draft.id,
+            fieldId = "members.members",
+            value = -3,
+        )
+
+        val restored = repository.observeDraft().first()
+        val members = restored?.values?.single { it.fieldId == "members.members" }
+        assertEquals(0, members?.value)
+    }
 }

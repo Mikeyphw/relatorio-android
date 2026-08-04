@@ -4,13 +4,26 @@ Aplicativo Android em pt-BR para preencher relatórios mensais, manter rascunhos
 
 ## Estado atual
 
-Esta entrega implementa a **Fase 2 — Fundação Android**.
+Esta entrega implementa a **Fase 3 — Formulário numérico guiado**.
 
 - modelo padrão: `AD_TIMOTEO_2026_V1`;
 - modelo alternativo: `RELATORIO_COMPLETO_V1`;
 - package ID: `com.mikeyphw.relatorio.android`;
 - target Devtool: `relatorio_android`;
-- versão: `0.2.0-phase2`.
+- versão: `0.3.0-phase3`.
+
+## O que já funciona
+
+- criação e restauração de rascunho;
+- identificação com dados reutilizados;
+- seleção entre os dois modelos;
+- preenchimento guiado dos 33 ou 74 campos;
+- botões grandes de menos e mais;
+- digitação direta dos números;
+- salvamento automático no Room;
+- retomada da seção atual pelo DataStore;
+- nomes personalizados para as reuniões sem rótulo do modelo completo;
+- funcionamento sem internet.
 
 ## Estrutura
 
@@ -18,7 +31,7 @@ Esta entrega implementa a **Fase 2 — Fundação Android**.
 app/          Interface Compose, ViewModel, DataStore e composição do aplicativo
 core-model/   Modelos, catálogo dos formulários e validações
 persistence/  Banco Room, DAO, mapeadores e repositório
-docs/         Escopo e critérios da fase
+docs/         Escopo e critérios das fases
 ```
 
 ## Compilar
@@ -40,7 +53,8 @@ app/build/outputs/apk/debug/app-debug.apk
   :core-model:test \
   :persistence:testDebugUnitTest \
   :app:testDebugUnitTest \
-  :app:assembleDebug
+  :app:assembleDebug \
+  :app:lintDebug
 ```
 
 Em um ambiente com dispositivo ou emulador:
@@ -53,11 +67,9 @@ Em um ambiente com dispositivo ou emulador:
 
 ## Devtool
 
-A configuração inclui o target `relatorio_android`:
-
 ```bash
 devtool --yes --copy -r "$HOME/Code/relatorio-android" \
   --target relatorio_android validate
 ```
 
-Consulte `docs/PHASE_2_IMPLEMENTATION.md` para o escopo completo.
+Consulte `docs/PHASE_3_GUIDED_NUMERIC_FORM.md` para o escopo completo.

@@ -1,20 +1,33 @@
-# Relatório de validação — Fase 2
+# Relatório de validação — Fase 3
 
 ## Concluído neste ambiente
 
-- validador estrutural da Fase 2: aprovado;
-- catálogo do modelo padrão: 33 campos;
-- catálogo do modelo completo: 74 campos;
-- compilação isolada do módulo `core-model` com Kotlin/JVM 17: aprovada;
-- verificação executável de criação do rascunho: aprovada;
-- compilação estática de `persistence` contra stubs compatíveis com Room: aprovada;
-- compilação estática de `MainViewModel` contra stubs de Lifecycle, Flow e repositório: aprovada;
-- XML e TOML: analisados sem erro;
-- verificação de espaços inválidos no patch: aprovada;
-- manifesto sem permissão de internet: confirmado.
+- validador estrutural da Fase 3: aprovado;
+- catálogo do modelo padrão: 33 campos em 5 seções;
+- catálogo do modelo completo: 74 campos em 10 seções;
+- atualização numérica com limite inferior zero: verificada;
+- persistência imediata de valores: contrato verificado;
+- persistência de rótulos personalizados: contrato verificado;
+- progresso do rascunho no DataStore: contrato verificado;
+- navegação para frente, para trás e conclusão numérica: verificada;
+- XML, JSON, TOML e Python: analisados sem erro;
+- manifesto Android sem permissão de internet: confirmado;
+- inventário do overlay e hashes de origem/destino: verificados.
 
-## Não executado neste ambiente
+## Validação no ambiente Android do usuário
 
-O build Android completo e o Android Lint não puderam ser executados porque o ambiente de geração não possui Android SDK nem cache do Gradle 9.4.1, e não possui acesso de rede para baixar esses componentes.
+Executar:
 
-O projeto inclui Gradle Wrapper, testes e configuração Devtool para executar a validação integral no ambiente Android/chroot do usuário.
+```bash
+devtool --yes --copy \
+  -r "$HOME/Code/relatorio-android" \
+  --target relatorio_android \
+  validate \
+  --task :app:compileDebugKotlin \
+  --task :core-model:test \
+  --task :persistence:testDebugUnitTest \
+  --task :app:testDebugUnitTest \
+  --task :app:lintDebug
+```
+
+Os testes instrumentados de persistência exigem dispositivo ou emulador e permanecem disponíveis em `persistence/src/androidTest`.

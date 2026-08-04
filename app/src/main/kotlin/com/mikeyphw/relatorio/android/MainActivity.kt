@@ -24,7 +24,10 @@ class MainActivity : ComponentActivity() {
         )
         setContent {
             val state = viewModel.uiState.collectAsStateWithLifecycle().value
-            RelatorioTheme {
+            RelatorioTheme(
+                textSizePreference = state.textSizePreference,
+                highContrast = state.highContrast,
+            ) {
                 RelatorioApp(
                     state = state,
                     actions = viewModel,

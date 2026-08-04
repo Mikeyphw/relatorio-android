@@ -48,8 +48,19 @@ abstract class ReportDao {
     @Query("DELETE FROM reports WHERE status = :status")
     abstract suspend fun deleteReportsByStatus(status: String)
 
+    @Query("DELETE FROM reports WHERE status = :draftStatus AND id != :reportId")
+    abstract suspend fun deleteOtherDrafts(draftStatus: String, reportId: String)
+
     @Query("DELETE FROM reports WHERE id = :reportId")
     abstract suspend fun deleteReport(reportId: String)
+
+    @Query(
+        """
+        DELETE FROM reports
+        WHERE id = :reportId AND status = :completedStatus
+        """,
+    )
+    abstract suspend fun deleteCompletedReport(reportId: String, completedStatus: String): Int
 
     @Query(
         """
@@ -98,6 +109,22 @@ abstract class ReportDao {
         status: String,
         updatedAtEpochMillis: Long,
     )
+
+
+    @Query(
+        """
+        UPDATE reports SET
+            status = :draftStatus,
+            updatedAtEpochMillis = :updatedAtEpochMillis
+        WHERE id = :reportId AND status = :completedStatus
+        """,
+    )
+    abstract suspend fun reopenCompletedReport(
+        reportId: String,
+        completedStatus: String,
+        draftStatus: String,
+        updatedAtEpochMillis: Long,
+    ): Int
 
     @Query(
         """
@@ -209,4 +236,22 @@ abstract class ReportDao {
         }
         touchReport(reportId, updatedAtEpochMillis)
     }
+    @Transaction
+    open suspend fun reopenAsOnlyDraft(
+        reportId: String,
+        completedStatus: String,
+        draftStatus: String,
+        updatedAtEpochMillis: Long,
+    ) {
+        deleteOtherDrafts(draftStatus = draftStatus, reportId = reportId)
+        check(
+            reopenCompletedReport(
+                reportId = reportId,
+                completedStatus = completedStatus,
+                draftStatus = draftStatus,
+                updatedAtEpochMillis = updatedAtEpochMillis,
+            ) == 1,
+        ) { "Relatório concluído não encontrado: $reportId" }
+    }
+
 }

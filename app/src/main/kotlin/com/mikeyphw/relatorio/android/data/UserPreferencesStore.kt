@@ -3,6 +3,7 @@ package com.mikeyphw.relatorio.android.data
 import android.content.Context
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -19,6 +20,16 @@ data class DraftProgress(
     val completedSectionCount: Int = 0,
 )
 
+enum class TextSizePreference(val stableId: String) {
+    Large("large"),
+    ExtraLarge("extra_large");
+
+    companion object {
+        fun fromStableId(value: String?): TextSizePreference =
+            entries.firstOrNull { it.stableId == value } ?: Large
+    }
+}
+
 data class UserPreferences(
     val defaultTemplateId: ReportTemplateId = ReportTemplateId.AdTimoteo2026,
     val regional: String = "",
@@ -26,6 +37,8 @@ data class UserPreferences(
     val leadPastor: String = "",
     val ministry: String = "Ministério AD Timóteo MG",
     val presidentPastor: String = "Carmo Matias Gonçalves",
+    val textSizePreference: TextSizePreference = TextSizePreference.Large,
+    val highContrast: Boolean = false,
     val draftProgress: DraftProgress = DraftProgress(),
 )
 
@@ -45,6 +58,19 @@ class UserPreferencesStore(private val context: Context) {
             preferences[Keys.LeadPastor] = identity.leadPastor
             preferences[Keys.Ministry] = identity.ministry
             preferences[Keys.PresidentPastor] = identity.presidentPastor
+        }
+    }
+
+
+    suspend fun setTextSizePreference(value: TextSizePreference) {
+        context.reportPreferencesDataStore.edit { preferences ->
+            preferences[Keys.TextSize] = value.stableId
+        }
+    }
+
+    suspend fun setHighContrast(enabled: Boolean) {
+        context.reportPreferencesDataStore.edit { preferences ->
+            preferences[Keys.HighContrast] = enabled
         }
     }
 
@@ -85,6 +111,8 @@ class UserPreferencesStore(private val context: Context) {
         leadPastor = preferences[Keys.LeadPastor].orEmpty(),
         ministry = preferences[Keys.Ministry] ?: "Ministério AD Timóteo MG",
         presidentPastor = preferences[Keys.PresidentPastor] ?: "Carmo Matias Gonçalves",
+        textSizePreference = TextSizePreference.fromStableId(preferences[Keys.TextSize]),
+        highContrast = preferences[Keys.HighContrast] ?: false,
         draftProgress = DraftProgress(
             reportId = preferences[Keys.DraftProgressReportId].orEmpty(),
             currentSectionIndex = preferences[Keys.DraftProgressCurrentSection] ?: 0,
@@ -99,6 +127,8 @@ class UserPreferencesStore(private val context: Context) {
         val LeadPastor = stringPreferencesKey("lead_pastor")
         val Ministry = stringPreferencesKey("ministry")
         val PresidentPastor = stringPreferencesKey("president_pastor")
+        val TextSize = stringPreferencesKey("text_size")
+        val HighContrast = booleanPreferencesKey("high_contrast")
         val DraftProgressReportId = stringPreferencesKey("draft_progress_report_id")
         val DraftProgressCurrentSection = intPreferencesKey("draft_progress_current_section")
         val DraftProgressCompletedSections = intPreferencesKey("draft_progress_completed_sections")

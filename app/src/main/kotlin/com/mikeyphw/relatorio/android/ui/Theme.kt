@@ -13,6 +13,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mikeyphw.relatorio.android.data.TextSizePreference
 
 private val LightColors = lightColorScheme(
     primary = Color(0xFF174E73),
@@ -54,6 +55,42 @@ private val DarkColors = darkColorScheme(
     outline = Color(0xFF8B9BA5),
 )
 
+private val HighContrastLightColors = lightColorScheme(
+    primary = Color(0xFF003B5C),
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFFD8F0FF),
+    onPrimaryContainer = Color.Black,
+    secondary = Color(0xFF174D36),
+    onSecondary = Color.White,
+    background = Color.White,
+    onBackground = Color.Black,
+    surface = Color.White,
+    onSurface = Color.Black,
+    surfaceVariant = Color(0xFFF0F0F0),
+    onSurfaceVariant = Color(0xFF202020),
+    outline = Color(0xFF303030),
+    error = Color(0xFF8A0000),
+    onError = Color.White,
+    errorContainer = Color(0xFFFFDAD6),
+    onErrorContainer = Color.Black,
+)
+
+private val HighContrastDarkColors = darkColorScheme(
+    primary = Color(0xFFB8E2FF),
+    onPrimary = Color.Black,
+    primaryContainer = Color(0xFF00517B),
+    onPrimaryContainer = Color.White,
+    secondary = Color(0xFFB9F2D4),
+    onSecondary = Color.Black,
+    background = Color.Black,
+    onBackground = Color.White,
+    surface = Color(0xFF080808),
+    onSurface = Color.White,
+    surfaceVariant = Color(0xFF202020),
+    onSurfaceVariant = Color.White,
+    outline = Color(0xFFE0E0E0),
+)
+
 private val LargeTypography = Typography(
     headlineLarge = TextStyle(fontSize = 32.sp, lineHeight = 39.sp, fontWeight = FontWeight.SemiBold),
     headlineMedium = TextStyle(fontSize = 28.sp, lineHeight = 35.sp, fontWeight = FontWeight.SemiBold),
@@ -69,6 +106,21 @@ private val LargeTypography = Typography(
     labelSmall = TextStyle(fontSize = 14.sp, lineHeight = 19.sp, fontWeight = FontWeight.Medium),
 )
 
+private val ExtraLargeTypography = Typography(
+    headlineLarge = TextStyle(fontSize = 36.sp, lineHeight = 44.sp, fontWeight = FontWeight.Bold),
+    headlineMedium = TextStyle(fontSize = 32.sp, lineHeight = 40.sp, fontWeight = FontWeight.Bold),
+    headlineSmall = TextStyle(fontSize = 28.sp, lineHeight = 36.sp, fontWeight = FontWeight.SemiBold),
+    titleLarge = TextStyle(fontSize = 26.sp, lineHeight = 34.sp, fontWeight = FontWeight.SemiBold),
+    titleMedium = TextStyle(fontSize = 23.sp, lineHeight = 31.sp, fontWeight = FontWeight.SemiBold),
+    titleSmall = TextStyle(fontSize = 21.sp, lineHeight = 29.sp, fontWeight = FontWeight.SemiBold),
+    bodyLarge = TextStyle(fontSize = 22.sp, lineHeight = 32.sp),
+    bodyMedium = TextStyle(fontSize = 20.sp, lineHeight = 29.sp),
+    bodySmall = TextStyle(fontSize = 18.sp, lineHeight = 27.sp),
+    labelLarge = TextStyle(fontSize = 22.sp, lineHeight = 30.sp, fontWeight = FontWeight.SemiBold),
+    labelMedium = TextStyle(fontSize = 20.sp, lineHeight = 28.sp, fontWeight = FontWeight.Medium),
+    labelSmall = TextStyle(fontSize = 18.sp, lineHeight = 25.sp, fontWeight = FontWeight.Medium),
+)
+
 private val AppShapes = Shapes(
     small = RoundedCornerShape(10.dp),
     medium = RoundedCornerShape(16.dp),
@@ -77,10 +129,25 @@ private val AppShapes = Shapes(
 )
 
 @Composable
-fun RelatorioTheme(content: @Composable () -> Unit) {
+fun RelatorioTheme(
+    textSizePreference: TextSizePreference = TextSizePreference.Large,
+    highContrast: Boolean = false,
+    content: @Composable () -> Unit,
+) {
+    val dark = isSystemInDarkTheme()
+    val colors = when {
+        highContrast && dark -> HighContrastDarkColors
+        highContrast -> HighContrastLightColors
+        dark -> DarkColors
+        else -> LightColors
+    }
     MaterialTheme(
-        colorScheme = if (isSystemInDarkTheme()) DarkColors else LightColors,
-        typography = LargeTypography,
+        colorScheme = colors,
+        typography = if (textSizePreference == TextSizePreference.ExtraLarge) {
+            ExtraLargeTypography
+        } else {
+            LargeTypography
+        },
         shapes = AppShapes,
         content = content,
     )

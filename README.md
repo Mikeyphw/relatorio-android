@@ -4,46 +4,44 @@ Aplicativo Android em pt-BR para preencher relatórios mensais, manter rascunhos
 
 ## Estado atual
 
-Esta entrega implementa a **Fase 6 — PDF oficial, salvamento e compartilhamento**.
+Esta entrega implementa em conjunto:
+
+- **Fase 7 — Acessibilidade e usabilidade**;
+- **Fase 8 — Histórico e manutenção segura**.
+
+Dados do projeto:
 
 - modelo padrão: `AD_TIMOTEO_2026_V1`;
 - modelo alternativo: `RELATORIO_COMPLETO_V1`;
 - package ID: `com.mikeyphw.relatorio.android`;
 - target Devtool: `relatorio_android`;
-- versão: `0.6.0-phase6`.
+- versão: `0.8.0-phase7-8`.
 
-## O que já funciona
+## O que funciona
 
-- criação e restauração de rascunho;
-- identificação com dados reutilizados;
-- seleção entre os dois modelos;
-- preenchimento guiado dos 33 ou 74 campos;
-- botões grandes de menos e mais;
-- digitação direta dos números;
-- salvamento automático no Room;
-- retomada da seção atual pelo DataStore;
-- nomes personalizados para reuniões sem rótulo do modelo completo;
-- cadastro, edição e exclusão de movimentações;
-- motivo por extenso com código automático;
-- datas em formato brasileiro com armazenamento ISO;
-- anotações com salvamento automático;
-- revisão final com erros bloqueantes e avisos não bloqueantes;
-- conferência de EBD, Santa Ceia, cartas e datas de movimentação;
-- confirmação antes de concluir;
-- histórico de relatórios concluídos;
-- PDF A4 próprio para cada modelo;
-- visualização do PDF em aplicativo instalado;
-- salvamento pelo seletor de documentos do Android;
-- compartilhamento seguro por `content://`;
-- funcionamento sem internet.
+- criação, salvamento e restauração de rascunho;
+- dois modelos de formulário, com 33 ou 74 campos;
+- preenchimento guiado com botões grandes;
+- movimentações de membros e anotações;
+- revisão com erros bloqueantes e avisos;
+- conclusão e histórico local;
+- PDF A4, visualização, salvamento e compartilhamento;
+- letras grandes ou muito grandes;
+- contraste reforçado opcional;
+- ajuda em pt-BR dentro do aplicativo;
+- pesquisa no histórico por mês, ano, congregação ou formulário;
+- reutilização segura para o próximo mês;
+- reabertura para correção;
+- exclusão confirmada de relatório concluído;
+- funcionamento offline, sem permissões de internet ou armazenamento amplo.
 
 ## Estrutura
 
 ```text
-app/          Interface Compose, ViewModel, DataStore, PDF Android e composição do aplicativo
-core-model/   Modelos, catálogos, datas, revisão e conteúdo de impressão
+app/          Interface Compose, ViewModel, DataStore, PDF Android e composição
+core-model/   Modelos, catálogos, revisão, histórico e conteúdo do PDF
 persistence/  Banco Room, DAO, mapeadores e repositório
-docs/         Escopo e critérios das fases
+docs/         Escopo e critérios de cada fase
 ```
 
 ## Compilar
@@ -52,36 +50,17 @@ docs/         Escopo e critérios das fases
 ./gradlew :app:assembleDebug
 ```
 
-APK esperado:
-
-```text
-app/build/outputs/apk/debug/app-debug.apk
-```
-
-## Testar
+## Validar
 
 ```bash
 ./gradlew \
+  :app:compileDebugKotlin \
   :core-model:test \
   :persistence:testDebugUnitTest \
+  :persistence:compileDebugAndroidTestKotlin \
   :app:testDebugUnitTest \
-  :app:assembleDebug \
+  :app:compileDebugAndroidTestKotlin \
   :app:lintDebug
 ```
 
-Em um ambiente com dispositivo ou emulador:
-
-```bash
-./gradlew \
-  :persistence:connectedDebugAndroidTest \
-  :app:connectedDebugAndroidTest
-```
-
-## Devtool
-
-```bash
-devtool --yes --copy -r "$HOME/Code/relatorio-android" \
-  --target relatorio_android validate
-```
-
-Consulte `docs/PHASE_6_PDF_EXPORT.md` para o escopo completo.
+Consulte `docs/PHASE_7_ACCESSIBILITY_USABILITY.md` e `docs/PHASE_8_HISTORY_MAINTENANCE.md`.

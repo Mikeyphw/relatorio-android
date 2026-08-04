@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -144,7 +145,7 @@ internal fun ReviewScreen(
             enabled = canComplete && !saving,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(ReviewActionHeight),
+                .heightIn(min = ReviewActionHeight),
         ) {
             Icon(Icons.Default.CheckCircle, contentDescription = null)
             Spacer(Modifier.width(10.dp))

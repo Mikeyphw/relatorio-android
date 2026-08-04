@@ -11,8 +11,8 @@ android {
         applicationId = "com.mikeyphw.relatorio.android"
         minSdk = 26
         targetSdk = 36
-        versionCode = 5
-        versionName = "0.6.0-phase6"
+        versionCode = 7
+        versionName = "0.8.0-phase7-8"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

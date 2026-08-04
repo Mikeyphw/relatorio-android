@@ -49,7 +49,7 @@ app_build = (ROOT / "app/build.gradle.kts").read_text(encoding="utf-8")
 version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
 
 checks = {
-    "phase version": version == "0.6.0-phase6" and 'versionName = "0.6.0-phase6"' in app_build,
+    "phase version": version in {"0.6.0-phase6", "0.8.0-phase7-8"} and f'versionName = "{version}"' in app_build,
     "pdf route": "CompletedReportDetail" in view_model and "CompletedReportDetailScreen" in app_ui,
     "completed report loading": "getReport(reportId" in dao and "dao.getReport(reportId)?.toModel()" in repository,
     "completion opens pdf": "route.value = AppRoute.CompletedReportDetail" in view_model,

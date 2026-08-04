@@ -13,6 +13,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -209,6 +210,68 @@ class ReportRepositoryPersistenceTest {
         val completed = repository.observeCompletedReports().first()
         assertEquals(1, completed.size)
         assertEquals(draft.id, completed.single().id)
+    }
+
+    @Test
+    fun completedReportCanSeedNextMonthWithoutMovementsOrNotes() = runTest {
+        val draft = repository.createDraft(
+            templateId = ReportTemplateId.AdTimoteo2026,
+            identity = ReportIdentity(month = 12, year = 2026, congregation = "Central"),
+        )
+        repository.updateDraftValue(draft.id, "members.members", 90)
+        repository.saveDraftMovement(
+            draft.id,
+            MemberMovement(id = "old-event", memberName = "Ana", reasonCode = "BNA"),
+        )
+        repository.updateDraftNotes(draft.id, "Não copiar")
+        repository.complete(draft.id)
+
+        val copy = repository.duplicateCompletedForNextMonth(draft.id)
+
+        assertEquals(1, copy.identity.month)
+        assertEquals(2027, copy.identity.year)
+        assertEquals(90, copy.values.single { it.fieldId == "members.members" }.value)
+        assertEquals(0, copy.movements.size)
+        assertEquals("", copy.notes)
+        assertEquals(copy.id, repository.observeDraft().first()?.id)
+    }
+
+    @Test
+    fun completedReportCanBeReopenedAsTheOnlyDraft() = runTest {
+        val oldDraft = repository.createDraft(
+            templateId = ReportTemplateId.AdTimoteo2026,
+            identity = ReportIdentity(month = 7, year = 2026, congregation = "Rascunho"),
+        )
+        val completed = repository.createDraft(
+            templateId = ReportTemplateId.AdTimoteo2026,
+            identity = ReportIdentity(month = 8, year = 2026, congregation = "Central"),
+        )
+        repository.complete(completed.id)
+        repository.createDraft(
+            templateId = ReportTemplateId.Complete,
+            identity = ReportIdentity(month = 9, year = 2026, congregation = "Outro rascunho"),
+        )
+
+        val reopened = repository.reopenCompletedAsDraft(completed.id)
+
+        assertEquals(completed.id, reopened.id)
+        assertEquals(completed.id, repository.observeDraft().first()?.id)
+        assertTrue(repository.observeCompletedReports().first().none { it.id == completed.id })
+        assertNull(repository.getReport(oldDraft.id))
+    }
+
+    @Test
+    fun onlyCompletedReportsCanBeDeletedByMaintenanceAction() = runTest {
+        val completed = repository.createDraft(
+            templateId = ReportTemplateId.AdTimoteo2026,
+            identity = ReportIdentity(month = 8, year = 2026, congregation = "Central"),
+        )
+        repository.complete(completed.id)
+
+        repository.deleteCompletedReport(completed.id)
+
+        assertNull(repository.getReport(completed.id))
+        assertEquals(0, repository.observeCompletedReports().first().size)
     }
 
 }

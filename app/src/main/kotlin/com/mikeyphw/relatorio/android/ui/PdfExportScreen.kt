@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -21,11 +22,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.SaveAlt
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -34,6 +39,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -64,6 +70,11 @@ private val ExportMonthNames = listOf(
 @Composable
 internal fun CompletedReportDetailScreen(
     report: MonthlyReport?,
+    hasDraft: Boolean,
+    saving: Boolean,
+    onDuplicate: () -> Unit,
+    onReopen: () -> Unit,
+    onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -73,6 +84,26 @@ internal fun CompletedReportDetailScreen(
     var message by remember(report?.id) { mutableStateOf<String?>(null) }
     var messageIsError by remember(report?.id) { mutableStateOf(false) }
     var pendingSaveFile by remember(report?.id) { mutableStateOf<File?>(null) }
+    var confirmation by remember(report?.id) { mutableStateOf<MaintenanceConfirmation?>(null) }
+
+    confirmation?.let { selectedConfirmation ->
+        AlertDialog(
+            onDismissRequest = { confirmation = null },
+            title = { Text(selectedConfirmation.title) },
+            text = { Text(selectedConfirmation.message(hasDraft)) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        confirmation = null
+                        selectedConfirmation.action(onDuplicate, onReopen, onDelete)
+                    },
+                ) { Text(selectedConfirmation.confirmText) }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmation = null }) { Text("Cancelar") }
+            },
+        )
+    }
 
     val saveLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/pdf"),
@@ -160,7 +191,7 @@ internal fun CompletedReportDetailScreen(
             enabled = !busy,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(ExportActionHeight),
+                .heightIn(min = ExportActionHeight),
         ) {
             Icon(Icons.Default.Visibility, contentDescription = null)
             Spacer(Modifier.width(12.dp))
@@ -177,7 +208,7 @@ internal fun CompletedReportDetailScreen(
             enabled = !busy,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(ExportActionHeight),
+                .heightIn(min = ExportActionHeight),
         ) {
             Icon(Icons.Default.SaveAlt, contentDescription = null)
             Spacer(Modifier.width(12.dp))
@@ -201,11 +232,52 @@ internal fun CompletedReportDetailScreen(
             enabled = !busy,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(ExportActionHeight),
+                .heightIn(min = ExportActionHeight),
         ) {
             Icon(Icons.Default.Share, contentDescription = null)
             Spacer(Modifier.width(12.dp))
             Text("Compartilhar PDF")
+        }
+
+
+        OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Text("Manutenção do relatório", style = MaterialTheme.typography.titleLarge)
+                Text(
+                    "Use estas opções para o mês seguinte, fazer uma correção ou apagar este relatório.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                OutlinedButton(
+                    onClick = { confirmation = MaintenanceConfirmation.Duplicate },
+                    enabled = !busy && !saving,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = ExportActionHeight),
+                ) {
+                    Icon(Icons.Default.ContentCopy, contentDescription = null)
+                    Spacer(Modifier.width(12.dp))
+                    Text("Usar como base para o próximo mês")
+                }
+                OutlinedButton(
+                    onClick = { confirmation = MaintenanceConfirmation.Reopen },
+                    enabled = !busy && !saving,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = ExportActionHeight),
+                ) {
+                    Icon(Icons.Default.Edit, contentDescription = null)
+                    Spacer(Modifier.width(12.dp))
+                    Text("Corrigir este relatório")
+                }
+                TextButton(
+                    onClick = { confirmation = MaintenanceConfirmation.Delete },
+                    enabled = !busy && !saving,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = ExportActionHeight),
+                ) {
+                    Icon(Icons.Default.Delete, contentDescription = null)
+                    Spacer(Modifier.width(12.dp))
+                    Text("Excluir relatório")
+                }
+            }
         }
 
         if (message != null) {
@@ -272,6 +344,37 @@ private fun ReportExportSummary(report: MonthlyReport) {
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+        }
+    }
+}
+
+
+private enum class MaintenanceConfirmation(
+    val title: String,
+    val confirmText: String,
+) {
+    Duplicate("Criar relatório do próximo mês?", "Criar rascunho"),
+    Reopen("Corrigir este relatório?", "Abrir para correção"),
+    Delete("Excluir este relatório?", "Excluir"),
+    ;
+
+    fun message(hasDraft: Boolean): String = when (this) {
+        Duplicate -> buildString {
+            append("As quantidades serão copiadas para o mês seguinte. Movimentações e anotações começarão vazias.")
+            if (hasDraft) append(" O rascunho atual será substituído.")
+        }
+        Reopen -> buildString {
+            append("O relatório sairá temporariamente da lista de prontos até ser concluído novamente.")
+            if (hasDraft) append(" O rascunho atual será substituído.")
+        }
+        Delete -> "Esta ação apaga o relatório e não pode ser desfeita."
+    }
+
+    fun action(onDuplicate: () -> Unit, onReopen: () -> Unit, onDelete: () -> Unit) {
+        when (this) {
+            Duplicate -> onDuplicate()
+            Reopen -> onReopen()
+            Delete -> onDelete()
         }
     }
 }

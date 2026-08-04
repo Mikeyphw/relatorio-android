@@ -40,7 +40,7 @@ app_build = (ROOT / "app/build.gradle.kts").read_text(encoding="utf-8")
 version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
 
 checks = {
-    "phase version": re.fullmatch(r"0\.[5-9]\.0-phase[5-9]", version) is not None and f'versionName = "{version}"' in app_build,
+    "phase version": (re.fullmatch(r"0\.[5-9]\.0-phase[5-9]", version) is not None or version == "0.8.0-phase7-8") and f'versionName = "{version}"' in app_build,
     "review route": "Review," in view_model and "AppRoute.Review" in app_ui,
     "review actions": all(token in view_model for token in ["openReview", "completeReport"]),
     "review screen wired": "ReviewScreen(" in app_ui and "Revisar e concluir" in app_ui,

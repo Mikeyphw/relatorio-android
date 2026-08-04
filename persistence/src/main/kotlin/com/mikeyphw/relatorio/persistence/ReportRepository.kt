@@ -3,6 +3,7 @@ package com.mikeyphw.relatorio.persistence
 import com.mikeyphw.relatorio.model.MemberMovement
 import com.mikeyphw.relatorio.model.MonthlyReport
 import com.mikeyphw.relatorio.model.ReportDraftFactory
+import com.mikeyphw.relatorio.model.ReportHistory
 import com.mikeyphw.relatorio.model.ReportIdentity
 import com.mikeyphw.relatorio.model.ReportStatus
 import com.mikeyphw.relatorio.model.ReportSummary
@@ -114,6 +115,41 @@ class ReportRepository(
             status = ReportStatus.Completed.storageValue,
             updatedAtEpochMillis = nowEpochMillis(),
         )
+    }
+
+    suspend fun duplicateCompletedForNextMonth(reportId: String): MonthlyReport {
+        val source = requireNotNull(getReport(reportId)) { "Relatório não encontrado: $reportId" }
+        check(source.status == ReportStatus.Completed) { "Somente relatórios concluídos podem ser reutilizados." }
+        val copy = ReportHistory.copyForNextMonth(
+            source = source,
+            nowEpochMillis = nowEpochMillis(),
+        )
+        dao.replaceDraft(
+            draftStatus = ReportStatus.Draft.storageValue,
+            report = copy.toEntity(),
+            values = copy.valueEntities(),
+            movements = emptyList(),
+        )
+        return copy
+    }
+
+    suspend fun reopenCompletedAsDraft(reportId: String): MonthlyReport {
+        dao.reopenAsOnlyDraft(
+            reportId = reportId,
+            completedStatus = ReportStatus.Completed.storageValue,
+            draftStatus = ReportStatus.Draft.storageValue,
+            updatedAtEpochMillis = nowEpochMillis(),
+        )
+        return requireNotNull(getReport(reportId)) { "Relatório não encontrado após reabertura: $reportId" }
+    }
+
+    suspend fun deleteCompletedReport(reportId: String) {
+        check(
+            dao.deleteCompletedReport(
+                reportId = reportId,
+                completedStatus = ReportStatus.Completed.storageValue,
+            ) == 1,
+        ) { "Relatório concluído não encontrado: $reportId" }
     }
 
     suspend fun deleteReport(reportId: String) = dao.deleteReport(reportId)

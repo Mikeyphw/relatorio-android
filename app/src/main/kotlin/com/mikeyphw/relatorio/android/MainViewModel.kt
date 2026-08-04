@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.mikeyphw.relatorio.android.data.UserPreferences
+import com.mikeyphw.relatorio.android.data.TextSizePreference
 import com.mikeyphw.relatorio.android.data.UserPreferencesStore
 import com.mikeyphw.relatorio.model.MemberMovementInput
 import com.mikeyphw.relatorio.model.MemberMovementValidator
@@ -40,6 +41,7 @@ enum class AppRoute {
     Review,
     CompletedReports,
     CompletedReportDetail,
+    AccessibilitySettings,
 }
 
 enum class IdentityMode { Create, Edit }
@@ -108,6 +110,8 @@ data class MainUiState(
     val reviewIssues: List<ReportReviewIssue> = emptyList(),
     val canComplete: Boolean = false,
     val saving: Boolean = false,
+    val textSizePreference: TextSizePreference = TextSizePreference.Large,
+    val highContrast: Boolean = false,
 )
 
 interface AppActions {
@@ -115,6 +119,12 @@ interface AppActions {
     fun continueDraft()
     fun openCompletedReports()
     fun openCompletedReport(reportId: String)
+    fun openAccessibilitySettings()
+    fun setTextSizePreference(value: TextSizePreference)
+    fun setHighContrast(enabled: Boolean)
+    fun duplicateCompletedReport()
+    fun reopenCompletedReport()
+    fun deleteCompletedReport()
     fun chooseTemplate(templateId: ReportTemplateId)
     fun continueFromTemplatePicker()
     fun updateIdentity(transform: (IdentityForm) -> IdentityForm)
@@ -272,6 +282,8 @@ class MainViewModel(
             reviewIssues = reviewIssues,
             canComplete = stored.draft != null && reviewIssues.none { it.severity == ReportReviewSeverity.Blocking },
             saving = isSaving,
+            textSizePreference = stored.userPreferences.textSizePreference,
+            highContrast = stored.userPreferences.highContrast,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -315,6 +327,75 @@ class MainViewModel(
                 val report = repository.getReport(reportId) ?: return@launch
                 selectedCompletedReport.value = report
                 route.value = AppRoute.CompletedReportDetail
+            } finally {
+                saving.value = false
+            }
+        }
+    }
+
+
+    override fun openAccessibilitySettings() {
+        route.value = AppRoute.AccessibilitySettings
+    }
+
+    override fun setTextSizePreference(value: TextSizePreference) {
+        viewModelScope.launch { preferences.setTextSizePreference(value) }
+    }
+
+    override fun setHighContrast(enabled: Boolean) {
+        viewModelScope.launch { preferences.setHighContrast(enabled) }
+    }
+
+    override fun duplicateCompletedReport() {
+        val selected = selectedCompletedReport.value ?: return
+        if (saving.value) return
+        viewModelScope.launch {
+            saving.value = true
+            try {
+                val draft = repository.duplicateCompletedForNextMonth(selected.id)
+                preferences.resetDraftProgress(draft.id)
+                preferences.saveIdentity(draft.identity)
+                selectedTemplate.value = draft.templateId
+                selectedCompletedReport.value = null
+                route.value = AppRoute.DraftSummary
+            } finally {
+                saving.value = false
+            }
+        }
+    }
+
+    override fun reopenCompletedReport() {
+        val selected = selectedCompletedReport.value ?: return
+        if (saving.value) return
+        viewModelScope.launch {
+            saving.value = true
+            try {
+                val draft = repository.reopenCompletedAsDraft(selected.id)
+                val sectionCount = ReportTemplateCatalog.definition(draft.templateId).sections.size
+                preferences.saveDraftProgress(
+                    reportId = draft.id,
+                    currentSectionIndex = 0,
+                    completedSectionCount = sectionCount,
+                )
+                preferences.saveIdentity(draft.identity)
+                selectedTemplate.value = draft.templateId
+                selectedCompletedReport.value = null
+                route.value = AppRoute.DraftSummary
+            } finally {
+                saving.value = false
+            }
+        }
+    }
+
+    override fun deleteCompletedReport() {
+        val selected = selectedCompletedReport.value ?: return
+        if (saving.value) return
+        viewModelScope.launch {
+            saving.value = true
+            try {
+                repository.deleteCompletedReport(selected.id)
+                selectedCompletedReport.value = null
+                route.value = AppRoute.CompletedReports
             } finally {
                 saving.value = false
             }
@@ -609,6 +690,7 @@ class MainViewModel(
                 selectedCompletedReport.value = null
                 route.value = AppRoute.CompletedReports
             }
+            AppRoute.AccessibilitySettings -> route.value = AppRoute.Home
         }
     }
 

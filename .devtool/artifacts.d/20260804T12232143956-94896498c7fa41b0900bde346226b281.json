@@ -1,0 +1,228 @@
+{
+  "applied_at": "2026-08-04T12:23:21.439560Z",
+  "artifact": "/storage/emulated/0/Download/relatorio_android_phase7_8_accessibility_history_overlay.zip",
+  "artifact_name": "relatorio_android_phase7_8_accessibility_history_overlay.zip",
+  "type": "overlay",
+  "sha256": "d8f9ef0879a51733ea600b00d8d8dd2ef3c0ea8e55fa1a54d26e08ace0bcc226",
+  "status": "ok",
+  "validation_status": "not-run",
+  "commit_message": "Implement Phases 7 and 8 accessibility and history",
+  "commit_hash": "",
+  "file_count": 25,
+  "change_counts": {
+    "add": 6,
+    "modify": 19
+  },
+  "manifest": {
+    "schema_version": 2,
+    "type": "overlay",
+    "name": "Relatório Android Phases 7 e 8 - acessibilidade e histórico",
+    "description": "Implementa em um único overlay a Fase 7 de acessibilidade e usabilidade e a Fase 8 de histórico e manutenção segura dos relatórios.",
+    "target": "relatorio_android",
+    "inventory": {
+      "format": 1,
+      "entries": [
+        {
+          "path": "PROJECT_MANIFEST.json",
+          "action": "modify",
+          "sha256": "5e3320fbe508fd678aa3e2730cb3f0db1b573321e73dc702e6a7292f388a9628",
+          "size": 18228,
+          "source_sha256": "9deafbc1a073756d8e1c5493fa467a0fb5b7b6257dad34f99be27a1dc1b5b647"
+        },
+        {
+          "path": "README.md",
+          "action": "modify",
+          "sha256": "352b0009b58a15b78b559d92847e2b0f241867661bf44e7780b494a8bf855153",
+          "size": 1963,
+          "source_sha256": "0311620c4e3325d7b16c2e8a1071a470d31f3e47a24bb9dd44533f4d3f6784a3"
+        },
+        {
+          "path": "VALIDATION_REPORT.md",
+          "action": "modify",
+          "sha256": "faad49e8c60bc35e56db2cc30dedca1a8839bec465eef82ee9e0098c8ba82c94",
+          "size": 1399,
+          "source_sha256": "5e3b5312b3060d4d4b6a4a415eab775274da0bebda87d44383eb3652f1492093"
+        },
+        {
+          "path": "VERSION",
+          "action": "modify",
+          "sha256": "c2dc1af524d805a3ce8ec2a94d7313a10471a9e4c1c376596b902e2d269dd4be",
+          "size": 15,
+          "source_sha256": "000a88713acbbd7c4bf45a4020d5ab9f4ef34321c5f788d776bc4655aa02b4ee"
+        },
+        {
+          "path": "app/build.gradle.kts",
+          "action": "modify",
+          "sha256": "29135dc241ed70a7a478bd89dd4260df0f823807ec26968d4bd2652971ffa56a",
+          "size": 2415,
+          "source_sha256": "ea870d31447881a1b363377e18575738aabb64bdfd528fecc08b7d7572ac820e"
+        },
+        {
+          "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/MainActivity.kt",
+          "action": "modify",
+          "sha256": "3443e270faf43912f0e00c28897fc651b1212389a8c0eb7eff2acc42dead53b6",
+          "size": 1388,
+          "source_sha256": "ea0d7faf9eb6cf664530aca2e2b52af70e1e3d02ff2a541a4caaf070475149f1"
+        },
+        {
+          "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/MainViewModel.kt",
+          "action": "modify",
+          "sha256": "b769b47e6275b49341e616570c406db08b7f50ef68f4ec76bc2fcbc7795fc203",
+          "size": 28086,
+          "source_sha256": "ee86ba3166b7eb31cde58d540edf63ed4735713e5dd15d65d93b13e9bb0a1dc4"
+        },
+        {
+          "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/data/UserPreferencesStore.kt",
+          "action": "modify",
+          "sha256": "dd9bbd7922c8243cb43e242d374bc0a3c62567e04b1c89b4f266df09ba897d27",
+          "size": 5730,
+          "source_sha256": "405c10dfec38d85294ac159558b86c9bff3aa5139fff5c64abcc2007c57f59cc"
+        },
+        {
+          "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/AccessibilitySettingsScreen.kt",
+          "action": "add",
+          "sha256": "f2f00fa12a80e9de4005dffca24579eb9a2d494ff0cca612ab504de8ff250930",
+          "size": 7832
+        },
+        {
+          "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/MovementScreens.kt",
+          "action": "modify",
+          "sha256": "d41a69a0c4055264d0a929b3bfe86127eefe2bab17de513ced86afaf2a564493",
+          "size": 15765,
+          "source_sha256": "3e3786af4fade9f33bffacb536e172619ee9de738dd3ad5f4cf90fb37ba75837"
+        },
+        {
+          "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/PdfExportScreen.kt",
+          "action": "modify",
+          "sha256": "69c9744a16586f9d005ac40fde0725c326ac6ff46fdaac11d731cba1ee3a5a5d",
+          "size": 16189,
+          "source_sha256": "263a6be9fd1c5a027c838b3e9b73cf0fffa98fbc59c5b747235d8f3391640e55"
+        },
+        {
+          "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/RelatorioApp.kt",
+          "action": "modify",
+          "sha256": "78591b2a730c882253bd413b52b00f06bc1a94d96bf48e77c347fdd823dddbda",
+          "size": 43368,
+          "source_sha256": "0a2ab25edee9b6a6a54e5cd44946cd02b989ac485a3e1918df20009a982185db"
+        },
+        {
+          "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/ReviewScreen.kt",
+          "action": "modify",
+          "sha256": "63cd53e08f32540f7756da31fddbcd5545177c9951f66e1545a6e724f9a0f872",
+          "size": 12499,
+          "source_sha256": "ce3a15108b5ad87a74b7e12d8c193125ce14a3add8c4377ba52d6a24e7154d55"
+        },
+        {
+          "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/Theme.kt",
+          "action": "modify",
+          "sha256": "a1ff81da216c7f0549d665a9735594bc2edea18418972b0ef2fa4461335728cc",
+          "size": 6370,
+          "source_sha256": "99910d53919d8cbfa5e60106d14da4aa0c96feafeb0926a7046f992074a9be30"
+        },
+        {
+          "path": "core-model/src/main/kotlin/com/mikeyphw/relatorio/model/ReportHistory.kt",
+          "action": "add",
+          "sha256": "3ce131a229a84bb1b53fc9f91ff86fb6539379a81b9c9798e3e5a5b266ff5310",
+          "size": 2245
+        },
+        {
+          "path": "core-model/src/test/kotlin/com/mikeyphw/relatorio/model/ReportHistoryTest.kt",
+          "action": "add",
+          "sha256": "496f98d0425004e92284c62c96f560f29f75f0283e5ff965b9cb5110eabe6f0b",
+          "size": 2575
+        },
+        {
+          "path": "docs/PHASE_7_ACCESSIBILITY_USABILITY.md",
+          "action": "add",
+          "sha256": "7e1179552a8f77d19ff7b4b776a8dc67c62155b85a65df9be7509131dd5e0c3e",
+          "size": 1260
+        },
+        {
+          "path": "docs/PHASE_8_HISTORY_MAINTENANCE.md",
+          "action": "add",
+          "sha256": "3c225c779c001e9b0c26e95270241fd274d3b8c44db5df97076727b4a4d356c8",
+          "size": 1551
+        },
+        {
+          "path": "persistence/src/androidTest/kotlin/com/mikeyphw/relatorio/persistence/ReportRepositoryPersistenceTest.kt",
+          "action": "modify",
+          "sha256": "deb8fbb9cbf6778aa0300651ac95010fb5bdf569b55d3fc6cf6d21b19d7f2a96",
+          "size": 10190,
+          "source_sha256": "eaf8024406b2b4b4e0fe72a4e1ff9ea5635a877be1c8bbcc83acc16ef76097b6"
+        },
+        {
+          "path": "persistence/src/main/kotlin/com/mikeyphw/relatorio/persistence/ReportDao.kt",
+          "action": "modify",
+          "sha256": "da0ad030f51ac809d71af8a3fe5b8742fba986ee36025514d58e2947ee2d6c3e",
+          "size": 7275,
+          "source_sha256": "08aa89feb090ceb4fb7b334d7939ad09ccf457cc7191ca33ec270eed3c357449"
+        },
+        {
+          "path": "persistence/src/main/kotlin/com/mikeyphw/relatorio/persistence/ReportRepository.kt",
+          "action": "modify",
+          "sha256": "543bc893405892674310621a77e5ef13560c984ba8a9a91b0aeb73298b4d2e01",
+          "size": 5546,
+          "source_sha256": "a99c0a0411a6de9eb5d1119699f7cbda7a4c9a929b5c8759a0f1afa7fce7abc2"
+        },
+        {
+          "path": "tools/validate_phase4.py",
+          "action": "modify",
+          "sha256": "f857d1fb67166f8d3fe101ea988fcf440e78bcb1ed0a3f3d743f16e369b1ae50",
+          "size": 4763,
+          "source_sha256": "afcc862fe371734109732d70787c43a1fd08db190c8785b1ae41adfb1f0bc82a"
+        },
+        {
+          "path": "tools/validate_phase5.py",
+          "action": "modify",
+          "sha256": "22bdcdaea7d50431e77daea64f3d086d6a80fc0969d7c33877cd21b514369a36",
+          "size": 4306,
+          "source_sha256": "da312b0b278b33975c0613509579359df14ca3370d2bba57391dff7262b18df0"
+        },
+        {
+          "path": "tools/validate_phase6.py",
+          "action": "modify",
+          "sha256": "3a2263fb22da627630035d8f174f853e6cb5c64676032063f683717c9eb3fe0d",
+          "size": 5183,
+          "source_sha256": "afdf9e744a169cc05ab21b077241da9f55150df0b3b0ea47c08b1da42074bb9a"
+        },
+        {
+          "path": "tools/validate_phase7_8.py",
+          "action": "add",
+          "sha256": "9800b7e5ce9245845af6714b2ee36d79bd0fb06705292c9404e216243c2d2d20",
+          "size": 5309
+        }
+      ]
+    },
+    "apply": {
+      "atomic": true,
+      "conflict_policy": "fail",
+      "path_policy": "repository-relative",
+      "requires_clean_worktree": false,
+      "commit": {
+        "enabled": true,
+        "strategy": "single",
+        "message": "Implement Phases 7 and 8 accessibility and history"
+      }
+    },
+    "validation": {
+      "required": false,
+      "mode": "disabled",
+      "restore": false,
+      "build": false,
+      "test": false,
+      "rollback_on_failure": true,
+      "allow_deferred": false
+    },
+    "notes": [
+      "Requer a Fase 6 PDF export r2 já aplicada.",
+      "Adiciona tamanho de texto grande ou muito grande e contraste reforçado persistidos no DataStore.",
+      "Adiciona uma tela de ajuda em pt-BR e substitui alturas fixas por alturas mínimas adaptáveis.",
+      "Adiciona pesquisa acento-insensível no histórico por congregação, mês, ano ou formulário.",
+      "Permite usar relatório concluído como base para o próximo mês, mantendo quantidades e limpando eventos mensais.",
+      "Permite reabrir um relatório concluído para correção e excluir somente relatórios concluídos, sempre com confirmação.",
+      "Mantém o esquema Room na versão 1 e não adiciona permissões de internet ou armazenamento amplo.",
+      "Aplique com --no-validate e execute a validação Android explícita separadamente."
+    ]
+  },
+  "history_id": "94896498c7fa41b0900bde346226b281"
+}

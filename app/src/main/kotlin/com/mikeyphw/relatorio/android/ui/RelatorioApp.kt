@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -22,6 +23,7 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AccessibilityNew
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Article
 import androidx.compose.material.icons.filled.CheckCircle
@@ -32,6 +34,7 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.NavigateNext
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -74,6 +77,7 @@ import com.mikeyphw.relatorio.android.IdentityForm
 import com.mikeyphw.relatorio.android.IdentityMode
 import com.mikeyphw.relatorio.android.MainUiState
 import com.mikeyphw.relatorio.model.MonthlyReport
+import com.mikeyphw.relatorio.model.ReportHistory
 import com.mikeyphw.relatorio.model.ReportFieldDefinition
 import com.mikeyphw.relatorio.model.ReportSectionDefinition
 import com.mikeyphw.relatorio.model.ReportSummary
@@ -114,6 +118,7 @@ fun RelatorioApp(
                                 AppRoute.Review -> "Revisão final"
                                 AppRoute.CompletedReports -> "Relatórios prontos"
                                 AppRoute.CompletedReportDetail -> "PDF do relatório"
+                                AppRoute.AccessibilitySettings -> "Leitura e ajuda"
                                 AppRoute.Home -> "Relatório Mensal AD"
                             },
                         )
@@ -143,6 +148,7 @@ fun RelatorioApp(
                     onNewReport = actions::startNewReport,
                     onContinue = actions::continueDraft,
                     onCompleted = actions::openCompletedReports,
+                    onAccessibility = actions::openAccessibilitySettings,
                     modifier = Modifier.padding(contentPadding),
                 )
                 AppRoute.TemplatePicker -> TemplatePickerScreen(
@@ -223,6 +229,18 @@ fun RelatorioApp(
                 )
                 AppRoute.CompletedReportDetail -> CompletedReportDetailScreen(
                     report = state.selectedCompletedReport,
+                    hasDraft = state.draft != null,
+                    saving = state.saving,
+                    onDuplicate = actions::duplicateCompletedReport,
+                    onReopen = actions::reopenCompletedReport,
+                    onDelete = actions::deleteCompletedReport,
+                    modifier = Modifier.padding(contentPadding),
+                )
+                AppRoute.AccessibilitySettings -> AccessibilitySettingsScreen(
+                    textSizePreference = state.textSizePreference,
+                    highContrast = state.highContrast,
+                    onTextSizeChange = actions::setTextSizePreference,
+                    onHighContrastChange = actions::setHighContrast,
                     modifier = Modifier.padding(contentPadding),
                 )
             }
@@ -237,6 +255,7 @@ private fun HomeScreen(
     onNewReport: () -> Unit,
     onContinue: () -> Unit,
     onCompleted: () -> Unit,
+    onAccessibility: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var showReplaceDraftConfirmation by remember(hasDraft) { mutableStateOf(false) }
@@ -310,6 +329,13 @@ private fun HomeScreen(
             onClick = onCompleted,
             outlined = true,
         )
+        LargeActionButton(
+            text = "Leitura e ajuda",
+            supportingText = "Aumentar letras, reforçar contraste e ver instruções",
+            icon = Icons.Default.AccessibilityNew,
+            onClick = onAccessibility,
+            outlined = true,
+        )
 
         OutlinedCard(modifier = Modifier.fillMaxWidth()) {
             Column(
@@ -380,7 +406,7 @@ private fun TemplatePickerScreen(
             onClick = onContinue,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(MinimumActionHeight),
+                .heightIn(min = MinimumActionHeight),
         ) {
             Text("Continuar")
             Spacer(Modifier.width(8.dp))
@@ -524,7 +550,7 @@ private fun IdentityScreen(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(MinimumActionHeight),
+                .heightIn(min = MinimumActionHeight),
         ) {
             Text(if (saving) "Salvando..." else "Salvar e continuar")
         }
@@ -559,7 +585,7 @@ private fun MonthPicker(
                 onClick = { expanded = true },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(MinimumActionHeight),
+                    .heightIn(min = MinimumActionHeight),
                 contentPadding = PaddingValues(horizontal = 16.dp),
             ) {
                 Text(MonthNames.getOrElse(selectedMonth - 1) { "Escolher mês" })
@@ -813,7 +839,7 @@ private fun NumericSectionScreen(
                 onClick = onPrevious,
                 modifier = Modifier
                     .weight(1f)
-                    .height(MinimumActionHeight),
+                    .heightIn(min = MinimumActionHeight),
             ) {
                 Text("Voltar")
             }
@@ -821,7 +847,7 @@ private fun NumericSectionScreen(
                 onClick = onNext,
                 modifier = Modifier
                     .weight(1f)
-                    .height(MinimumActionHeight),
+                    .heightIn(min = MinimumActionHeight),
             ) {
                 Text(if (isLastSection) "Concluir números" else "Próxima seção")
             }
@@ -933,6 +959,11 @@ private fun CompletedReportsScreen(
     onHome: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var query by remember { mutableStateOf("") }
+    val filteredReports = remember(reports, query) {
+        ReportHistory.filter(reports = reports, query = query)
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -946,6 +977,27 @@ private fun CompletedReportsScreen(
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.semantics { heading() },
         )
+        Text(
+            "Pesquise pelo mês, ano, congregação ou nome do formulário.",
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        OutlinedTextField(
+            value = query,
+            onValueChange = { query = it.take(80) },
+            label = { Text("Pesquisar relatórios") },
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Text(
+            text = if (query.isBlank()) {
+                "${reports.size} relatório(s) salvo(s)"
+            } else {
+                "${filteredReports.size} resultado(s) encontrado(s)"
+            },
+            style = MaterialTheme.typography.labelLarge,
+        )
+
         if (reports.isEmpty()) {
             OutlinedCard(modifier = Modifier.fillMaxWidth()) {
                 Text(
@@ -953,12 +1005,19 @@ private fun CompletedReportsScreen(
                     modifier = Modifier.padding(18.dp),
                 )
             }
+        } else if (filteredReports.isEmpty()) {
+            OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    "Nenhum relatório corresponde à pesquisa. Apague o texto e tente novamente.",
+                    modifier = Modifier.padding(18.dp),
+                )
+            }
         } else {
-            reports.forEach { report ->
+            filteredReports.forEach { report ->
                 OutlinedCard(modifier = Modifier.fillMaxWidth()) {
                     Column(
                         modifier = Modifier.padding(18.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         Text(
                             "${MonthNames[report.month - 1]} de ${report.year}",
@@ -973,11 +1032,11 @@ private fun CompletedReportsScreen(
                             onClick = { onOpenReport(report.id) },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(MinimumActionHeight),
+                                .heightIn(min = MinimumActionHeight),
                         ) {
                             Icon(Icons.Default.Description, contentDescription = null)
                             Spacer(Modifier.width(10.dp))
-                            Text("Abrir e gerar PDF")
+                            Text("Abrir relatório")
                         }
                     }
                 }
@@ -1035,7 +1094,7 @@ private fun LargeActionButton(
             enabled = enabled,
             modifier = modifier
                 .fillMaxWidth()
-                .height(76.dp),
+                .heightIn(min = 76.dp),
             contentPadding = PaddingValues(horizontal = 18.dp),
         ) { content() }
     } else {
@@ -1044,7 +1103,7 @@ private fun LargeActionButton(
             enabled = enabled,
             modifier = modifier
                 .fillMaxWidth()
-                .height(76.dp),
+                .heightIn(min = 76.dp),
             contentPadding = PaddingValues(horizontal = 18.dp),
             colors = ButtonDefaults.buttonColors(),
         ) { content() }

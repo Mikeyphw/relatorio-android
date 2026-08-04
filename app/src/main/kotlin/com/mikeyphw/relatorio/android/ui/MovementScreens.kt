@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -104,7 +105,7 @@ internal fun MovementsScreen(
             onClick = onAdd,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(MovementActionHeight),
+                .heightIn(min = MovementActionHeight),
         ) {
             Icon(Icons.Default.Add, contentDescription = null)
             Spacer(Modifier.width(10.dp))
@@ -182,7 +183,7 @@ private fun MovementCard(
                     onClick = onEdit,
                     modifier = Modifier
                         .weight(1f)
-                        .height(54.dp),
+                        .heightIn(min = 54.dp),
                 ) {
                     Icon(Icons.Default.Edit, contentDescription = null)
                     Spacer(Modifier.width(6.dp))
@@ -192,7 +193,7 @@ private fun MovementCard(
                     onClick = onDelete,
                     modifier = Modifier
                         .weight(1f)
-                        .height(54.dp),
+                        .heightIn(min = 54.dp),
                 ) {
                     Icon(Icons.Default.Delete, contentDescription = null)
                     Spacer(Modifier.width(6.dp))
@@ -333,7 +334,7 @@ internal fun MovementEditorScreen(
             enabled = !saving,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(MovementActionHeight),
+                .heightIn(min = MovementActionHeight),
         ) {
             Text(if (saving) "Salvando..." else "Salvar pessoa")
         }
@@ -354,7 +355,7 @@ private fun ReasonSelector(
             onClick = { expanded = true },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(MovementActionHeight),
+                .heightIn(min = MovementActionHeight),
             contentPadding = PaddingValues(horizontal = 16.dp),
         ) {
             Text(

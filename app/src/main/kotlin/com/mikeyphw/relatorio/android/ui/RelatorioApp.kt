@@ -276,7 +276,7 @@ fun RelatorioApp(
                 AppRoute.AccessibilitySettings -> AccessibilitySettingsScreen(
                     textSizePreference = state.textSizePreference,
                     highContrast = state.highContrast,
-                    onTextSizePreferenceChange = actions::setTextSizePreference,
+                    onTextSizeChange = actions::setTextSizePreference,
                     onHighContrastChange = actions::setHighContrast,
                     modifier = Modifier.padding(contentPadding),
                 )

@@ -42,7 +42,7 @@ app_build = (ROOT / "app/build.gradle.kts").read_text(encoding="utf-8")
 version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
 
 checks = {
-    "phase version": (re.fullmatch(r"0\.[4-9]\.0-phase[4-9]", version) is not None or version == "0.8.0-phase7-8") and f'versionName = "{version}"' in app_build,
+    "phase version": (re.fullmatch(r"0\.[4-9]\.0-phase[4-9]", version) is not None or version == "0.8.0-phase7-8" or re.fullmatch(r"1\.\d+\.\d+", version) is not None) and f'versionName = "{version}"' in app_build,
     "movement routes": all(token in view_model for token in ["Movements", "MovementEditor", "Notes"]),
     "movement actions": all(
         token in view_model

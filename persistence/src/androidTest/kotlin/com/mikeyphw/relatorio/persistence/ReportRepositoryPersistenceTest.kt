@@ -356,4 +356,26 @@ class ReportRepositoryPersistenceTest {
         assertEquals("Restaurada", repository.observeDraft().first()?.identity?.congregation)
     }
 
+
+    @Test
+    fun preferenceOnlyBackupRestoreDoesNotRequireNewReports() = runTest {
+        val archive = ReportBackupArchive(
+            createdAtEpochMillis = 4_000L,
+            appVersion = "1.0.1",
+            reports = emptyList(),
+            preferences = BackupPreferencesSnapshot(
+                congregation = "Preferência restaurada",
+                highContrast = true,
+            ),
+        )
+
+        val preview = repository.previewRestore(archive, replaceCurrentDraft = false)
+        val result = repository.restoreBackup(archive, replaceCurrentDraft = false)
+
+        assertTrue(preview.canRestore)
+        assertTrue(preview.willRestorePreferences)
+        assertEquals(0, result.restoredReportCount)
+        assertTrue(result.restoredPreferences)
+    }
+
 }

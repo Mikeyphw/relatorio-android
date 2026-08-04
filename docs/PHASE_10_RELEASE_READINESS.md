@@ -2,7 +2,7 @@
 
 ## Entregue
 
-- versão de produto `1.0.0`;
+- versão de produto `1.0.1`;
 - ação direta de impressão pelo serviço de impressão do Android;
 - PDF criado de forma atômica, sem deixar arquivo parcial após falha;
 - verificação de espaço livre antes da geração do PDF;
@@ -18,3 +18,6 @@
 ## Limite de entrega
 
 O repositório não contém chave de assinatura. A assinatura final depende da chave privada do responsável pelo aplicativo. O comando `bash tools/build_signed_release.sh` usa a chave indicada no ambiente e verifica o APK assinado.
+
+
+O fechamento pós-auditoria está documentado em `PHASE_1_TO_10_GAP_CLOSURE.md`.

@@ -94,7 +94,8 @@ class ReportBackupTest {
         val protectedPreview = ReportBackupPlanner.preview(archive, listOf(existingCompleted, currentDraft), false)
         assertEquals(1, protectedPreview.skippedDuplicateCount)
         assertEquals(1, protectedPreview.skippedDraftCount)
-        assertFalse(protectedPreview.canRestore)
+        assertTrue(protectedPreview.canRestore)
+        assertTrue(protectedPreview.willRestorePreferences)
 
         val replacingPreview = ReportBackupPlanner.preview(archive, listOf(existingCompleted, currentDraft), true)
         assertEquals(listOf("backup-draft"), replacingPreview.importableReports.map { it.id })
@@ -157,7 +158,8 @@ class ReportBackupTest {
 
         val preview = ReportBackupPlanner.preview(archive, listOf(currentDraft), true)
 
-        assertFalse(preview.canRestore)
+        assertTrue(preview.canRestore)
+        assertTrue(preview.willRestorePreferences)
         assertEquals(1, preview.skippedDuplicateCount)
         assertFalse(preview.willReplaceCurrentDraft)
     }
@@ -204,6 +206,30 @@ class ReportBackupTest {
         assertTrue(result.isFailure)
     }
 
+
+    @Test
+    fun validBackupWithoutReportsCanRestorePreferences() {
+        val archive = ReportBackupArchive(
+            createdAtEpochMillis = 30L,
+            appVersion = "1.0.1",
+            reports = emptyList(),
+            preferences = BackupPreferencesSnapshot(
+                congregation = "Congregação restaurada",
+                textSizePreferenceId = "extra_large",
+                highContrast = true,
+            ),
+        )
+
+        val preview = ReportBackupPlanner.preview(
+            archive = archive,
+            existingReports = emptyList(),
+            replaceCurrentDraft = false,
+        )
+
+        assertTrue(preview.canRestore)
+        assertTrue(preview.willRestorePreferences)
+        assertTrue(preview.importableReports.isEmpty())
+    }
 
     private fun String.withUpdatedChecksum(): String {
         val checksumRegex = Regex("""checksum-sha256="([0-9a-fA-F]{64})"""")

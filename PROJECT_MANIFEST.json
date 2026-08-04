@@ -1,34 +1,28 @@
 {
   "project": "Relatório Mensal AD Android",
-  "phase": "9 e 10 - Backup, portabilidade e prontidão final",
-  "version": "1.0.0",
+  "phase": "1 a 10 - Fechamento final das lacunas de auditoria",
+  "version": "1.0.1",
   "package_id": "com.mikeyphw.relatorio.android",
   "devtool_target": "relatorio_android",
-  "base": "Phase 7/8 landed by user (commit c672363) over Phase 6 r2 commit fba9fbd",
+  "base": "Phase 9/10 audit snapshot at commit da8b2c1d2de50f52d6c6d15c1092cd1bada9be3f",
   "default_template": "AD_TIMOTEO_2026_V1",
   "alternate_template": "RELATORIO_COMPLETO_V1",
-  "generated_at_utc": "2026-08-04T13:08:10.633906+00:00",
+  "generated_at_utc": "2026-08-04T14:31:00.642427+00:00",
   "validation": {
-    "phase9_10_structural_validator": "passed",
-    "prior_phase_promise_audit": "passed",
+    "phase1_10_final_validator": "passed",
+    "historical_validator_chain": "phases 2, 3, 4, 5, 6, 7/8 and 9/10 passed",
     "core_model_kotlin_compile_werror": "passed",
-    "core_model_runtime_tests": "25 passed",
-    "backup_xml_round_trip_unicode": "passed",
-    "backup_sha256_corruption_detection": "passed",
-    "malicious_doctype_with_valid_checksum_rejection": "passed",
-    "unsupported_backup_preferences_rejection": "passed",
-    "duplicate_restore_planner": "passed",
-    "same_id_draft_replacement_planner": "passed",
-    "movement_id_collision_guard": "passed",
-    "persistence_contract_compile": "passed",
-    "viewmodel_contract_compile": "passed",
-    "backup_manager_contract_compile": "passed",
-    "print_adapter_contract_compile": "passed",
-    "compose_source_syntax_parse": "passed",
-    "xml_json_toml_python_shell_parse": "passed",
-    "full_android_gradle_build": "pending_user_environment",
-    "real_device_release_checklist": "pending_user_device",
-    "signed_release_apk": "requires_user_signing_key"
+    "core_model_runtime_tests": "26 passed",
+    "preference_only_restore_contract": "passed",
+    "preference_only_restore_persistence_test": "present",
+    "contextual_help_contract": "passed",
+    "three_primary_home_actions_contract": "passed",
+    "deprecated_compose_api_scan": "passed",
+    "end_to_end_compose_instrumentation": "present; pending connected device execution",
+    "json_xml_toml_python_shell_parse": "passed",
+    "full_android_gradle_build": "pending_user_environment; Gradle distribution unavailable offline here",
+    "real_device_acceptance": "pending_user_device and intended user",
+    "signed_release_apk": "requires_user signing key"
   },
   "files": [
     {
@@ -43,33 +37,48 @@
     },
     {
       "path": "README.md",
-      "bytes": 2366,
-      "sha256": "9ad7eb4e04ecf7ca392cea86da89844edb3b022fec51e994a6fc25fb733819c3"
+      "bytes": 2552,
+      "sha256": "452a044693f6d0f9c3bff0f701607b5f9ff8d6dd6191c41e76ef196e269088da"
     },
     {
       "path": "VALIDATION_REPORT.md",
-      "bytes": 1900,
-      "sha256": "eb6c9bf805d58590f67cf7ea6acb6e00ff0fc3d37bfccd4bcb149471072bb3b6"
+      "bytes": 1863,
+      "sha256": "5e5552dfc0d832195eb3201a8f16ad7f73ba7b7b9ed823ff96b287fdb92aa32b"
     },
     {
       "path": "VERSION",
       "bytes": 6,
-      "sha256": "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03"
+      "sha256": "44e161e4495cac2cf7858043e9e6418e9579f0ddcfae826f9a372622968ce066"
     },
     {
       "path": "app/build.gradle.kts",
-      "bytes": 2446,
-      "sha256": "c2938a461093d360c1de056ff7746c24250a954fa26c7c8127801bb738449eed"
+      "bytes": 2501,
+      "sha256": "0e350de2874bbbc6998bfe338b475d42cbe7c352db1b0182bf4470abbeebab60"
+    },
+    {
+      "path": "app/src/androidTest/kotlin/com/mikeyphw/relatorio/android/AppEndToEndTest.kt",
+      "bytes": 4054,
+      "sha256": "518434d4a8a326cfd5ba7b489499915f37bda7a61d79896f1808a3e70d3a43b6"
     },
     {
       "path": "app/src/androidTest/kotlin/com/mikeyphw/relatorio/android/AppSmokeTest.kt",
-      "bytes": 1256,
-      "sha256": "66ea21cd71371f9539fbba419f2fafc7dc0e8f6db0aed71e6a84412e3a1a435f"
+      "bytes": 1521,
+      "sha256": "d4ccf5861c6e63dff8ff271f02f46873a7552f3e3f90bb52d0351af35f0b95f0"
+    },
+    {
+      "path": "app/src/androidTest/kotlin/com/mikeyphw/relatorio/android/BackupPreferencesRestoreTest.kt",
+      "bytes": 1502,
+      "sha256": "0e4bf9ebefd6b304e1c6e03465793f8833831a9b30f5be9ea619ece912878860"
     },
     {
       "path": "app/src/androidTest/kotlin/com/mikeyphw/relatorio/android/ReportPdfExporterTest.kt",
       "bytes": 1495,
       "sha256": "2d541c06024fe94035af77dfe6ad13a04dfd70226248450b4016dba44fe943cf"
+    },
+    {
+      "path": "app/src/androidTest/kotlin/com/mikeyphw/relatorio/android/TestAppDataResetRule.kt",
+      "bytes": 883,
+      "sha256": "462fed300c8e0f78ecc2d383d9ae487839fe678d436cd086ff6e47f8ba411102"
     },
     {
       "path": "app/src/main/AndroidManifest.xml",
@@ -83,8 +92,8 @@
     },
     {
       "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/MainViewModel.kt",
-      "bytes": 35554,
-      "sha256": "3881e1b69f00f1c6dbf3c5c06530a2faa48ff6b67a9283f4d624cbc8ba1b6659"
+      "bytes": 35818,
+      "sha256": "62232c15a523006bc4b99d158e9ef37e13e11f1b77ce15c937e6c90dee051275"
     },
     {
       "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/RelatorioApplication.kt",
@@ -98,8 +107,8 @@
     },
     {
       "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/data/UserPreferencesStore.kt",
-      "bytes": 8368,
-      "sha256": "b0034a2fa72871de892f41b21eb12643f5c03b6bb2757509eb617846a6615750"
+      "bytes": 8541,
+      "sha256": "7fc60d9af8cdd1ab0b9bb7bd8c5e647aed93f9051517921ef2900088c5d6a866"
     },
     {
       "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/pdf/ReportPdfDocumentWriter.kt",
@@ -123,13 +132,13 @@
     },
     {
       "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/BackupRestoreScreen.kt",
-      "bytes": 12830,
-      "sha256": "a964e710864b65b15d935e23be191bf6d87e9d4196658a4cbef95bd974992e04"
+      "bytes": 13552,
+      "sha256": "4d38168430c31b20f9dae4b28f352648869c4fa0631d5d99953dc05554e9e709"
     },
     {
       "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/MovementScreens.kt",
-      "bytes": 15765,
-      "sha256": "d41a69a0c4055264d0a929b3bfe86127eefe2bab17de513ced86afaf2a564493"
+      "bytes": 15899,
+      "sha256": "4a2b3ae191579d32ced835de0e0b9016f6e726cffe4e7b04893c0df95b36360f"
     },
     {
       "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/PdfExportScreen.kt",
@@ -138,18 +147,18 @@
     },
     {
       "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/PrivacyInfoScreen.kt",
-      "bytes": 3690,
-      "sha256": "9e7e28a5cd8ad7331e3639a7844124c4f7d3e2f7e2a4c6f394f1dfd542f8076c"
+      "bytes": 3715,
+      "sha256": "6927fa8d8021fb2188a0e27e8529f2e9e7f2eff9246f121ac164e97cc268ae39"
     },
     {
       "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/RelatorioApp.kt",
-      "bytes": 45248,
-      "sha256": "a1be3d70ed73fecbd89d2f9460cda10f3b76c1df34420eab07ef4c4414bfbdea"
+      "bytes": 50270,
+      "sha256": "6448242c24414a20e941b7954ed05cdf75a84b8ac9463f8de7c9fc9a287aa3c8"
     },
     {
       "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/ReviewScreen.kt",
-      "bytes": 12499,
-      "sha256": "63cd53e08f32540f7756da31fddbcd5545177c9951f66e1545a6e724f9a0f872"
+      "bytes": 12612,
+      "sha256": "622a1503f1ce781c99a5663e2328f31137a798a70a9baac9fd644ea7b0d0c612"
     },
     {
       "path": "app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/Theme.kt",
@@ -177,6 +186,11 @@
       "sha256": "72ad104952968a4d812ccb2bde15532dede04df6e2c0b09802de327a4132e009"
     },
     {
+      "path": "app/src/main/res/values-v31/styles.xml",
+      "bytes": 693,
+      "sha256": "23e5d1528d9fa978641e5062d4b344abace487d54c21321a34ba8a05b77983eb"
+    },
+    {
       "path": "app/src/main/res/values/colors.xml",
       "bytes": 79,
       "sha256": "ca6b279fa7c8aaee593321a32285097c0b9ecc1952ae3d156085e90e844b8aaf"
@@ -190,11 +204,6 @@
       "path": "app/src/main/res/values/styles.xml",
       "bytes": 438,
       "sha256": "e25be0fc530f641410af05ddbb6b86216166e7ed9b924f9e91de6a90b75d1de3"
-    },
-    {
-      "path": "app/src/main/res/values-v31/styles.xml",
-      "bytes": 693,
-      "sha256": "23e5d1528d9fa978641e5062d4b344abace487d54c21321a34ba8a05b77983eb"
     },
     {
       "path": "app/src/main/res/xml/file_paths.xml",
@@ -233,8 +242,8 @@
     },
     {
       "path": "core-model/src/main/kotlin/com/mikeyphw/relatorio/model/ReportBackup.kt",
-      "bytes": 27326,
-      "sha256": "5ba8622b5ad7875d47ed55fb89b3e15cb90f5d6997b176d1ce32e4fe79774432"
+      "bytes": 27607,
+      "sha256": "c3bb47edecf6c07ab96a0ba11612a73421ae58a2ab35abcaa7d8ea1a67ab23b5"
     },
     {
       "path": "core-model/src/main/kotlin/com/mikeyphw/relatorio/model/ReportDraftFactory.kt",
@@ -273,8 +282,8 @@
     },
     {
       "path": "core-model/src/test/kotlin/com/mikeyphw/relatorio/model/ReportBackupTest.kt",
-      "bytes": 8372,
-      "sha256": "11be565a73e93d56fe9619596b2e5e8d0e6cd6eefc69a5a8c4d543ac36fe0ec7"
+      "bytes": 9261,
+      "sha256": "6fde3fb4f97b60051f2078301f2a77d8ac3937e3f1cd027adbb15273b6833fd8"
     },
     {
       "path": "core-model/src/test/kotlin/com/mikeyphw/relatorio/model/ReportDraftFactoryTest.kt",
@@ -308,8 +317,13 @@
     },
     {
       "path": "docs/PHASE_10_RELEASE_READINESS.md",
-      "bytes": 1003,
-      "sha256": "5b87d8cbe1ea461cadcd8d21084394a519a7fb82538a640b2b2714dae4c88462"
+      "bytes": 1086,
+      "sha256": "becbeaf79f57b8882b34700fcfd05f8f06ddb62abadd9dd321f91bfda63a5957"
+    },
+    {
+      "path": "docs/PHASE_1_TO_10_GAP_CLOSURE.md",
+      "bytes": 1480,
+      "sha256": "9883ac119e7ba3c4446529d875599859bf486f89af8c02c302670c4423114bf5"
     },
     {
       "path": "docs/PHASE_2_IMPLEMENTATION.md",
@@ -357,9 +371,19 @@
       "sha256": "777e35a25f6db98a3aa5ab7873b00a76d78a4c3c143a3afd573cf2a3389615fc"
     },
     {
+      "path": "docs/REAL_DEVICE_ACCEPTANCE.md",
+      "bytes": 2222,
+      "sha256": "6ecf89581888ed2e73032f21e2250cd7fe8ad43f34e0413c399f458b68724d11"
+    },
+    {
       "path": "docs/RELEASE_CHECKLIST.md",
-      "bytes": 1271,
-      "sha256": "fc83d95a9b4f8775d982c453a58fd61fb1abf48ec6178314f791ccc0e741964c"
+      "bytes": 1427,
+      "sha256": "ee229abafd59a28f525ef304c3e84467c4c328cbc06ac8fe87d2b02935e254fc"
+    },
+    {
+      "path": "gradle.properties",
+      "bytes": 311,
+      "sha256": "946ef6a70ff2eed5158e253ec54a981adbefa5bd7b2f5fb5ac896884144a0ac6"
     },
     {
       "path": "gradle/libs.versions.toml",
@@ -375,11 +399,6 @@
       "path": "gradle/wrapper/gradle-wrapper.properties",
       "bytes": 339,
       "sha256": "032a71c92fc7f3c1cadf8880f0554b71aa6beb411f97ac253aa93932cb3784d5"
-    },
-    {
-      "path": "gradle.properties",
-      "bytes": 311,
-      "sha256": "946ef6a70ff2eed5158e253ec54a981adbefa5bd7b2f5fb5ac896884144a0ac6"
     },
     {
       "path": "gradlew",
@@ -408,8 +427,8 @@
     },
     {
       "path": "persistence/src/androidTest/kotlin/com/mikeyphw/relatorio/persistence/ReportRepositoryPersistenceTest.kt",
-      "bytes": 13604,
-      "sha256": "dcfe591d808fc5f4de2fb36743106ea319d96dc927129bea4a8251cb268cd87e"
+      "bytes": 14385,
+      "sha256": "4860f6ab2941f1bb12ed8941372f9380d4f73394541d7f21db364a215a94d110"
     },
     {
       "path": "persistence/src/main/AndroidManifest.xml",
@@ -423,8 +442,8 @@
     },
     {
       "path": "persistence/src/main/kotlin/com/mikeyphw/relatorio/persistence/ReportDao.kt",
-      "bytes": 7986,
-      "sha256": "475ab97c0affd77671cfc958d0ade9d5140afb8b2f3e97fa17d9c8cd0c2d0cce"
+      "bytes": 8074,
+      "sha256": "342455c3a1ccfe91be714094986730d4d50e526c19012f5f707369663b6dec24"
     },
     {
       "path": "persistence/src/main/kotlin/com/mikeyphw/relatorio/persistence/ReportDatabase.kt",
@@ -438,8 +457,8 @@
     },
     {
       "path": "persistence/src/main/kotlin/com/mikeyphw/relatorio/persistence/ReportRepository.kt",
-      "bytes": 7233,
-      "sha256": "28680933ee54ce35d4623f77b2d7314ebbc9d720b10630c1f0596c6a57808b89"
+      "bytes": 7486,
+      "sha256": "5f4299727655ff8907552ded92f943e27cac727b767f41b4695d80c2ea9d037a"
     },
     {
       "path": "persistence/src/test/kotlin/com/mikeyphw/relatorio/persistence/ReportMappersTest.kt",
@@ -457,6 +476,16 @@
       "sha256": "3bc3f7696eeeabc3cc0ba5fc191d44f8ceb0a87c13f7957a73961e6949ba3d92"
     },
     {
+      "path": "tools/run_final_release_gate.sh",
+      "bytes": 706,
+      "sha256": "a26e8b6521d4b066c1f70fdab0c70cf144470767a9985098740e9a727465a0aa"
+    },
+    {
+      "path": "tools/validate_phase1_10_final.py",
+      "bytes": 4020,
+      "sha256": "f47eed1b7f9e29b1c1760d75db51724f34f2470fdf8b2e77c08a64c31cb464ab"
+    },
+    {
       "path": "tools/validate_phase2.py",
       "bytes": 2805,
       "sha256": "6c476866f9ed6826e32d522c146036c8d636221fc6546a5d5af9a0bd86ae9619"
@@ -468,28 +497,28 @@
     },
     {
       "path": "tools/validate_phase4.py",
-      "bytes": 4763,
-      "sha256": "f857d1fb67166f8d3fe101ea988fcf440e78bcb1ed0a3f3d743f16e369b1ae50"
+      "bytes": 4816,
+      "sha256": "b23a921411e58709b6accac58f47534b3d7018969f9729ac27ac166b5de7f968"
     },
     {
       "path": "tools/validate_phase5.py",
-      "bytes": 4306,
-      "sha256": "22bdcdaea7d50431e77daea64f3d086d6a80fc0969d7c33877cd21b514369a36"
+      "bytes": 4359,
+      "sha256": "d843e4202388e047a389fd41beed6c6d5f978cd3b9c29dcb692bdb12bca177ed"
     },
     {
       "path": "tools/validate_phase6.py",
-      "bytes": 5183,
-      "sha256": "3a2263fb22da627630035d8f174f853e6cb5c64676032063f683717c9eb3fe0d"
+      "bytes": 5238,
+      "sha256": "99baab0c1fb8fbd19dd1d4354c402854762cc1e6c6b283f43ce6e67052f027e3"
     },
     {
       "path": "tools/validate_phase7_8.py",
-      "bytes": 5309,
-      "sha256": "9800b7e5ce9245845af6714b2ee36d79bd0fb06705292c9404e216243c2d2d20"
+      "bytes": 5360,
+      "sha256": "7832d6035fe3ae114ab8bff3363e987314b3bcc6753b7f1d60c75f619b7739d9"
     },
     {
       "path": "tools/validate_phase9_10.py",
-      "bytes": 5958,
-      "sha256": "4905f74264f192c3a79b2bcb33dea972b9177e620a10fe6d0b4c83a563dec00f"
+      "bytes": 7078,
+      "sha256": "6cfe225f21f6c263d5c0f8e6f31544480863dfe7e7b606f6640211bf39271924"
     }
   ]
 }

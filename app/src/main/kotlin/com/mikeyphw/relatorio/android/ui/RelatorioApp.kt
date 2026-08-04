@@ -23,16 +23,16 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AccessibilityNew
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Article
+import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.NavigateNext
+import androidx.compose.material.icons.automirrored.filled.NavigateNext
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
@@ -64,6 +64,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -100,32 +101,27 @@ fun RelatorioApp(
     actions: AppActions,
 ) {
     BackHandler(enabled = state.route != AppRoute.Home) { actions.goBack() }
+    var showContextualHelp by remember(state.route, state.currentSectionIndex) { mutableStateOf(false) }
+    var showMoreOptions by remember { mutableStateOf(false) }
+    val help = contextualHelpFor(state)
+
+    if (showContextualHelp) {
+        AlertDialog(
+            onDismissRequest = { showContextualHelp = false },
+            title = { Text(help.title) },
+            text = { Text(help.message) },
+            confirmButton = {
+                Button(onClick = { showContextualHelp = false }) { Text("Entendi") }
+            },
+        )
+    }
 
     Scaffold(
         topBar = {
-            if (state.route != AppRoute.Home) {
-                TopAppBar(
-                    title = {
-                        Text(
-                            text = when (state.route) {
-                                AppRoute.TemplatePicker -> "Novo relatório"
-                                AppRoute.Identity -> "Identificação"
-                                AppRoute.DraftSummary -> "Relatório em andamento"
-                                AppRoute.NumericSection -> "Preenchimento"
-                                AppRoute.Movements -> "Movimentações"
-                                AppRoute.MovementEditor -> "Dados da pessoa"
-                                AppRoute.Notes -> "Anotações"
-                                AppRoute.Review -> "Revisão final"
-                                AppRoute.CompletedReports -> "Relatórios prontos"
-                                AppRoute.CompletedReportDetail -> "PDF do relatório"
-                                AppRoute.AccessibilitySettings -> "Leitura e ajuda"
-                                AppRoute.BackupRestore -> "Backup e restauração"
-                                AppRoute.PrivacyInfo -> "Privacidade"
-                                AppRoute.Home -> "Relatório Mensal AD"
-                            },
-                        )
-                    },
-                    navigationIcon = {
+            TopAppBar(
+                title = { Text(routeTitle(state.route)) },
+                navigationIcon = {
+                    if (state.route != AppRoute.Home) {
                         TextButton(onClick = actions::goBack) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -134,9 +130,49 @@ fun RelatorioApp(
                             Spacer(Modifier.width(6.dp))
                             Text("Voltar")
                         }
-                    },
-                )
-            }
+                    }
+                },
+                actions = {
+                    TextButton(onClick = { showContextualHelp = true }) {
+                        Icon(Icons.Default.HelpOutline, contentDescription = null)
+                        Spacer(Modifier.width(4.dp))
+                        Text("Ajuda")
+                    }
+                    if (state.route == AppRoute.Home) {
+                        Box {
+                            TextButton(onClick = { showMoreOptions = true }) {
+                                Text("Mais opções")
+                            }
+                            DropdownMenu(
+                                expanded = showMoreOptions,
+                                onDismissRequest = { showMoreOptions = false },
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Leitura e ajuda") },
+                                    onClick = {
+                                        showMoreOptions = false
+                                        actions.openAccessibilitySettings()
+                                    },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Backup e restauração") },
+                                    onClick = {
+                                        showMoreOptions = false
+                                        actions.openBackupRestore()
+                                    },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Privacidade e informações") },
+                                    onClick = {
+                                        showMoreOptions = false
+                                        actions.openPrivacyInfo()
+                                    },
+                                )
+                            }
+                        }
+                    }
+                },
+            )
         },
     ) { contentPadding ->
         Surface(
@@ -150,9 +186,6 @@ fun RelatorioApp(
                     onNewReport = actions::startNewReport,
                     onContinue = actions::continueDraft,
                     onCompleted = actions::openCompletedReports,
-                    onAccessibility = actions::openAccessibilitySettings,
-                    onBackup = actions::openBackupRestore,
-                    onPrivacy = actions::openPrivacyInfo,
                     modifier = Modifier.padding(contentPadding),
                 )
                 AppRoute.TemplatePicker -> TemplatePickerScreen(
@@ -243,7 +276,7 @@ fun RelatorioApp(
                 AppRoute.AccessibilitySettings -> AccessibilitySettingsScreen(
                     textSizePreference = state.textSizePreference,
                     highContrast = state.highContrast,
-                    onTextSizeChange = actions::setTextSizePreference,
+                    onTextSizePreferenceChange = actions::setTextSizePreference,
                     onHighContrastChange = actions::setHighContrast,
                     modifier = Modifier.padding(contentPadding),
                 )
@@ -270,6 +303,91 @@ fun RelatorioApp(
     }
 }
 
+private data class ContextualHelp(
+    val title: String,
+    val message: String,
+)
+
+private fun routeTitle(route: AppRoute): String = when (route) {
+    AppRoute.Home -> "Relatório Mensal AD"
+    AppRoute.TemplatePicker -> "Novo relatório"
+    AppRoute.Identity -> "Identificação"
+    AppRoute.DraftSummary -> "Relatório em andamento"
+    AppRoute.NumericSection -> "Preenchimento"
+    AppRoute.Movements -> "Movimentações"
+    AppRoute.MovementEditor -> "Dados da pessoa"
+    AppRoute.Notes -> "Anotações"
+    AppRoute.Review -> "Revisão final"
+    AppRoute.CompletedReports -> "Relatórios prontos"
+    AppRoute.CompletedReportDetail -> "PDF do relatório"
+    AppRoute.AccessibilitySettings -> "Leitura e ajuda"
+    AppRoute.BackupRestore -> "Backup e restauração"
+    AppRoute.PrivacyInfo -> "Privacidade"
+}
+
+private fun contextualHelpFor(state: MainUiState): ContextualHelp = when (state.route) {
+    AppRoute.Home -> ContextualHelp(
+        "Como começar",
+        "Use Novo relatório para iniciar o mês, Continuar relatório para retomar um rascunho ou Relatórios prontos para abrir documentos concluídos. As demais funções ficam em Mais opções.",
+    )
+    AppRoute.TemplatePicker -> ContextualHelp(
+        "Escolha do formulário",
+        "O Relatório AD Timóteo é o formulário atual e já vem selecionado. Escolha Relatório Completo somente quando precisar do modelo anterior.",
+    )
+    AppRoute.Identity -> ContextualHelp(
+        "Dados do relatório",
+        "Informe a congregação e confira mês, ano e dirigentes. Esses dados serão lembrados no próximo relatório para reduzir a digitação.",
+    )
+    AppRoute.DraftSummary -> ContextualHelp(
+        "Relatório em andamento",
+        "Preencha primeiro as seções numéricas. Depois adicione movimentações, anotações e use Revisar e concluir. Tudo é salvo automaticamente.",
+    )
+    AppRoute.NumericSection -> {
+        val section = state.draft
+            ?.let { ReportTemplateCatalog.definition(it.templateId).sections.getOrNull(state.currentSectionIndex) }
+        ContextualHelp(
+            section?.titlePtBr ?: "Preenchimento numérico",
+            "Use os botões de menos e mais ou toque no número para digitar. Deixe zero quando não houve atividade. Avance por todas as seções para liberar a conclusão.",
+        )
+    }
+    AppRoute.Movements -> ContextualHelp(
+        "Movimentações do mês",
+        "Adicione somente pessoas com alguma ocorrência no mês. Toque em uma pessoa para editar e use Excluir apenas quando tiver certeza.",
+    )
+    AppRoute.MovementEditor -> ContextualHelp(
+        "Dados da pessoa",
+        "Informe o nome e escolha o motivo por extenso. O código é preenchido automaticamente. As datas usam dia, mês e ano.",
+    )
+    AppRoute.Notes -> ContextualHelp(
+        "Anotações",
+        "Este campo é opcional. O texto é salvo automaticamente enquanto você digita e não será perdido ao voltar.",
+    )
+    AppRoute.Review -> ContextualHelp(
+        "Conferência final",
+        "Itens vermelhos precisam ser corrigidos. Avisos amarelos pedem conferência, mas não impedem a conclusão.",
+    )
+    AppRoute.CompletedReports -> ContextualHelp(
+        "Histórico",
+        "Pesquise pelo mês, ano, congregação ou formulário. Abra um relatório para gerar PDF, corrigir, copiar para o próximo mês ou excluir.",
+    )
+    AppRoute.CompletedReportDetail -> ContextualHelp(
+        "PDF e manutenção",
+        "Visualize, salve, compartilhe ou imprima o PDF. Corrigir reabre o relatório como rascunho; usar como base cria um novo mês sem copiar movimentações e anotações.",
+    )
+    AppRoute.AccessibilitySettings -> ContextualHelp(
+        "Leitura confortável",
+        "Escolha letras grandes ou muito grandes e ative contraste reforçado. As mudanças são salvas para as próximas aberturas.",
+    )
+    AppRoute.BackupRestore -> ContextualHelp(
+        "Proteção dos dados",
+        "Salve um backup antes de trocar de celular. Ao restaurar, confira a prévia; relatórios repetidos são ignorados e as configurações também podem ser recuperadas.",
+    )
+    AppRoute.PrivacyInfo -> ContextualHelp(
+        "Privacidade",
+        "O aplicativo funciona offline. Os dados só saem do aparelho quando você escolhe salvar, compartilhar ou fazer backup.",
+    )
+}
+
 @Composable
 private fun HomeScreen(
     hasDraft: Boolean,
@@ -277,9 +395,6 @@ private fun HomeScreen(
     onNewReport: () -> Unit,
     onContinue: () -> Unit,
     onCompleted: () -> Unit,
-    onAccessibility: () -> Unit,
-    onBackup: () -> Unit,
-    onPrivacy: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var showReplaceDraftConfirmation by remember(hasDraft) { mutableStateOf(false) }
@@ -315,7 +430,7 @@ private fun HomeScreen(
     ) {
         Spacer(Modifier.height(8.dp))
         Icon(
-            imageVector = Icons.Default.Article,
+            imageVector = Icons.AutoMirrored.Filled.Article,
             contentDescription = null,
             modifier = Modifier.size(58.dp),
             tint = MaterialTheme.colorScheme.primary,
@@ -351,27 +466,6 @@ private fun HomeScreen(
             supportingText = if (completedCount == 0) "Nenhum relatório concluído" else "$completedCount relatório(s)",
             icon = Icons.Default.FolderOpen,
             onClick = onCompleted,
-            outlined = true,
-        )
-        LargeActionButton(
-            text = "Leitura e ajuda",
-            supportingText = "Aumentar letras, reforçar contraste e ver instruções",
-            icon = Icons.Default.AccessibilityNew,
-            onClick = onAccessibility,
-            outlined = true,
-        )
-        LargeActionButton(
-            text = "Backup e restauração",
-            supportingText = "Guardar os dados ou levar para outro celular",
-            icon = Icons.Default.FolderOpen,
-            onClick = onBackup,
-            outlined = true,
-        )
-        LargeActionButton(
-            text = "Privacidade e informações",
-            supportingText = "Como os dados são guardados e guia rápido",
-            icon = Icons.Default.Article,
-            onClick = onPrivacy,
             outlined = true,
         )
 
@@ -448,7 +542,7 @@ private fun TemplatePickerScreen(
         ) {
             Text("Continuar")
             Spacer(Modifier.width(8.dp))
-            Icon(Icons.Default.NavigateNext, contentDescription = null)
+            Icon(Icons.AutoMirrored.Filled.NavigateNext, contentDescription = null)
         }
     }
 }
@@ -558,7 +652,12 @@ private fun IdentityScreen(
             modifier = Modifier.fillMaxWidth(),
         )
         IdentityTextField("Regional", form.regional) { value -> onFormChange { it.copy(regional = value) } }
-        IdentityTextField("Congregação", form.congregation) { value -> onFormChange { it.copy(congregation = value) } }
+        IdentityTextField(
+            label = "Congregação",
+            value = form.congregation,
+            onValueChange = { value -> onFormChange { it.copy(congregation = value) } },
+            modifier = Modifier.testTag("identity_congregation"),
+        )
         IdentityTextField("Pastor dirigente", form.leadPastor) { value -> onFormChange { it.copy(leadPastor = value) } }
 
         HorizontalDivider()
@@ -588,7 +687,8 @@ private fun IdentityScreen(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(min = MinimumActionHeight),
+                .heightIn(min = MinimumActionHeight)
+                .testTag("identity_save"),
         ) {
             Text(if (saving) "Salvando..." else "Salvar e continuar")
         }
@@ -599,6 +699,7 @@ private fun IdentityScreen(
 private fun IdentityTextField(
     label: String,
     value: String,
+    modifier: Modifier = Modifier,
     onValueChange: (String) -> Unit,
 ) {
     OutlinedTextField(
@@ -606,7 +707,7 @@ private fun IdentityTextField(
         onValueChange = onValueChange,
         label = { Text(label) },
         singleLine = true,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
     )
 }
 
@@ -767,7 +868,7 @@ private fun DraftSummaryScreen(
         LargeActionButton(
             text = "Anotações e sugestões",
             supportingText = if (draft.notes.isBlank()) "Opcional" else "Texto salvo",
-            icon = Icons.Default.Article,
+            icon = Icons.AutoMirrored.Filled.Article,
             onClick = onNotes,
         )
         LargeActionButton(
@@ -885,7 +986,8 @@ private fun NumericSectionScreen(
                 onClick = onNext,
                 modifier = Modifier
                     .weight(1f)
-                    .heightIn(min = MinimumActionHeight),
+                    .heightIn(min = MinimumActionHeight)
+                    .testTag("numeric_next"),
             ) {
                 Text(if (isLastSection) "Concluir números" else "Próxima seção")
             }
@@ -1122,7 +1224,7 @@ private fun LargeActionButton(
                     )
                 }
             }
-            Icon(Icons.Default.NavigateNext, contentDescription = null)
+            Icon(Icons.AutoMirrored.Filled.NavigateNext, contentDescription = null)
         }
     }
 

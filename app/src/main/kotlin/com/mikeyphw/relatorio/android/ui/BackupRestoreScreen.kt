@@ -85,10 +85,13 @@ internal fun BackupRestoreScreen(
             title = { Text("Restaurar este backup?") },
             text = {
                 Text(
-                    if (preview?.willReplaceCurrentDraft == true) {
-                        "O rascunho atual será substituído. Relatórios repetidos serão ignorados."
-                    } else {
-                        "Os relatórios novos serão acrescentados. Relatórios repetidos serão ignorados."
+                    when {
+                        preview?.willReplaceCurrentDraft == true ->
+                            "O rascunho atual será substituído. As configurações também serão restauradas. Relatórios repetidos serão ignorados."
+                        preview?.importableReports?.isEmpty() == true ->
+                            "Não há relatórios novos. Somente as configurações e preferências serão restauradas."
+                        else ->
+                            "Os relatórios novos serão acrescentados e as configurações serão restauradas. Relatórios repetidos serão ignorados."
                     },
                 )
             },
@@ -261,6 +264,9 @@ private fun RestorePreviewCard(
             Text("${preview.completedReportsInBackup} concluído(s)")
             Text("${preview.draftReportsInBackup} em andamento")
             Text("${preview.importableReports.size} novo(s) para restaurar")
+            if (preview.willRestorePreferences) {
+                Text("Configurações de identificação, formulário, leitura e contraste serão restauradas")
+            }
             if (preview.skippedDuplicateCount > 0) {
                 Text("${preview.skippedDuplicateCount} repetido(s) serão ignorados")
             }
@@ -294,7 +300,13 @@ private fun RestorePreviewCard(
             ) {
                 Icon(Icons.Default.History, contentDescription = null)
                 Spacer(Modifier.width(12.dp))
-                Text("Restaurar ${preview.importableReports.size} relatório(s)")
+                Text(
+                    if (preview.importableReports.isEmpty()) {
+                        "Restaurar configurações"
+                    } else {
+                        "Restaurar ${preview.importableReports.size} relatório(s) e configurações"
+                    },
+                )
             }
             TextButton(
                 onClick = onCancel,

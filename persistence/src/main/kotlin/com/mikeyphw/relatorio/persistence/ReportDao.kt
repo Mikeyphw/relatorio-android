@@ -49,6 +49,9 @@ abstract class ReportDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insertMovement(movement: MemberMovementEntity)
 
+    @Query("DELETE FROM reports")
+    abstract suspend fun clearAllReportsForTesting()
+
     @Query("DELETE FROM reports WHERE status = :status")
     abstract suspend fun deleteReportsByStatus(status: String)
 

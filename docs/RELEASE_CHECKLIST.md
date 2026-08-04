@@ -1,4 +1,4 @@
-# Checklist de lançamento 1.0.0
+# Checklist de lançamento 1.0.1
 
 ## Validação automatizada
 
@@ -10,8 +10,12 @@
 - [ ] `:app:compileDebugAndroidTestKotlin`
 - [ ] `:app:lintDebug`
 - [ ] `:app:assembleRelease`
+- [ ] `python tools/validate_phase1_10_final.py`
+- [ ] `:app:connectedDebugAndroidTest`
 
 ## Teste em aparelho real
+
+Use `docs/REAL_DEVICE_ACCEPTANCE.md` como registro de evidências.
 
 - [ ] criar e retomar um rascunho após encerrar o processo;
 - [ ] preencher os dois modelos com fonte do Android em 200%;

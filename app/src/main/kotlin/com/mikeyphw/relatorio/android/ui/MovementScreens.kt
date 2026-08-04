@@ -38,6 +38,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -269,7 +270,7 @@ internal fun MovementEditorScreen(
             label = { Text("Nome da pessoa *") },
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
             singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().testTag("movement_name"),
         )
         OutlinedTextField(
             value = form.eventDateText,
@@ -334,7 +335,8 @@ internal fun MovementEditorScreen(
             enabled = !saving,
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(min = MovementActionHeight),
+                .heightIn(min = MovementActionHeight)
+                .testTag("movement_save"),
         ) {
             Text(if (saving) "Salvando..." else "Salvar pessoa")
         }
@@ -415,7 +417,7 @@ internal fun NotesScreen(
             },
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
             minLines = 10,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().testTag("notes_input"),
         )
     }
 }

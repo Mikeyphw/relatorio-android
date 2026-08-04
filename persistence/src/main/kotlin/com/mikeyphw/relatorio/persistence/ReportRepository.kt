@@ -32,6 +32,11 @@ class ReportRepository(
     suspend fun snapshotAllReports(): List<MonthlyReport> =
         dao.getAllReports().map { it.toModel() }
 
+    /** Resets persisted reports before an instrumentation scenario. */
+    suspend fun clearAllForTesting() {
+        dao.clearAllReportsForTesting()
+    }
+
     suspend fun previewRestore(
         archive: ReportBackupArchive,
         replaceCurrentDraft: Boolean,
@@ -46,20 +51,24 @@ class ReportRepository(
         replaceCurrentDraft: Boolean,
     ): BackupRestoreResult {
         val preview = previewRestore(archive, replaceCurrentDraft)
-        check(preview.blockingErrors.isEmpty()) { preview.blockingErrors.joinToString(" ") }
-        check(preview.importableReports.isNotEmpty()) { "Não há relatórios novos para restaurar." }
+        check(preview.canRestore) {
+            preview.blockingErrors.joinToString(" ").ifBlank { "Este backup não pode ser restaurado." }
+        }
         val reports = preview.importableReports
-        dao.restoreReports(
-            reports = reports.map { it.toEntity() },
-            values = reports.flatMap { it.valueEntities() },
-            movements = reports.flatMap { it.movementEntities() },
-            replaceCurrentDraft = preview.willReplaceCurrentDraft,
-            draftStatus = ReportStatus.Draft.storageValue,
-        )
+        if (reports.isNotEmpty()) {
+            dao.restoreReports(
+                reports = reports.map { it.toEntity() },
+                values = reports.flatMap { it.valueEntities() },
+                movements = reports.flatMap { it.movementEntities() },
+                replaceCurrentDraft = preview.willReplaceCurrentDraft,
+                draftStatus = ReportStatus.Draft.storageValue,
+            )
+        }
         return BackupRestoreResult(
             restoredReportCount = reports.size,
             skippedDuplicateCount = preview.skippedDuplicateCount,
             restoredDraftId = reports.singleOrNull { it.status == ReportStatus.Draft }?.id,
+            restoredPreferences = preview.willRestorePreferences,
         )
     }
 

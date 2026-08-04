@@ -469,8 +469,13 @@ class MainViewModel(
                 pendingBackupArchive = null
                 backupUi.value = BackupUiState(
                     message = buildString {
-                        append(result.restoredReportCount)
-                        append(" relatório(s) restaurado(s).")
+                        if (result.restoredReportCount > 0) {
+                            append(result.restoredReportCount)
+                            append(" relatório(s) restaurado(s). ")
+                        }
+                        if (result.restoredPreferences) {
+                            append("Configurações e preferências restauradas.")
+                        }
                         if (result.skippedDuplicateCount > 0) {
                             append(" ")
                             append(result.skippedDuplicateCount)

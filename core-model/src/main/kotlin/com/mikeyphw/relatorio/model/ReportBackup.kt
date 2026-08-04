@@ -50,16 +50,19 @@ data class BackupRestorePreview(
     val skippedDuplicateCount: Int,
     val skippedDraftCount: Int,
     val willReplaceCurrentDraft: Boolean,
+    val willRestorePreferences: Boolean,
     val blockingErrors: List<String>,
     val warnings: List<String>,
 ) {
-    val canRestore: Boolean get() = blockingErrors.isEmpty() && importableReports.isNotEmpty()
+    val canRestore: Boolean
+        get() = blockingErrors.isEmpty() && (willRestorePreferences || importableReports.isNotEmpty())
 }
 
 data class BackupRestoreResult(
     val restoredReportCount: Int,
     val skippedDuplicateCount: Int,
     val restoredDraftId: String?,
+    val restoredPreferences: Boolean,
 )
 
 object ReportBackupValidator {
@@ -213,6 +216,7 @@ object ReportBackupPlanner {
                 skippedDuplicateCount = 0,
                 skippedDraftCount = 0,
                 willReplaceCurrentDraft = false,
+                willRestorePreferences = false,
                 blockingErrors = validation.blockingErrors,
                 warnings = validation.warnings,
             )
@@ -274,7 +278,9 @@ object ReportBackupPlanner {
             addAll(validation.warnings)
             if (duplicates > 0) add("$duplicates relatório(s) repetido(s) serão ignorados.")
             if (skippedDrafts > 0) add("O relatório em andamento do backup não será restaurado sem autorização para substituir o rascunho atual.")
-            if (archive.reports.isNotEmpty() && importable.isEmpty()) add("Não há relatórios novos para restaurar.")
+            if (archive.reports.isNotEmpty() && importable.isEmpty()) {
+                add("Não há relatórios novos. As configurações do backup ainda podem ser restauradas.")
+            }
         }
 
         return BackupRestorePreview(
@@ -285,6 +291,7 @@ object ReportBackupPlanner {
             skippedDuplicateCount = duplicates,
             skippedDraftCount = skippedDrafts,
             willReplaceCurrentDraft = willReplaceExistingDraft && importable.any { it.status == ReportStatus.Draft },
+            willRestorePreferences = true,
             blockingErrors = emptyList(),
             warnings = warnings,
         )

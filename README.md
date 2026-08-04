@@ -4,10 +4,7 @@ Aplicativo Android em pt-BR para preencher relatórios mensais, manter rascunhos
 
 ## Estado atual
 
-Esta entrega conclui o roadmap funcional com:
-
-- **Fase 9 — Backup e portabilidade dos dados**;
-- **Fase 10 — Prontidão final de lançamento**.
+Esta entrega fecha as lacunas auditadas das Fases 1 a 10, preservando o roadmap funcional e adicionando a regressão final de qualidade.
 
 Dados do projeto:
 
@@ -15,7 +12,7 @@ Dados do projeto:
 - modelo alternativo: `RELATORIO_COMPLETO_V1`;
 - package ID: `com.mikeyphw.relatorio.android`;
 - target Devtool: `relatorio_android`;
-- versão: `1.0.0`.
+- versão: `1.0.1`.
 
 ## O que funciona
 
@@ -31,6 +28,9 @@ Dados do projeto:
 - backup XML restaurável com verificação SHA-256 de integridade;
 - pacote ZIP com backup e PDFs concluídos;
 - prévia e proteção contra duplicatas antes da restauração;
+- restauração isolada de configurações mesmo quando não há relatório novo;
+- ajuda contextual em todas as telas;
+- tela inicial com três ações principais e opções secundárias organizadas;
 - tela de privacidade e guia rápido;
 - funcionamento offline, sem permissões de internet ou armazenamento amplo.
 
@@ -52,14 +52,13 @@ docs/         Escopo, privacidade, checklist e critérios de lançamento
 ## Validar
 
 ```bash
-./gradlew \
-  :app:compileDebugKotlin \
-  :core-model:test \
-  :persistence:testDebugUnitTest \
-  :persistence:compileDebugAndroidTestKotlin \
-  :app:testDebugUnitTest \
-  :app:compileDebugAndroidTestKotlin \
-  :app:lintDebug
+bash tools/run_final_release_gate.sh
+```
+
+Com um aparelho de aceitação conectado:
+
+```bash
+bash tools/run_final_release_gate.sh --device
 ```
 
 ## Gerar APK release assinado
@@ -73,3 +72,6 @@ bash tools/build_signed_release.sh
 ```
 
 A assinatura final depende da chave privada oficial do responsável pelo aplicativo.
+
+
+A distribuição final exige o preenchimento de `docs/REAL_DEVICE_ACCEPTANCE.md`.

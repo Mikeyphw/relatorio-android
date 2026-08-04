@@ -17,7 +17,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.FactCheck
+import androidx.compose.material.icons.automirrored.filled.FactCheck
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -36,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -145,7 +146,8 @@ internal fun ReviewScreen(
             enabled = canComplete && !saving,
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(min = ReviewActionHeight),
+                .heightIn(min = ReviewActionHeight)
+                .testTag("review_complete"),
         ) {
             Icon(Icons.Default.CheckCircle, contentDescription = null)
             Spacer(Modifier.width(10.dp))
@@ -199,7 +201,7 @@ private fun NumericReviewCard(
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.FactCheck, contentDescription = null)
+                Icon(Icons.AutoMirrored.Filled.FactCheck, contentDescription = null)
                 Spacer(Modifier.width(10.dp))
                 Text("Seções numéricas", style = MaterialTheme.typography.titleLarge)
             }

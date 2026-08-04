@@ -98,6 +98,11 @@ class UserPreferencesStore(private val context: Context) {
         }
     }
 
+    /** Resets DataStore before an instrumentation scenario. */
+    suspend fun clearAllForTesting() {
+        context.reportPreferencesDataStore.edit { it.clear() }
+    }
+
     suspend fun saveIdentity(identity: ReportIdentity) {
         context.reportPreferencesDataStore.edit { preferences ->
             preferences[Keys.Regional] = identity.regional

@@ -51,7 +51,7 @@ database = (ROOT / "persistence/src/main/kotlin/com/mikeyphw/relatorio/persisten
 manifest = (ROOT / "app/src/main/AndroidManifest.xml").read_text(encoding="utf-8")
 
 checks = {
-    "combined phase version": version == "0.8.0-phase7-8" and 'versionName = "0.8.0-phase7-8"' in app_build,
+    "combined phase version": (version == "0.8.0-phase7-8" or re.fullmatch(r"1\.\d+\.\d+", version) is not None) and f'versionName = "{version}"' in app_build,
     "accessibility route": "AccessibilitySettings" in view_model and "AccessibilitySettingsScreen" in app_ui,
     "text size preference": "TextSizePreference" in preferences and "setTextSizePreference" in preferences,
     "high contrast preference": "setHighContrast" in preferences and "HighContrastLightColors" in theme,

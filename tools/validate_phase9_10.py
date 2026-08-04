@@ -39,10 +39,10 @@ for required in required_files:
     require((ROOT / required).is_file(), f"arquivo obrigatório ausente: {required}")
 
 build = text("app/build.gradle.kts")
-require('versionCode = 10' in build, "versionCode final não é 10")
-require('versionName = "1.0.0"' in build, "versionName final não é 1.0.0")
+require('versionCode = 11' in build, "versionCode final não é 11")
+require('versionName = "1.0.1"' in build, "versionName final não é 1.0.1")
 require("buildConfig = true" in build, "BuildConfig precisa estar habilitado para exportar a versão no backup")
-require(text("VERSION").strip() == "1.0.0", "arquivo VERSION não está em 1.0.0")
+require(text("VERSION").strip() == "1.0.1", "arquivo VERSION não está em 1.0.1")
 
 manifest = text("app/src/main/AndroidManifest.xml")
 for forbidden in ("android.permission.INTERNET", "MANAGE_EXTERNAL_STORAGE", "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"):
@@ -106,6 +106,17 @@ require("ReportReviewEngine.review" in view_model, "motor de revisão não está
 require("ReportPdfDocumentWriter" in manager, "geração de PDF não foi preservada no pacote")
 require("ReportHistory.filter" in app_ui, "pesquisa do histórico não foi preservada")
 require("version = 1" in text("persistence/src/main/kotlin/com/mikeyphw/relatorio/persistence/ReportDatabase.kt"), "esquema Room mudou sem migração")
+
+# Final gap-closure contracts.
+require("willRestorePreferences" in backup, "prévia não permite restauração de preferências")
+require("restoredPreferences" in backup, "resultado não registra restauração de preferências")
+require("clearAllForTesting" in repository, "isolamento da regressão de interface ausente")
+require("contextualHelpFor" in app_ui and 'Text("Ajuda")' in app_ui, "ajuda contextual por tela ausente")
+require('Text("Mais opções")' in app_ui, "ações secundárias da tela inicial não foram reorganizadas")
+require("AppEndToEndTest" in text("app/src/androidTest/kotlin/com/mikeyphw/relatorio/android/AppEndToEndTest.kt"), "regressão ponta a ponta ausente")
+require("junit4.v2.createAndroidComposeRule" in text("app/src/androidTest/kotlin/com/mikeyphw/relatorio/android/AppSmokeTest.kt"), "Compose Test v2 não foi adotado")
+for deprecated in ("Icons.Default.Article", "Icons.Default.NavigateNext", "Icons.Default.FactCheck"):
+    require(deprecated not in app_ui + text("app/src/main/kotlin/com/mikeyphw/relatorio/android/ui/ReviewScreen.kt"), f"ícone depreciado presente: {deprecated}")
 
 if ERRORS:
     print("Phase 9/10 validation failed:")

@@ -10,7 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Article
+import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
@@ -32,7 +32,7 @@ internal fun PrivacyInfoScreen(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.spacedBy(18.dp),
     ) {
         Icon(
-            Icons.Default.Article,
+            Icons.AutoMirrored.Filled.Article,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
         )

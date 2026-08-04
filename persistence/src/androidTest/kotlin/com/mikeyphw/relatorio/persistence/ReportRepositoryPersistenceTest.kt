@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.mikeyphw.relatorio.model.MemberMovement
 import com.mikeyphw.relatorio.model.ReportIdentity
 import com.mikeyphw.relatorio.model.ReportTemplateId
 import kotlinx.coroutines.flow.first
@@ -103,6 +104,53 @@ class ReportRepositoryPersistenceTest {
         val restored = repository.observeDraft().first()
         val customMeeting = restored?.values?.single { it.fieldId == "meetings.custom_1" }
         assertEquals("Reunião de famílias", customMeeting?.customLabel)
+    }
+
+    @Test
+    fun movementAndNotesAreSavedAndRestored() = runTest {
+        val draft = repository.createDraft(
+            templateId = ReportTemplateId.AdTimoteo2026,
+            identity = ReportIdentity(month = 8, year = 2026, congregation = "Central"),
+        )
+
+        repository.saveDraftMovement(
+            reportId = draft.id,
+            movement = MemberMovement(
+                id = "movement-1",
+                registrationNumber = "42",
+                memberName = "João da Silva",
+                eventDateIso = "2026-08-03",
+                reasonCode = "BNA",
+                occurrence = "Batismo nas águas",
+                birthDateIso = "1980-01-01",
+            ),
+        )
+        repository.updateDraftNotes(draft.id, "Anotação mensal")
+
+        val restored = repository.observeDraft().first()
+        assertEquals("João da Silva", restored?.movements?.single()?.memberName)
+        assertEquals("Anotação mensal", restored?.notes)
+    }
+
+    @Test
+    fun movementCanBeEditedAndDeleted() = runTest {
+        val draft = repository.createDraft(
+            templateId = ReportTemplateId.AdTimoteo2026,
+            identity = ReportIdentity(month = 8, year = 2026, congregation = "Central"),
+        )
+        val original = MemberMovement(
+            id = "movement-2",
+            memberName = "Maria",
+            eventDateIso = "2026-08-04",
+            reasonCode = "CMR",
+        )
+
+        repository.saveDraftMovement(draft.id, original)
+        repository.saveDraftMovement(draft.id, original.copy(memberName = "Maria Souza"))
+        assertEquals("Maria Souza", repository.observeDraft().first()?.movements?.single()?.memberName)
+
+        repository.deleteDraftMovement(draft.id, original.id)
+        assertEquals(0, repository.observeDraft().first()?.movements?.size)
     }
 
     @Test

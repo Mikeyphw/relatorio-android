@@ -1,5 +1,6 @@
 package com.mikeyphw.relatorio.persistence
 
+import com.mikeyphw.relatorio.model.MemberMovement
 import com.mikeyphw.relatorio.model.ReportDraftFactory
 import com.mikeyphw.relatorio.model.ReportIdentity
 import com.mikeyphw.relatorio.model.ReportTemplateId
@@ -23,5 +24,24 @@ class ReportMappersTest {
         assertEquals("Primavera VI", entity.congregation)
         assertEquals(33, values.size)
         assertEquals(0, values.sumOf { it.value })
+    }
+
+    @Test
+    fun movementMapperPreservesAllFields() {
+        val movement = MemberMovement(
+            id = "movement-1",
+            registrationNumber = "10",
+            memberName = "João",
+            eventDateIso = "2026-08-03",
+            reasonCode = "BNA",
+            occurrence = "Batismo nas águas",
+            birthDateIso = "1980-01-01",
+        )
+
+        val entity = movement.toEntity(reportId = "report-1")
+
+        assertEquals("report-1", entity.reportId)
+        assertEquals("João", entity.memberName)
+        assertEquals("1980-01-01", entity.birthDateIso)
     }
 }

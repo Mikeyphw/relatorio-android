@@ -38,11 +38,22 @@ abstract class ReportDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insertMovements(movements: List<MemberMovementEntity>)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun insertMovement(movement: MemberMovementEntity)
+
     @Query("DELETE FROM reports WHERE status = :status")
     abstract suspend fun deleteReportsByStatus(status: String)
 
     @Query("DELETE FROM reports WHERE id = :reportId")
     abstract suspend fun deleteReport(reportId: String)
+
+    @Query(
+        """
+        DELETE FROM member_movements
+        WHERE id = :movementId AND reportId = :reportId
+        """,
+    )
+    abstract suspend fun deleteMovement(reportId: String, movementId: String): Int
 
     @Query(
         """
@@ -83,6 +94,20 @@ abstract class ReportDao {
         status: String,
         updatedAtEpochMillis: Long,
     )
+
+    @Query(
+        """
+        UPDATE reports SET
+            notes = :notes,
+            updatedAtEpochMillis = :updatedAtEpochMillis
+        WHERE id = :reportId
+        """,
+    )
+    abstract suspend fun updateNotes(
+        reportId: String,
+        notes: String,
+        updatedAtEpochMillis: Long,
+    ): Int
 
     @Query(
         """
@@ -154,6 +179,29 @@ abstract class ReportDao {
     ) {
         check(updateCustomLabel(reportId, fieldId, customLabel) == 1) {
             "Campo de relatório não encontrado: $fieldId"
+        }
+        touchReport(reportId, updatedAtEpochMillis)
+    }
+
+    @Transaction
+    open suspend fun saveDraftMovement(
+        reportId: String,
+        movement: MemberMovementEntity,
+        updatedAtEpochMillis: Long,
+    ) {
+        check(movement.reportId == reportId) { "Movimentação ligada a outro relatório." }
+        insertMovement(movement)
+        touchReport(reportId, updatedAtEpochMillis)
+    }
+
+    @Transaction
+    open suspend fun deleteDraftMovement(
+        reportId: String,
+        movementId: String,
+        updatedAtEpochMillis: Long,
+    ) {
+        check(deleteMovement(reportId, movementId) == 1) {
+            "Movimentação não encontrada: $movementId"
         }
         touchReport(reportId, updatedAtEpochMillis)
     }

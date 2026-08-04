@@ -43,8 +43,9 @@ complete_fields = len(re.findall(r"\bfield\(", complete_block)) + 18
 standard_sections = len(re.findall(r"\bsection\(", standard_block))
 complete_sections = len(re.findall(r"\bsection\(", complete_block)) + 3
 
+version_code_match = re.search(r"versionCode\s*=\s*(\d+)", app_build)
 checks = {
-    "phase version": 'versionName = "0.3.0-phase3"' in app_build,
+    "phase 3 or later version": version_code_match is not None and int(version_code_match.group(1)) >= 2,
     "numeric route": "NumericSection" in view_model and "NumericSectionScreen" in ui,
     "numeric actions": all(
         token in view_model

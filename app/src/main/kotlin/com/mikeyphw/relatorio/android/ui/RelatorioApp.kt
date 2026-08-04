@@ -108,6 +108,9 @@ fun RelatorioApp(
                                 AppRoute.Identity -> "Identificação"
                                 AppRoute.DraftSummary -> "Relatório em andamento"
                                 AppRoute.NumericSection -> "Preenchimento"
+                                AppRoute.Movements -> "Movimentações"
+                                AppRoute.MovementEditor -> "Dados da pessoa"
+                                AppRoute.Notes -> "Anotações"
                                 AppRoute.CompletedReports -> "Relatórios prontos"
                                 AppRoute.Home -> "Relatório Mensal AD"
                             },
@@ -160,6 +163,8 @@ fun RelatorioApp(
                     completedSectionCount = state.completedSectionCount,
                     onEditIdentity = actions::editDraftIdentity,
                     onStartFilling = actions::startNumericForm,
+                    onMovements = actions::openMovements,
+                    onNotes = actions::openNotes,
                     onHome = actions::goHome,
                     modifier = Modifier.padding(contentPadding),
                 )
@@ -171,6 +176,31 @@ fun RelatorioApp(
                     onCustomLabelChange = actions::updateDraftCustomLabel,
                     onPrevious = actions::previousNumericSection,
                     onNext = actions::nextNumericSection,
+                    modifier = Modifier.padding(contentPadding),
+                )
+                AppRoute.Movements -> MovementsScreen(
+                    draft = state.draft,
+                    onAdd = actions::addMovement,
+                    onEdit = actions::editMovement,
+                    onDelete = actions::deleteMovement,
+                    modifier = Modifier.padding(contentPadding),
+                )
+                AppRoute.MovementEditor -> MovementEditorScreen(
+                    form = state.movementForm,
+                    includesBirthDate = state.draft
+                        ?.let { ReportTemplateCatalog.definition(it.templateId).movementIncludesBirthDate }
+                        ?: true,
+                    isEditing = state.editingMovementId != null,
+                    validationMessages = state.validationMessages,
+                    saving = state.saving,
+                    onFormChange = actions::updateMovementForm,
+                    onSave = actions::saveMovement,
+                    modifier = Modifier.padding(contentPadding),
+                )
+                AppRoute.Notes -> NotesScreen(
+                    notes = state.notesText,
+                    saving = state.notesSaving,
+                    onNotesChange = actions::updateNotes,
                     modifier = Modifier.padding(contentPadding),
                 )
                 AppRoute.CompletedReports -> CompletedReportsScreen(
@@ -543,6 +573,8 @@ private fun DraftSummaryScreen(
     completedSectionCount: Int,
     onEditIdentity: () -> Unit,
     onStartFilling: () -> Unit,
+    onMovements: () -> Unit,
+    onNotes: () -> Unit,
     onHome: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -617,7 +649,7 @@ private fun DraftSummaryScreen(
                 )
                 Text(
                     if (numericWorkFinished) {
-                        "Você pode revisar qualquer seção. Movimentações, revisão final e PDF serão adicionados nas próximas fases."
+                        "Você pode revisar qualquer seção e preencher as movimentações e anotações."
                     } else {
                         "Os valores podem permanecer em zero quando não houve atividade no mês."
                     },
@@ -639,6 +671,22 @@ private fun DraftSummaryScreen(
             supportingText = "${definition.fieldCount} campos em $totalSections seções",
             icon = Icons.Default.Edit,
             onClick = onStartFilling,
+        )
+        LargeActionButton(
+            text = "Movimentação de membros",
+            supportingText = if (draft.movements.isEmpty()) {
+                "Nenhuma pessoa adicionada"
+            } else {
+                "${draft.movements.size} pessoa(s) adicionada(s)"
+            },
+            icon = Icons.Default.FolderOpen,
+            onClick = onMovements,
+        )
+        LargeActionButton(
+            text = "Anotações e sugestões",
+            supportingText = if (draft.notes.isBlank()) "Opcional" else "Texto salvo",
+            icon = Icons.Default.Article,
+            onClick = onNotes,
         )
         LargeActionButton(
             text = "Editar identificação",

@@ -33,17 +33,19 @@ internal fun MonthlyReport.valueEntities() = values.map { value ->
     )
 }
 
+internal fun MemberMovement.toEntity(reportId: String) = MemberMovementEntity(
+    id = id,
+    reportId = reportId,
+    registrationNumber = registrationNumber,
+    memberName = memberName,
+    eventDateIso = eventDateIso,
+    reasonCode = reasonCode,
+    occurrence = occurrence,
+    birthDateIso = birthDateIso,
+)
+
 internal fun MonthlyReport.movementEntities() = movements.map { movement ->
-    MemberMovementEntity(
-        id = movement.id,
-        reportId = id,
-        registrationNumber = movement.registrationNumber,
-        memberName = movement.memberName,
-        eventDateIso = movement.eventDateIso,
-        reasonCode = movement.reasonCode,
-        occurrence = movement.occurrence,
-        birthDateIso = movement.birthDateIso,
-    )
+    movement.toEntity(reportId = id)
 }
 
 internal fun ReportAggregate.toModel() = MonthlyReport(

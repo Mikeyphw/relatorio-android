@@ -5,8 +5,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.mikeyphw.relatorio.android.data.UserPreferences
 import com.mikeyphw.relatorio.android.data.UserPreferencesStore
+import com.mikeyphw.relatorio.model.MemberMovementInput
+import com.mikeyphw.relatorio.model.MemberMovementValidator
 import com.mikeyphw.relatorio.model.MonthlyReport
-import com.mikeyphw.relatorio.model.ReportDraftFactory
 import com.mikeyphw.relatorio.model.ReportIdentity
 import com.mikeyphw.relatorio.model.ReportIdentityValidator
 import com.mikeyphw.relatorio.model.ReportSummary
@@ -14,6 +15,8 @@ import com.mikeyphw.relatorio.model.ReportTemplateCatalog
 import com.mikeyphw.relatorio.model.ReportTemplateId
 import com.mikeyphw.relatorio.persistence.ReportRepository
 import java.time.LocalDate
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -28,6 +31,9 @@ enum class AppRoute {
     Identity,
     DraftSummary,
     NumericSection,
+    Movements,
+    MovementEditor,
+    Notes,
     CompletedReports,
 }
 
@@ -89,6 +95,10 @@ data class MainUiState(
     val defaultTemplate: ReportTemplateId = ReportTemplateId.AdTimoteo2026,
     val currentSectionIndex: Int = 0,
     val completedSectionCount: Int = 0,
+    val movementForm: MemberMovementInput = MemberMovementInput(),
+    val editingMovementId: String? = null,
+    val notesText: String = "",
+    val notesSaving: Boolean = false,
     val saving: Boolean = false,
 )
 
@@ -106,6 +116,14 @@ interface AppActions {
     fun updateDraftCustomLabel(fieldId: String, customLabel: String)
     fun nextNumericSection()
     fun previousNumericSection()
+    fun openMovements()
+    fun addMovement()
+    fun editMovement(movementId: String)
+    fun updateMovementForm(transform: (MemberMovementInput) -> MemberMovementInput)
+    fun saveMovement()
+    fun deleteMovement(movementId: String)
+    fun openNotes()
+    fun updateNotes(notes: String)
     fun goHome()
     fun goBack()
 }
@@ -120,7 +138,12 @@ class MainViewModel(
     private val identityMode = MutableStateFlow(IdentityMode.Create)
     private val validationMessages = MutableStateFlow<List<String>>(emptyList())
     private val activeSectionIndex = MutableStateFlow(0)
+    private val movementForm = MutableStateFlow(MemberMovementInput())
+    private val editingMovementId = MutableStateFlow<String?>(null)
+    private val notesText = MutableStateFlow("")
+    private val notesSaving = MutableStateFlow(false)
     private val saving = MutableStateFlow(false)
+    private var notesSaveJob: Job? = null
 
     private val navigationCore = combine(
         route,
@@ -146,18 +169,34 @@ class MainViewModel(
         navigation.copy(sectionIndex = sectionIndex)
     }
 
-    val uiState: StateFlow<MainUiState> = combine(
-        navigationState,
+    private val repositoryState = combine(
         repository.observeDraft(),
         repository.observeCompletedReports(),
         preferences.values,
+    ) { draft, completed, userPreferences ->
+        RepositoryState(draft, completed, userPreferences)
+    }
+
+    private val editorState = combine(
+        movementForm,
+        editingMovementId,
+        notesText,
+        notesSaving,
+    ) { form, movementId, notes, isNotesSaving ->
+        EditorState(form, movementId, notes, isNotesSaving)
+    }
+
+    val uiState: StateFlow<MainUiState> = combine(
+        navigationState,
+        repositoryState,
+        editorState,
         saving,
-    ) { navigation, draft, completed, userPreferences, isSaving ->
-        val totalSections = draft
+    ) { navigation, stored, editor, isSaving ->
+        val totalSections = stored.draft
             ?.let { ReportTemplateCatalog.definition(it.templateId).sections.size }
             ?: 0
-        val storedProgress = userPreferences.draftProgress.takeIf { progress ->
-            draft != null && progress.reportId == draft.id
+        val storedProgress = stored.userPreferences.draftProgress.takeIf { progress ->
+            stored.draft != null && progress.reportId == stored.draft.id
         }
         MainUiState(
             route = navigation.route,
@@ -165,9 +204,9 @@ class MainViewModel(
             identityForm = navigation.form,
             identityMode = navigation.mode,
             validationMessages = navigation.messages,
-            draft = draft,
-            completedReports = completed,
-            defaultTemplate = userPreferences.defaultTemplateId,
+            draft = stored.draft,
+            completedReports = stored.completed,
+            defaultTemplate = stored.userPreferences.defaultTemplateId,
             currentSectionIndex = navigation.sectionIndex.coerceIn(
                 minimumValue = 0,
                 maximumValue = (totalSections - 1).coerceAtLeast(0),
@@ -176,6 +215,10 @@ class MainViewModel(
                 ?.completedSectionCount
                 ?.coerceIn(0, totalSections)
                 ?: 0,
+            movementForm = editor.movementForm,
+            editingMovementId = editor.editingMovementId,
+            notesText = editor.notesText,
+            notesSaving = editor.notesSaving,
             saving = isSaving,
         )
     }.stateIn(
@@ -360,7 +403,91 @@ class MainViewModel(
         }
     }
 
+    override fun openMovements() {
+        validationMessages.value = emptyList()
+        route.value = AppRoute.Movements
+    }
+
+    override fun addMovement() {
+        movementForm.value = MemberMovementInput()
+        editingMovementId.value = null
+        validationMessages.value = emptyList()
+        route.value = AppRoute.MovementEditor
+    }
+
+    override fun editMovement(movementId: String) {
+        val movement = uiState.value.draft?.movements?.firstOrNull { it.id == movementId } ?: return
+        movementForm.value = MemberMovementValidator.fromMovement(movement)
+        editingMovementId.value = movement.id
+        validationMessages.value = emptyList()
+        route.value = AppRoute.MovementEditor
+    }
+
+    override fun updateMovementForm(transform: (MemberMovementInput) -> MemberMovementInput) {
+        movementForm.value = transform(movementForm.value)
+        validationMessages.value = emptyList()
+    }
+
+    override fun saveMovement() {
+        val draft = uiState.value.draft ?: return
+        val includesBirthDate = ReportTemplateCatalog.definition(draft.templateId).movementIncludesBirthDate
+        val form = movementForm.value
+        val errors = MemberMovementValidator.validate(form, includesBirthDate)
+        if (errors.isNotEmpty()) {
+            validationMessages.value = errors
+            return
+        }
+
+        viewModelScope.launch {
+            saving.value = true
+            try {
+                val movement = editingMovementId.value?.let { existingId ->
+                    MemberMovementValidator.toMovement(form, includesBirthDate, existingId)
+                } ?: MemberMovementValidator.toMovement(form, includesBirthDate)
+                repository.saveDraftMovement(draft.id, movement)
+                movementForm.value = MemberMovementInput()
+                editingMovementId.value = null
+                validationMessages.value = emptyList()
+                route.value = AppRoute.Movements
+            } finally {
+                saving.value = false
+            }
+        }
+    }
+
+    override fun deleteMovement(movementId: String) {
+        val draft = uiState.value.draft ?: return
+        if (draft.movements.none { it.id == movementId }) return
+        viewModelScope.launch {
+            repository.deleteDraftMovement(draft.id, movementId)
+        }
+    }
+
+    override fun openNotes() {
+        notesSaveJob?.cancel()
+        notesText.value = uiState.value.draft?.notes.orEmpty()
+        notesSaving.value = false
+        route.value = AppRoute.Notes
+    }
+
+    override fun updateNotes(notes: String) {
+        val draft = uiState.value.draft ?: return
+        val safeNotes = notes.take(MaximumNotesLength)
+        notesText.value = safeNotes
+        notesSaveJob?.cancel()
+        notesSaving.value = true
+        notesSaveJob = viewModelScope.launch {
+            delay(NotesSaveDelayMillis)
+            try {
+                repository.updateDraftNotes(draft.id, safeNotes)
+            } finally {
+                notesSaving.value = false
+            }
+        }
+    }
+
     override fun goHome() {
+        persistNotesImmediatelyIfNeeded()
         route.value = AppRoute.Home
     }
 
@@ -377,7 +504,31 @@ class MainViewModel(
             }
             AppRoute.DraftSummary -> route.value = AppRoute.Home
             AppRoute.NumericSection -> previousNumericSection()
+            AppRoute.Movements -> route.value = AppRoute.DraftSummary
+            AppRoute.MovementEditor -> {
+                validationMessages.value = emptyList()
+                route.value = AppRoute.Movements
+            }
+            AppRoute.Notes -> {
+                persistNotesImmediatelyIfNeeded()
+                route.value = AppRoute.DraftSummary
+            }
             AppRoute.CompletedReports -> route.value = AppRoute.Home
+        }
+    }
+
+    private fun persistNotesImmediatelyIfNeeded() {
+        if (route.value != AppRoute.Notes) return
+        val draft = uiState.value.draft ?: return
+        notesSaveJob?.cancel()
+        val currentNotes = notesText.value
+        notesSaveJob = viewModelScope.launch {
+            notesSaving.value = true
+            try {
+                repository.updateDraftNotes(draft.id, currentNotes)
+            } finally {
+                notesSaving.value = false
+            }
         }
     }
 
@@ -388,6 +539,19 @@ class MainViewModel(
         val mode: IdentityMode,
         val messages: List<String>,
         val sectionIndex: Int,
+    )
+
+    private data class RepositoryState(
+        val draft: MonthlyReport?,
+        val completed: List<ReportSummary>,
+        val userPreferences: UserPreferences,
+    )
+
+    private data class EditorState(
+        val movementForm: MemberMovementInput,
+        val editingMovementId: String?,
+        val notesText: String,
+        val notesSaving: Boolean,
     )
 
     class Factory(private val container: AppContainer) : ViewModelProvider.Factory {
@@ -403,5 +567,7 @@ class MainViewModel(
 
     private companion object {
         const val MaximumReportValue = 999_999
+        const val MaximumNotesLength = 4_000
+        const val NotesSaveDelayMillis = 350L
     }
 }

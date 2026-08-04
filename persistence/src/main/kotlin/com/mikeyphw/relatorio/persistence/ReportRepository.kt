@@ -1,5 +1,6 @@
 package com.mikeyphw.relatorio.persistence
 
+import com.mikeyphw.relatorio.model.MemberMovement
 import com.mikeyphw.relatorio.model.MonthlyReport
 import com.mikeyphw.relatorio.model.ReportDraftFactory
 import com.mikeyphw.relatorio.model.ReportIdentity
@@ -78,6 +79,32 @@ class ReportRepository(
         )
     }
 
+    suspend fun saveDraftMovement(reportId: String, movement: MemberMovement) {
+        dao.saveDraftMovement(
+            reportId = reportId,
+            movement = movement.toEntity(reportId),
+            updatedAtEpochMillis = nowEpochMillis(),
+        )
+    }
+
+    suspend fun deleteDraftMovement(reportId: String, movementId: String) {
+        dao.deleteDraftMovement(
+            reportId = reportId,
+            movementId = movementId,
+            updatedAtEpochMillis = nowEpochMillis(),
+        )
+    }
+
+    suspend fun updateDraftNotes(reportId: String, notes: String) {
+        check(
+            dao.updateNotes(
+                reportId = reportId,
+                notes = notes.take(MaximumNotesLength),
+                updatedAtEpochMillis = nowEpochMillis(),
+            ) == 1,
+        ) { "Relatório não encontrado: $reportId" }
+    }
+
     suspend fun complete(reportId: String) {
         dao.updateStatus(
             reportId = reportId,
@@ -87,4 +114,8 @@ class ReportRepository(
     }
 
     suspend fun deleteReport(reportId: String) = dao.deleteReport(reportId)
+
+    private companion object {
+        const val MaximumNotesLength = 4_000
+    }
 }

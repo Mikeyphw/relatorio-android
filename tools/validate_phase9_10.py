@@ -39,10 +39,10 @@ for required in required_files:
     require((ROOT / required).is_file(), f"arquivo obrigatório ausente: {required}")
 
 build = text("app/build.gradle.kts")
-require('versionCode = 11' in build, "versionCode final não é 11")
-require('versionName = "1.0.1"' in build, "versionName final não é 1.0.1")
+require('versionCode = 12' in build, "versionCode final não é 12")
+require('versionName = "1.2.0"' in build, "versionName final não é 1.2.0")
 require("buildConfig = true" in build, "BuildConfig precisa estar habilitado para exportar a versão no backup")
-require(text("VERSION").strip() == "1.0.1", "arquivo VERSION não está em 1.0.1")
+require(text("VERSION").strip() == "1.2.0", "arquivo VERSION não está em 1.2.0")
 
 manifest = text("app/src/main/AndroidManifest.xml")
 for forbidden in ("android.permission.INTERNET", "MANAGE_EXTERNAL_STORAGE", "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"):

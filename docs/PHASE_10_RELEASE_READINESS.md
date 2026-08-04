@@ -2,7 +2,7 @@
 
 ## Entregue
 
-- versão de produto `1.0.1`;
+- versão de produto `1.2.0`;
 - ação direta de impressão pelo serviço de impressão do Android;
 - PDF criado de forma atômica, sem deixar arquivo parcial após falha;
 - verificação de espaço livre antes da geração do PDF;

@@ -31,6 +31,7 @@ class AppEndToEndTest {
         composeRule.onNodeWithText("Entendi").performClick()
 
         composeRule.onNodeWithText("Preencher novo relatório").performClick()
+        composeRule.onNodeWithText("Começar em branco").performClick()
         composeRule.onNodeWithText("Relatório AD Timóteo").assertIsDisplayed()
         composeRule.onNodeWithText("Continuar").performClick()
 

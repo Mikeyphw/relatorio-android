@@ -17,31 +17,54 @@ import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.FormatSize
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.mikeyphw.relatorio.android.HeaderDefaultsForm
 import com.mikeyphw.relatorio.android.data.TextSizePreference
 
 @Composable
 internal fun AccessibilitySettingsScreen(
     textSizePreference: TextSizePreference,
     highContrast: Boolean,
+    headerDefaults: HeaderDefaultsForm,
+    savingHeaderDefaults: Boolean,
+    settingsMessage: String?,
+    settingsMessageIsError: Boolean,
     onTextSizeChange: (TextSizePreference) -> Unit,
     onHighContrastChange: (Boolean) -> Unit,
+    onSaveHeaderDefaults: (HeaderDefaultsForm) -> Unit,
+    onClearSettingsMessage: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var regional by rememberSaveable(headerDefaults.regional) { mutableStateOf(headerDefaults.regional) }
+    var congregation by rememberSaveable(headerDefaults.congregation) { mutableStateOf(headerDefaults.congregation) }
+    var leadPastor by rememberSaveable(headerDefaults.leadPastor) { mutableStateOf(headerDefaults.leadPastor) }
+    var ministry by rememberSaveable(headerDefaults.ministry) { mutableStateOf(headerDefaults.ministry) }
+    var presidentPastor by rememberSaveable(headerDefaults.presidentPastor) {
+        mutableStateOf(headerDefaults.presidentPastor)
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -51,19 +74,87 @@ internal fun AccessibilitySettingsScreen(
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
         Icon(
-            imageVector = Icons.Default.AccessibilityNew,
+            imageVector = Icons.Default.Settings,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
         )
         Text(
-            text = "Leitura e ajuda",
+            text = "Configurações",
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.semantics { heading() },
         )
         Text(
-            text = "Escolha o tamanho das letras e o contraste mais confortável. As mudanças são salvas automaticamente.",
+            text = "Defina os dados que aparecem ao iniciar um relatório e ajuste a leitura. O mês sempre começa como o mês anterior.",
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+
+        OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Settings, contentDescription = null)
+                    Text(
+                        text = "Valores padrão do cabeçalho",
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(start = 12.dp),
+                    )
+                }
+                Text(
+                    text = "Esses dados são apenas o ponto de partida. Ao criar o relatório, o usuário pode alterar qualquer campo. Alterar um relatório não muda estes padrões.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                HeaderDefaultTextField("Regional", regional) { regional = it.take(120) }
+                HeaderDefaultTextField("Congregação", congregation) { congregation = it.take(160) }
+                HeaderDefaultTextField("Pastor dirigente", leadPastor) { leadPastor = it.take(160) }
+                HeaderDefaultTextField("Ministério", ministry) { ministry = it.take(160) }
+                HeaderDefaultTextField("Pastor presidente", presidentPastor) { presidentPastor = it.take(160) }
+                Button(
+                    enabled = !savingHeaderDefaults,
+                    onClick = {
+                        onSaveHeaderDefaults(
+                            HeaderDefaultsForm(
+                                regional = regional,
+                                congregation = congregation,
+                                leadPastor = leadPastor,
+                                ministry = ministry,
+                                presidentPastor = presidentPastor,
+                            ),
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(if (savingHeaderDefaults) "Salvando..." else "Salvar valores padrão")
+                }
+                if (settingsMessage != null) {
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (settingsMessageIsError) {
+                                MaterialTheme.colorScheme.errorContainer
+                            } else {
+                                MaterialTheme.colorScheme.primaryContainer
+                            },
+                        ),
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            Text(
+                                text = settingsMessage,
+                                color = if (settingsMessageIsError) {
+                                    MaterialTheme.colorScheme.onErrorContainer
+                                } else {
+                                    MaterialTheme.colorScheme.onPrimaryContainer
+                                },
+                            )
+                            TextButton(onClick = onClearSettingsMessage) { Text("Fechar aviso") }
+                        }
+                    }
+                }
+            }
+        }
 
         OutlinedCard(modifier = Modifier.fillMaxWidth()) {
             Column(
@@ -141,10 +232,10 @@ internal fun AccessibilitySettingsScreen(
                     )
                 }
                 HelpStep("1", "Toque em Preencher novo relatório.")
-                HelpStep("2", "Confira o mês e os dados da congregação.")
-                HelpStep("3", "Use os botões de menos e mais para informar as quantidades.")
-                HelpStep("4", "Revise e conclua o relatório.")
-                HelpStep("5", "Abra, salve ou compartilhe o PDF.")
+                HelpStep("2", "Escolha começar em branco ou copiar o relatório anterior.")
+                HelpStep("3", "Confira o mês e os dados da congregação.")
+                HelpStep("4", "Use os botões de menos e mais para informar as quantidades.")
+                HelpStep("5", "Revise e conclua o relatório, depois abra, salve ou compartilhe o PDF.")
             }
         }
 
@@ -154,6 +245,21 @@ internal fun AccessibilitySettingsScreen(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
+}
+
+@Composable
+private fun HeaderDefaultTextField(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth(),
+    )
 }
 
 @Composable

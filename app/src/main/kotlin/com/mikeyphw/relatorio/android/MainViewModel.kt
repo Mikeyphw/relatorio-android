@@ -35,6 +35,7 @@ import kotlinx.coroutines.launch
 
 enum class AppRoute {
     Home,
+    NewReportStart,
     TemplatePicker,
     Identity,
     DraftSummary,
@@ -52,9 +53,11 @@ enum class AppRoute {
 
 enum class IdentityMode { Create, Edit }
 
+private val InitialPreviousMonth: LocalDate = LocalDate.now().minusMonths(1)
+
 data class IdentityForm(
-    val month: Int = LocalDate.now().monthValue,
-    val yearText: String = LocalDate.now().year.toString(),
+    val month: Int = InitialPreviousMonth.monthValue,
+    val yearText: String = InitialPreviousMonth.year.toString(),
     val regional: String = "",
     val congregation: String = "",
     val leadPastor: String = "",
@@ -82,11 +85,14 @@ data class IdentityForm(
             presidentPastor = identity.presidentPastor,
         )
 
-        fun fromPreferences(preferences: UserPreferences): IdentityForm {
-            val today = LocalDate.now()
+        fun fromPreferences(
+            preferences: UserPreferences,
+            today: LocalDate = LocalDate.now(),
+        ): IdentityForm {
+            val previousMonth = today.minusMonths(1)
             return IdentityForm(
-                month = today.monthValue,
-                yearText = today.year.toString(),
+                month = previousMonth.monthValue,
+                yearText = previousMonth.year.toString(),
                 regional = preferences.regional,
                 congregation = preferences.congregation,
                 leadPastor = preferences.leadPastor,
@@ -94,6 +100,32 @@ data class IdentityForm(
                 presidentPastor = preferences.presidentPastor,
             )
         }
+    }
+}
+
+data class HeaderDefaultsForm(
+    val regional: String = "",
+    val congregation: String = "",
+    val leadPastor: String = "",
+    val ministry: String = "Ministério AD Timóteo MG",
+    val presidentPastor: String = "Carmo Matias Gonçalves",
+) {
+    fun normalized(): HeaderDefaultsForm = copy(
+        regional = regional.trim(),
+        congregation = congregation.trim(),
+        leadPastor = leadPastor.trim(),
+        ministry = ministry.trim(),
+        presidentPastor = presidentPastor.trim(),
+    )
+
+    companion object {
+        fun fromPreferences(preferences: UserPreferences) = HeaderDefaultsForm(
+            regional = preferences.regional,
+            congregation = preferences.congregation,
+            leadPastor = preferences.leadPastor,
+            ministry = preferences.ministry,
+            presidentPastor = preferences.presidentPastor,
+        )
     }
 }
 
@@ -118,6 +150,10 @@ data class MainUiState(
     val saving: Boolean = false,
     val textSizePreference: TextSizePreference = TextSizePreference.Large,
     val highContrast: Boolean = false,
+    val headerDefaults: HeaderDefaultsForm = HeaderDefaultsForm(),
+    val settingsSaving: Boolean = false,
+    val settingsMessage: String? = null,
+    val settingsMessageIsError: Boolean = false,
     val backupBusy: Boolean = false,
     val backupMessage: String? = null,
     val backupMessageIsError: Boolean = false,
@@ -127,6 +163,8 @@ data class MainUiState(
 
 interface AppActions {
     fun startNewReport()
+    fun startBlankReport()
+    fun copyPreviousCompletedReport()
     fun continueDraft()
     fun openCompletedReports()
     fun openCompletedReport(reportId: String)
@@ -141,6 +179,8 @@ interface AppActions {
     fun clearBackupMessage()
     fun setTextSizePreference(value: TextSizePreference)
     fun setHighContrast(enabled: Boolean)
+    fun saveHeaderDefaults(defaults: HeaderDefaultsForm)
+    fun clearSettingsMessage()
     fun duplicateCompletedReport()
     fun reopenCompletedReport()
     fun deleteCompletedReport()
@@ -186,6 +226,7 @@ class MainViewModel(
     private val saving = MutableStateFlow(false)
     private val selectedCompletedReport = MutableStateFlow<MonthlyReport?>(null)
     private val backupUi = MutableStateFlow(BackupUiState())
+    private val settingsUi = MutableStateFlow(SettingsUiState())
     private var pendingBackupArchive: ReportBackupArchive? = null
     private var notesSaveJob: Job? = null
 
@@ -230,8 +271,8 @@ class MainViewModel(
         EditorState(form, movementId, notes, isNotesSaving)
     }
 
-    private val workspaceState = combine(editorState, backupUi) { editor, backup ->
-        WorkspaceState(editor = editor, backup = backup)
+    private val workspaceState = combine(editorState, backupUi, settingsUi) { editor, backup, settings ->
+        WorkspaceState(editor = editor, backup = backup, settings = settings)
     }
 
     val uiState: StateFlow<MainUiState> = combine(
@@ -310,6 +351,10 @@ class MainViewModel(
             saving = isSaving,
             textSizePreference = stored.userPreferences.textSizePreference,
             highContrast = stored.userPreferences.highContrast,
+            headerDefaults = HeaderDefaultsForm.fromPreferences(stored.userPreferences),
+            settingsSaving = workspace.settings.saving,
+            settingsMessage = workspace.settings.message,
+            settingsMessageIsError = workspace.settings.messageIsError,
             backupBusy = workspace.backup.busy,
             backupMessage = workspace.backup.message,
             backupMessageIsError = workspace.backup.messageIsError,
@@ -335,7 +380,38 @@ class MainViewModel(
             selectedTemplate.value = preferences.values.first().defaultTemplateId
             identityMode.value = IdentityMode.Create
             validationMessages.value = emptyList()
+            route.value = AppRoute.NewReportStart
+        }
+    }
+
+    override fun startBlankReport() {
+        viewModelScope.launch {
+            selectedTemplate.value = preferences.values.first().defaultTemplateId
+            identityMode.value = IdentityMode.Create
+            validationMessages.value = emptyList()
             route.value = AppRoute.TemplatePicker
+        }
+    }
+
+    override fun copyPreviousCompletedReport() {
+        if (saving.value) return
+        val previousReport = uiState.value.completedReports.firstOrNull() ?: return
+        val previousMonth = LocalDate.now().minusMonths(1)
+        viewModelScope.launch {
+            saving.value = true
+            try {
+                val draft = repository.duplicateCompletedForMonth(
+                    reportId = previousReport.id,
+                    month = previousMonth.monthValue,
+                    year = previousMonth.year,
+                )
+                preferences.resetDraftProgress(draft.id)
+                selectedTemplate.value = draft.templateId
+                selectedCompletedReport.value = null
+                route.value = AppRoute.DraftSummary
+            } finally {
+                saving.value = false
+            }
         }
     }
 
@@ -366,6 +442,7 @@ class MainViewModel(
 
 
     override fun openAccessibilitySettings() {
+        settingsUi.value = SettingsUiState()
         route.value = AppRoute.AccessibilitySettings
     }
 
@@ -510,6 +587,43 @@ class MainViewModel(
         viewModelScope.launch { preferences.setHighContrast(enabled) }
     }
 
+    override fun saveHeaderDefaults(defaults: HeaderDefaultsForm) {
+        if (settingsUi.value.saving) return
+        val normalized = defaults.normalized()
+        val error = when {
+            normalized.ministry.isBlank() -> "Informe o ministério padrão."
+            normalized.presidentPastor.isBlank() -> "Informe o pastor presidente padrão."
+            else -> null
+        }
+        if (error != null) {
+            settingsUi.value = SettingsUiState(message = error, messageIsError = true)
+            return
+        }
+        viewModelScope.launch {
+            settingsUi.value = SettingsUiState(saving = true)
+            runCatching {
+                preferences.saveHeaderDefaults(
+                    regional = normalized.regional,
+                    congregation = normalized.congregation,
+                    leadPastor = normalized.leadPastor,
+                    ministry = normalized.ministry,
+                    presidentPastor = normalized.presidentPastor,
+                )
+            }.onSuccess {
+                settingsUi.value = SettingsUiState(message = "Valores padrão do cabeçalho salvos.")
+            }.onFailure { errorCause ->
+                settingsUi.value = SettingsUiState(
+                    message = errorCause.userMessage("Não foi possível salvar os valores padrão."),
+                    messageIsError = true,
+                )
+            }
+        }
+    }
+
+    override fun clearSettingsMessage() {
+        settingsUi.value = settingsUi.value.copy(message = null, messageIsError = false)
+    }
+
     override fun duplicateCompletedReport() {
         val selected = selectedCompletedReport.value ?: return
         if (saving.value) return
@@ -518,7 +632,6 @@ class MainViewModel(
             try {
                 val draft = repository.duplicateCompletedForNextMonth(selected.id)
                 preferences.resetDraftProgress(draft.id)
-                preferences.saveIdentity(draft.identity)
                 selectedTemplate.value = draft.templateId
                 selectedCompletedReport.value = null
                 route.value = AppRoute.DraftSummary
@@ -541,7 +654,6 @@ class MainViewModel(
                     currentSectionIndex = 0,
                     completedSectionCount = sectionCount,
                 )
-                preferences.saveIdentity(draft.identity)
                 selectedTemplate.value = draft.templateId
                 selectedCompletedReport.value = null
                 route.value = AppRoute.DraftSummary
@@ -605,7 +717,6 @@ class MainViewModel(
                     preferences.resetDraftProgress(createdDraft.id)
                     activeSectionIndex.value = 0
                 }
-                preferences.saveIdentity(identity)
                 validationMessages.value = emptyList()
                 route.value = AppRoute.DraftSummary
             } finally {
@@ -829,7 +940,8 @@ class MainViewModel(
     override fun goBack() {
         when (route.value) {
             AppRoute.Home -> Unit
-            AppRoute.TemplatePicker -> route.value = AppRoute.Home
+            AppRoute.NewReportStart -> route.value = AppRoute.Home
+            AppRoute.TemplatePicker -> route.value = AppRoute.NewReportStart
             AppRoute.Identity -> {
                 route.value = if (identityMode.value == IdentityMode.Edit) {
                     AppRoute.DraftSummary
@@ -909,9 +1021,16 @@ class MainViewModel(
         val replaceCurrentDraft: Boolean = false,
     )
 
+    private data class SettingsUiState(
+        val saving: Boolean = false,
+        val message: String? = null,
+        val messageIsError: Boolean = false,
+    )
+
     private data class WorkspaceState(
         val editor: EditorState,
         val backup: BackupUiState,
+        val settings: SettingsUiState,
     )
 
     class Factory(private val container: AppContainer) : ViewModelProvider.Factory {

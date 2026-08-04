@@ -18,7 +18,7 @@ class ReportDraftFactoryTest {
         assertEquals("draft-1", draft.id)
         assertEquals(33, draft.values.size)
         assertTrue(draft.values.all { it.value == 0 })
-        assertEquals(8, draft.identity.month)
+        assertEquals(7, draft.identity.month)
         assertEquals(2026, draft.identity.year)
     }
 

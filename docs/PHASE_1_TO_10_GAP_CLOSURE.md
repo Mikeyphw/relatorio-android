@@ -21,7 +21,7 @@ Fechar as lacunas encontradas na auditoria final sem alterar os dois modelos de 
 ## Versão
 
 - `versionCode`: 11
-- `versionName`: `1.0.1`
+- `versionName`: `1.2.0`
 - banco Room: versão 1, sem migração
 
 ## Gates externos

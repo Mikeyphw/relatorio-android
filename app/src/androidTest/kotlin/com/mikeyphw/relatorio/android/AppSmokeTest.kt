@@ -24,6 +24,7 @@ class AppSmokeTest {
     @Test
     fun opensHomeAndStartsTheDefaultReportFlow() {
         composeRule.onNodeWithText("Preencher novo relatório").assertIsDisplayed().performClick()
+        composeRule.onNodeWithText("Começar em branco").assertIsDisplayed().performClick()
         composeRule.onNodeWithText("Relatório AD Timóteo").assertIsDisplayed()
         composeRule.onNodeWithText("Padrão").assertIsDisplayed()
         composeRule.onNodeWithText("Continuar").performClick()
@@ -33,6 +34,7 @@ class AppSmokeTest {
     @Test
     fun completeTemplateRemainsSelectable() {
         composeRule.onNodeWithText("Preencher novo relatório").performClick()
+        composeRule.onNodeWithText("Começar em branco").performClick()
         composeRule.onNodeWithText("Relatório Completo").performClick()
         composeRule.onNodeWithText("74 campos numéricos").assertIsDisplayed()
     }

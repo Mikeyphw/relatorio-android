@@ -24,10 +24,13 @@ object ReportDraftFactory {
         )
     }
 
-    fun defaultIdentity(today: LocalDate = LocalDate.now()): ReportIdentity = ReportIdentity(
-        month = today.monthValue,
-        year = today.year,
-    )
+    fun defaultIdentity(today: LocalDate = LocalDate.now()): ReportIdentity {
+        val previousMonth = today.minusMonths(1)
+        return ReportIdentity(
+            month = previousMonth.monthValue,
+            year = previousMonth.year,
+        )
+    }
 }
 
 object ReportIdentityValidator {

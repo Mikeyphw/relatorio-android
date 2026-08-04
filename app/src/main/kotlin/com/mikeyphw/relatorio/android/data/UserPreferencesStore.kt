@@ -113,6 +113,22 @@ class UserPreferencesStore(private val context: Context) {
         }
     }
 
+    suspend fun saveHeaderDefaults(
+        regional: String,
+        congregation: String,
+        leadPastor: String,
+        ministry: String,
+        presidentPastor: String,
+    ) {
+        context.reportPreferencesDataStore.edit { preferences ->
+            preferences[Keys.Regional] = regional.take(120)
+            preferences[Keys.Congregation] = congregation.take(160)
+            preferences[Keys.LeadPastor] = leadPastor.take(160)
+            preferences[Keys.Ministry] = ministry.take(160)
+            preferences[Keys.PresidentPastor] = presidentPastor.take(160)
+        }
+    }
+
 
     suspend fun setTextSizePreference(value: TextSizePreference) {
         context.reportPreferencesDataStore.edit { preferences ->

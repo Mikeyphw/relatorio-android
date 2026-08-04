@@ -2,10 +2,11 @@
 
 ## Concluído nesta entrega
 
-- todos os validadores históricos das Fases 2 a 10 passam sobre a versão final 1.0.1;
+- todos os validadores históricos das Fases 2 a 10 passam sobre a versão final 1.2.0;
 - 33 campos do modelo padrão e 74 do modelo completo preservados;
+- valores padrão do cabeçalho e cópia do relatório anterior implementados;
 - restauração somente de preferências implementada e coberta por teste;
-- 26 testes de `core-model` executados localmente e aprovados;
+- 27 testes de `core-model` executados localmente e aprovados;
 - fontes principais de `core-model`, persistência e ViewModel compiladas com contratos locais;
 - ajuda contextual adicionada a todas as rotas;
 - tela inicial restaurada para três ações principais;

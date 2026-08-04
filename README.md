@@ -12,11 +12,14 @@ Dados do projeto:
 - modelo alternativo: `RELATORIO_COMPLETO_V1`;
 - package ID: `com.mikeyphw.relatorio.android`;
 - target Devtool: `relatorio_android`;
-- versão: `1.0.1`.
+- versão: `1.2.0`.
 
 ## O que funciona
 
 - criação, salvamento e retomada de rascunho;
+- valores padrão do cabeçalho configuráveis;
+- novo relatório em branco sempre começa no mês anterior;
+- opção de copiar o relatório anterior sem copiar movimentações nem anotações;
 - dois modelos de formulário, com 33 ou 74 campos;
 - preenchimento guiado com botões grandes;
 - movimentações de membros e anotações;

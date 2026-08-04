@@ -38,10 +38,28 @@ object ReportHistory {
     ): MonthlyReport {
         val nextMonth = if (source.identity.month == 12) 1 else source.identity.month + 1
         val nextYear = if (source.identity.month == 12) source.identity.year + 1 else source.identity.year
+        return copyForMonth(
+            source = source,
+            month = nextMonth,
+            year = nextYear,
+            nowEpochMillis = nowEpochMillis,
+            newId = newId,
+        )
+    }
+
+    fun copyForMonth(
+        source: MonthlyReport,
+        month: Int,
+        year: Int,
+        nowEpochMillis: Long,
+        newId: String = UUID.randomUUID().toString(),
+    ): MonthlyReport {
+        require(month in 1..12) { "Mês inválido: $month" }
+        require(year in 2000..2100) { "Ano inválido: $year" }
         return source.copy(
             id = newId,
             status = ReportStatus.Draft,
-            identity = source.identity.copy(month = nextMonth, year = nextYear),
+            identity = source.identity.copy(month = month, year = year),
             values = source.values.map { it.copy() },
             movements = emptyList(),
             notes = "",

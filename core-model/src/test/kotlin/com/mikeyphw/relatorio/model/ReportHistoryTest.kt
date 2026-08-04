@@ -24,6 +24,27 @@ class ReportHistoryTest {
         assertEquals(99L, copy.createdAtEpochMillis)
     }
 
+
+    @Test
+    fun `copy for selected month keeps values and clears monthly events`() {
+        val source = report(month = 6, year = 2026)
+        val copy = ReportHistory.copyForMonth(
+            source = source,
+            month = 7,
+            year = 2026,
+            nowEpochMillis = 123L,
+            newId = "selected-month-copy",
+        )
+
+        assertEquals("selected-month-copy", copy.id)
+        assertEquals(7, copy.identity.month)
+        assertEquals(2026, copy.identity.year)
+        assertEquals(source.values, copy.values)
+        assertTrue(copy.movements.isEmpty())
+        assertEquals("", copy.notes)
+        assertEquals(123L, copy.createdAtEpochMillis)
+    }
+
     @Test
     fun `filter matches congregation month year and template`() {
         val reports = listOf(

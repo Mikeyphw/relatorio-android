@@ -1,4 +1,4 @@
-# Checklist de lançamento 1.0.1
+# Checklist de lançamento 1.2.0
 
 ## Validação automatizada
 

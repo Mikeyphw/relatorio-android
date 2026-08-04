@@ -148,7 +148,7 @@ fun RelatorioApp(
                                 onDismissRequest = { showMoreOptions = false },
                             ) {
                                 DropdownMenuItem(
-                                    text = { Text("Leitura e ajuda") },
+                                    text = { Text("Configurações") },
                                     onClick = {
                                         showMoreOptions = false
                                         actions.openAccessibilitySettings()
@@ -186,6 +186,13 @@ fun RelatorioApp(
                     onNewReport = actions::startNewReport,
                     onContinue = actions::continueDraft,
                     onCompleted = actions::openCompletedReports,
+                    modifier = Modifier.padding(contentPadding),
+                )
+                AppRoute.NewReportStart -> NewReportStartScreen(
+                    previousReport = state.completedReports.firstOrNull(),
+                    saving = state.saving,
+                    onStartBlank = actions::startBlankReport,
+                    onCopyPrevious = actions::copyPreviousCompletedReport,
                     modifier = Modifier.padding(contentPadding),
                 )
                 AppRoute.TemplatePicker -> TemplatePickerScreen(
@@ -276,8 +283,14 @@ fun RelatorioApp(
                 AppRoute.AccessibilitySettings -> AccessibilitySettingsScreen(
                     textSizePreference = state.textSizePreference,
                     highContrast = state.highContrast,
+                    headerDefaults = state.headerDefaults,
+                    savingHeaderDefaults = state.settingsSaving,
+                    settingsMessage = state.settingsMessage,
+                    settingsMessageIsError = state.settingsMessageIsError,
                     onTextSizeChange = actions::setTextSizePreference,
                     onHighContrastChange = actions::setHighContrast,
+                    onSaveHeaderDefaults = actions::saveHeaderDefaults,
+                    onClearSettingsMessage = actions::clearSettingsMessage,
                     modifier = Modifier.padding(contentPadding),
                 )
                 AppRoute.BackupRestore -> BackupRestoreScreen(
@@ -310,6 +323,7 @@ private data class ContextualHelp(
 
 private fun routeTitle(route: AppRoute): String = when (route) {
     AppRoute.Home -> "Relatório Mensal AD"
+    AppRoute.NewReportStart -> "Novo relatório"
     AppRoute.TemplatePicker -> "Novo relatório"
     AppRoute.Identity -> "Identificação"
     AppRoute.DraftSummary -> "Relatório em andamento"
@@ -320,7 +334,7 @@ private fun routeTitle(route: AppRoute): String = when (route) {
     AppRoute.Review -> "Revisão final"
     AppRoute.CompletedReports -> "Relatórios prontos"
     AppRoute.CompletedReportDetail -> "PDF do relatório"
-    AppRoute.AccessibilitySettings -> "Leitura e ajuda"
+    AppRoute.AccessibilitySettings -> "Configurações"
     AppRoute.BackupRestore -> "Backup e restauração"
     AppRoute.PrivacyInfo -> "Privacidade"
 }
@@ -330,13 +344,17 @@ private fun contextualHelpFor(state: MainUiState): ContextualHelp = when (state.
         "Como começar",
         "Use Novo relatório para iniciar o mês, Continuar relatório para retomar um rascunho ou Relatórios prontos para abrir documentos concluídos. As demais funções ficam em Mais opções.",
     )
+    AppRoute.NewReportStart -> ContextualHelp(
+        "Como deseja começar",
+        "Comece em branco para usar os valores padrão do cabeçalho. Use Copiar relatório anterior para reaproveitar quantidades do último relatório concluído; movimentações e anotações começam vazias.",
+    )
     AppRoute.TemplatePicker -> ContextualHelp(
         "Escolha do formulário",
         "O Relatório AD Timóteo é o formulário atual e já vem selecionado. Escolha Relatório Completo somente quando precisar do modelo anterior.",
     )
     AppRoute.Identity -> ContextualHelp(
         "Dados do relatório",
-        "Informe a congregação e confira mês, ano e dirigentes. Esses dados serão lembrados no próximo relatório para reduzir a digitação.",
+        "Confira mês, ano e dirigentes. Os campos começam com os valores padrão salvos em Configurações, mas podem ser alterados só para este relatório.",
     )
     AppRoute.DraftSummary -> ContextualHelp(
         "Relatório em andamento",
@@ -375,8 +393,8 @@ private fun contextualHelpFor(state: MainUiState): ContextualHelp = when (state.
         "Visualize, salve, compartilhe ou imprima o PDF. Corrigir reabre o relatório como rascunho; usar como base cria um novo mês sem copiar movimentações e anotações.",
     )
     AppRoute.AccessibilitySettings -> ContextualHelp(
-        "Leitura confortável",
-        "Escolha letras grandes ou muito grandes e ative contraste reforçado. As mudanças são salvas para as próximas aberturas.",
+        "Configurações",
+        "Defina os valores padrão do cabeçalho, escolha letras grandes ou muito grandes e ative contraste reforçado. O mês do novo relatório continua automático: sempre o mês anterior.",
     )
     AppRoute.BackupRestore -> ContextualHelp(
         "Proteção dos dados",
@@ -480,6 +498,78 @@ private fun HomeScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun NewReportStartScreen(
+    previousReport: ReportSummary?,
+    saving: Boolean,
+    onStartBlank: () -> Unit,
+    onCopyPrevious: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(ScreenPadding)
+            .navigationBarsPadding(),
+        verticalArrangement = Arrangement.spacedBy(SectionGap),
+    ) {
+        Text(
+            text = "Como deseja começar?",
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.semantics { heading() },
+        )
+        Text(
+            text = "O novo relatório começará no mês anterior ao mês atual. Depois você pode alterar o mês e qualquer dado do cabeçalho.",
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        LargeActionButton(
+            text = "Começar em branco",
+            supportingText = "Usa os valores padrão do cabeçalho e todos os números começam em zero",
+            icon = Icons.Default.Description,
+            onClick = onStartBlank,
+            enabled = !saving,
+        )
+        LargeActionButton(
+            text = "Copiar relatório anterior",
+            supportingText = if (previousReport == null) {
+                "Nenhum relatório concluído para copiar"
+            } else {
+                "Copia quantidades de ${MonthNames[previousReport.month - 1]} de ${previousReport.year}; movimentações e anotações ficam vazias"
+            },
+            icon = Icons.AutoMirrored.Filled.Article,
+            onClick = onCopyPrevious,
+            enabled = previousReport != null && !saving,
+            outlined = true,
+        )
+
+        if (previousReport != null) {
+            OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    modifier = Modifier.padding(18.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text("Relatório que será usado como base", style = MaterialTheme.typography.titleMedium)
+                    SummaryLine("Mês de origem", "${MonthNames[previousReport.month - 1]} de ${previousReport.year}")
+                    SummaryLine("Congregação", previousReport.congregation.ifBlank { "Não informada" })
+                    SummaryLine("Formulário", previousReport.templateId.displayNamePtBr)
+                }
+            }
+        }
+
+        Card(
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+        ) {
+            Text(
+                text = "Ao copiar, confira os números antes de concluir. As movimentações de membros e as anotações são mensais e não são copiadas automaticamente.",
+                modifier = Modifier.padding(18.dp),
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
         }
     }
 }
@@ -635,7 +725,7 @@ private fun IdentityScreen(
             modifier = Modifier.semantics { heading() },
         )
         Text(
-            "Confira os dados. As informações da igreja serão lembradas no próximo mês.",
+            "Confira os dados. Eles vieram das Configurações, mas podem ser alterados só para este relatório. O mês inicial é sempre o mês anterior.",
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 

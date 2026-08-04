@@ -14,6 +14,7 @@ validators = [
     "validate_phase6.py",
     "validate_phase7_8.py",
     "validate_phase9_10.py",
+    "validate_header_defaults_copy_previous.py",
 ]
 errors: list[str] = []
 
@@ -48,15 +49,17 @@ smoke = (ROOT / "app/src/androidTest/kotlin/com/mikeyphw/relatorio/android/AppSm
 e2e = (ROOT / "app/src/androidTest/kotlin/com/mikeyphw/relatorio/android/AppEndToEndTest.kt").read_text(encoding="utf-8")
 
 checks = {
-    "version 1.0.1": version == "1.0.1" and 'versionCode = 11' in build and 'versionName = "1.0.1"' in build,
+    "version 1.2.0": version == "1.2.0" and 'versionCode = 12' in build and 'versionName = "1.2.0"' in build,
     "preference-only restore": all(token in backup_model for token in ["willRestorePreferences", "restoredPreferences"]),
     "preference restore UI": "Restaurar configurações" in backup_ui and "configurações também" in backup_ui,
     "contextual help": "contextualHelpFor" in app_ui and 'Text("Ajuda")' in app_ui,
-    "three primary home actions": app_ui.count("LargeActionButton(", app_ui.index("private fun HomeScreen"), app_ui.index("private fun TemplatePickerScreen")) == 3,
+    "three primary home actions": app_ui.count("LargeActionButton(", app_ui.index("private fun HomeScreen"), app_ui.index("private fun NewReportStartScreen")) == 3,
     "secondary options menu": 'Text("Mais opções")' in app_ui,
     "auto mirrored icons": all(token not in app_ui + review_ui for token in ["Icons.Default.Article", "Icons.Default.NavigateNext", "Icons.Default.FactCheck"]),
     "Compose test v2": "junit4.v2.createAndroidComposeRule" in smoke and "junit4.v2.createAndroidComposeRule" in e2e,
-    "end-to-end flow": all(token in e2e for token in ["numeric_next", "movement_name", "review_complete", "PDF do relatório", "Backup e restauração"]),
+    "end-to-end flow": all(token in e2e for token in ["Começar em branco", "numeric_next", "movement_name", "review_complete", "PDF do relatório", "Backup e restauração"]),
+    "copy previous start option": all(token in app_ui for token in ["NewReportStartScreen", "Copiar relatório anterior", "movimentações e anotações ficam vazias"]),
+    "header defaults settings": all(token in app_ui for token in ["headerDefaults", "onSaveHeaderDefaults", "Configurações"]),
 }
 for name, passed in checks.items():
     if not passed:
@@ -76,7 +79,7 @@ if errors:
     raise SystemExit(1)
 
 print("Final Phase 1-10 validation passed")
-print("- all historical validators pass on the final 1.0.1 tree")
+print("- all historical validators pass on the final 1.2.0 tree")
 print("- preference-only restoration is enabled")
 print("- contextual help and three primary home actions are present")
 print("- deprecated Compose APIs are removed")

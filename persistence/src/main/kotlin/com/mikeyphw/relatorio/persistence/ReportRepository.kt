@@ -166,9 +166,26 @@ class ReportRepository(
 
     suspend fun duplicateCompletedForNextMonth(reportId: String): MonthlyReport {
         val source = requireNotNull(getReport(reportId)) { "Relatório não encontrado: $reportId" }
+        val nextMonth = if (source.identity.month == 12) 1 else source.identity.month + 1
+        val nextYear = if (source.identity.month == 12) source.identity.year + 1 else source.identity.year
+        return duplicateCompletedForMonth(
+            reportId = reportId,
+            month = nextMonth,
+            year = nextYear,
+        )
+    }
+
+    suspend fun duplicateCompletedForMonth(
+        reportId: String,
+        month: Int,
+        year: Int,
+    ): MonthlyReport {
+        val source = requireNotNull(getReport(reportId)) { "Relatório não encontrado: $reportId" }
         check(source.status == ReportStatus.Completed) { "Somente relatórios concluídos podem ser reutilizados." }
-        val copy = ReportHistory.copyForNextMonth(
+        val copy = ReportHistory.copyForMonth(
             source = source,
+            month = month,
+            year = year,
             nowEpochMillis = nowEpochMillis(),
         )
         dao.replaceDraft(

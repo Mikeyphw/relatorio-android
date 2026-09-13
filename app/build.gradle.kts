@@ -7,6 +7,7 @@ android {
     namespace = "com.mikeyphw.relatorio.android"
     compileSdk = 36
 
+    ndkVersion = "29.0.14206865"
     defaultConfig {
         applicationId = "com.mikeyphw.relatorio.android"
         minSdk = 26
@@ -32,8 +33,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     packaging {
@@ -50,6 +51,12 @@ android {
             "OldTargetApi",
             "UseKtx",
         )
+    }
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 

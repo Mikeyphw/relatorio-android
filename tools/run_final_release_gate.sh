@@ -5,6 +5,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
 python tools/validate_phase1_10_final.py
+python tools/validate_toolchain_baseline.py
 
 ./gradlew --no-daemon \
   :app:compileDebugKotlin \

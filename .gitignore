@@ -11,3 +11,17 @@ __pycache__/
 
 # Devtool local runtime state
 .devtool/
+
+# Android generated outputs and local signing material
+.kotlin/
+.cxx/
+.externalNativeBuild/
+*.apk
+*.ap_
+*.aab
+*.jks
+*.keystore
+*.p12
+*.pfx
+keystore.properties
+signing.properties

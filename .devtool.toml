@@ -20,7 +20,7 @@ prefer_native_termux = false
 [targets.relatorio_android.gradle]
 version = "9.4.1"
 max_workers = 1
-structured_events = false
+structured_events = true
 no_daemon = true
 parallel = false
 build_cache = false

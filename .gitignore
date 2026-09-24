@@ -8,3 +8,6 @@ captures/
 
 __pycache__/
 *.pyc
+
+# Devtool local runtime state
+.devtool/

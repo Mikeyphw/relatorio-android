@@ -14,7 +14,7 @@ chroot_name = "androidos"
 [targets.relatorio_android.android]
 variant = "debug"
 aapt2_provider = "auto"
-instrumentation = "never"
+instrumentation = "when-device-present"
 prefer_native_termux = false
 
 [targets.relatorio_android.gradle]

@@ -43,6 +43,14 @@ test = [":core-model:test", ":persistence:testDebugUnitTest", ":app:testDebugUni
 lint = ["lintDebug"]
 clean = ["clean"]
 
+[targets.relatorio_android.artifacts]
+required = false
+verify = false
+paths = [
+    "app/build/outputs/apk/debug/app-debug.apk",
+    "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk",
+]
+recursive = true
 [validation]
 android_safe = true
 max_workers = 1

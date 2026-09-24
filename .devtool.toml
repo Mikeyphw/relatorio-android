@@ -1,15 +1,17 @@
 [project]
-kind = "android"
+runner = "android"
+platform = "android"
 
 [execution]
 environment = "auto"
 chroot_name = "androidos"
 
 [targets.relatorio_android]
-type = "android"
 root = "."
 execution_environment = "auto"
 chroot_name = "androidos"
+runner = "android"
+platform = "android"
 
 [targets.relatorio_android.android]
 variant = "debug"

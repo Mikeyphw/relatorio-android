@@ -33,7 +33,6 @@ args = [
   "--no-configuration-cache",
   "-Dorg.gradle.parallel=false",
   "-Dorg.gradle.vfs.watch=false",
-  "-Dorg.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=768m -Dfile.encoding=UTF-8",
   "-Pkotlin.incremental=false",
   "-Pkotlin.compiler.execution.strategy=in-process",
 ]
@@ -64,3 +63,80 @@ parallel = false
 gradle_heap_mb = 1536
 gradle_metaspace_mb = 768
 memory_guard_mb = 256
+
+[targets.relatorio_android.jobs.ci-actions-contract]
+runner = "command"
+command = ["python3", "scripts/devtool_actions_contract.py"]
+inputs = [".devtool.toml", ".github/workflows/*.yml", "scripts/devtool_actions_contract.py"]
+metadata = { read_only = true }
+
+[targets.relatorio_android.workflows]
+ci-preflight = [
+  { id = "actions-contract", ref = "job:ci-actions-contract", depends_on = [] },
+  { id = "source-contract", ref = "job:ci-source-contract", depends_on = ["actions-contract"] },
+]
+ci-local = [
+  { id = "actions-contract", ref = "job:ci-actions-contract", depends_on = [] },
+  { id = "source-contract", ref = "job:ci-source-contract", depends_on = ["actions-contract"] },
+  { id = "unit", ref = "runner:android#test", depends_on = ["source-contract"] },
+  { id = "lint", ref = "runner:android#lint", depends_on = ["source-contract"] },
+]
+ci-source = [
+  { id = "actions-contract", ref = "job:ci-actions-contract", depends_on = [] },
+  { id = "source-contract", ref = "job:ci-source-contract", depends_on = ["actions-contract"] },
+]
+
+[workspace.scheduler]
+parallel = true
+max_parallel_nodes = 2
+max_gradle_nodes = 1
+max_dotnet_nodes = 1
+
+[wrapper]
+schema = 2
+default_command = "build"
+
+[wrapper.commands.build]
+description = "build through canonical Devtool and EXO"
+devtool = "build"
+target = "relatorio_android"
+allow_passthrough = true
+
+[wrapper.commands.test]
+description = "test through canonical Devtool and EXO"
+devtool = "test"
+target = "relatorio_android"
+allow_passthrough = true
+
+[wrapper.commands.lint]
+description = "lint through canonical Devtool and EXO"
+devtool = "lint"
+target = "relatorio_android"
+allow_passthrough = true
+
+[wrapper.commands.validate]
+description = "validate through canonical Devtool and EXO"
+devtool = "validate"
+target = "relatorio_android"
+allow_passthrough = true
+
+[wrapper.commands.ci-preflight]
+description = "ci-preflight through canonical Devtool and EXO"
+workflow = "ci-preflight"
+target = "relatorio_android"
+
+[wrapper.commands.ci-local]
+description = "ci-local through canonical Devtool and EXO"
+workflow = "ci-local"
+target = "relatorio_android"
+
+[targets.relatorio_android.jobs.ci-source-contract]
+runner = "command"
+command = ["python3", "scripts/verify_relatorio_actions.py", "--static"]
+inputs = [".devtool.toml", "scripts/verify_relatorio_actions.py", ".github/workflows/*.yml"]
+metadata = { read_only = true }
+
+[wrapper.commands.ci-source]
+description = "Read-only project-specific source and CI contract with EXO evidence"
+workflow = "ci-source"
+target = "relatorio_android"

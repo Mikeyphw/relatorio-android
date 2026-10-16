@@ -1,0 +1,82 @@
+# Pull requests and pushes must validate the Android source without release credentials.
+name: Relatorio Android CI
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: relatorio-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  android:
+    name: Android tests, lint and debug APK
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify repository and current release-source contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          python3 scripts/verify_relatorio_actions.py --static
+          python3 tools/validate_phase9_10.py
+      - name: Configure Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Prepare Android SDK
+        uses: android-actions/setup-android@v4
+      - name: Install Android SDK 36 build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sdkmanager --install 'platforms;android-36' 'build-tools;36.0.0' 'platform-tools'
+      - name: Configure Gradle cache
+        uses: gradle/actions/setup-gradle@v4
+      - name: Run unit tests, compile device tests, lint and build debug APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x ./gradlew
+          ./gradlew --no-daemon --max-workers=2 \
+            :core-model:test \
+            :persistence:testDebugUnitTest \
+            :app:testDebugUnitTest \
+            :persistence:compileDebugAndroidTestKotlin \
+            :app:compileDebugAndroidTestKotlin \
+            :app:lintDebug \
+            :app:assembleDebug
+      - name: Verify Android application ID, signature and APK hash
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk=app/build/outputs/apk/debug/app-debug.apk
+          test -s "$apk" && test ! -L "$apk"
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --print-certs "$apk"
+          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$apk" | grep -F "package: name='com.mikeyphw.relatorio.android.debug'"
+          sha256sum "$apk"
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-ci-debug-apk-${{ github.run_id }}-${{ github.run_attempt }}
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7
+      - name: Upload test and lint results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-ci-reports-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            **/build/test-results/**/*.xml
+            **/build/reports/tests/**
+            **/build/reports/lint-results-*.html
+          if-no-files-found: ignore
+          retention-days: 7

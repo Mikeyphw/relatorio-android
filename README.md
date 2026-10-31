@@ -43,33 +43,24 @@ persistence/  Banco Room, DAO, mapeadores e restauração transacional
 docs/         Escopo, privacidade, checklist e critérios de lançamento
 ```
 
-## Compilar
+## Build e validação via Devtool + GitHub Actions
+
+**Gradle é executado apenas no GitHub Actions.** Os checks locais são Python puro:
 
 ```bash
-./gradlew :app:assembleDebug
+./devtoolw                    # ci-source (padrão)
+./devtoolw remote-debug-plan # planejar build debug remoto
+./devtoolw remote-debug-build --yes  # após commit/push para master
 ```
 
-## Validar
+Os testes JVM, lint e compilação do APK rodam no GitHub. A compilação dos
+AndroidTest **não significa execução em emulador**. Consulte
+`docs/ci/DEVTOOL_ORCHESTRATION.md` para acompanhar requisições, verificar
+artefatos e usar refs diferentes de `master`.
 
-```bash
-./gradlew \
-  :app:compileDebugKotlin \
-  :core-model:test \
-  :persistence:testDebugUnitTest \
-  :persistence:compileDebugAndroidTestKotlin \
-  :app:testDebugUnitTest \
-  :app:compileDebugAndroidTestKotlin \
-  :app:lintDebug
-```
+## Release assinada
 
-## Gerar APK release assinado
-
-O guia do usuário está em `docs/MANUAL_RAPIDO_PT_BR.md`.
-
-O projeto não guarda chave ou senha. Defina as variáveis descritas em `docs/RELEASE_CHECKLIST.md` e execute:
-
-```bash
-bash tools/build_signed_release.sh
-```
-
-A assinatura final depende da chave privada oficial do responsável pelo aplicativo.
+O guia do usuário está em `docs/MANUAL_RAPIDO_PT_BR.md`. A geração local por
+`tools/build_signed_release.sh` está bloqueada para evitar Gradle fora do
+GitHub. A Wave A **não cria build ou assinatura de release**: isso exige
+workflow hospedado revisado em etapa separada, com tratamento seguro das chaves.

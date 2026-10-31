@@ -31,3 +31,7 @@
 ## Assinatura
 
 Use `bash tools/build_signed_release.sh` somente com a chave oficial do projeto. Não inclua a chave, senhas ou APKs assinados no Git.
+
+
+> Wave A (2026-10-30): o script local `tools/build_signed_release.sh` não executa
+> Gradle nem produz release; o workflow de release hospedado ainda não foi implementado.

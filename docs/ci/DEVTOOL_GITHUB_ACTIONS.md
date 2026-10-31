@@ -1,6 +1,6 @@
 # Relatório Mensal AD — GitHub Actions through Devtool
 
-This adds **debug-only GitHub CI and manual Devtool dispatch**, without changing the existing `relatorio_android` target or the local release signing flow.
+This adds **debug-only GitHub CI and manual Devtool dispatch**, while retaining Android target metadata; local Gradle and local release signing are blocked under the hosted-only policy.
 
 ## Contents
 
@@ -83,7 +83,7 @@ devtool --no-hud -r "$PWD" actions run relatorio-android-ci.yml --ref "$REF" --y
 - JVM tests **do not replace** real Android device tests for PDF output, Room runtime, accessibility, storage and backup behavior.
 - AndroidTest Kotlin test **compilation** does not execute on an emulator or physical device.
 - APK has debug signing and **cannot** be represented as the officially signed production release.
-- The existing `tools/build_signed_release.sh` stays a separate local signing workflow. No signing secrets, keystore material, APKs, or release attestations are committed.
+- The legacy `tools/build_signed_release.sh` now fails closed; hosted release/signing is not part of Wave A. No signing secrets, keystore material, APKs, or release attestations are committed.
 - GitHub Actions success is a remote build signal. It is not automatically Devtool's `device_qualified` or `release_qualified` verdict.
 
 ### Expected errors

@@ -2,22 +2,32 @@
 runner = "android"
 platform = "android"
 
+# Wave A host-only source validation: do not auto-promote Android repositories
+# into chroot; all Gradle tasks are delegated to GitHub Actions.
 [execution]
-environment = "auto"
-chroot_name = "androidos"
+# Wave D: Devtool native Gradle execution is forbidden for this repository.
+gradle_execution = "github-actions-only"
+environment = "host"
+
 
 [targets.relatorio_android]
 root = "."
-execution_environment = "auto"
-chroot_name = "androidos"
+execution_environment = "host"
 runner = "android"
 platform = "android"
+# Conservative ownership for Android, Python checkers, workflows, and docs.
+# Single-target workspace: prefer over-selection to missing changes.
+inputs = [
+  ".devtool.toml", "settings.gradle.kts", "build.gradle.kts", "gradle.properties",
+  "gradle/wrapper/**", ".github/workflows/**", "tools/**", "scripts/**",
+  "app/**", "core-model/**", "persistence/**", "docs/**", "VERSION", "README.md",
+]
 
 [targets.relatorio_android.android]
 variant = "debug"
 aapt2_provider = "auto"
 instrumentation = "when-device-present"
-prefer_native_termux = false
+prefer_native_termux = true
 
 [targets.relatorio_android.gradle]
 version = "9.4.1"
@@ -66,24 +76,49 @@ memory_guard_mb = 256
 
 [targets.relatorio_android.jobs.ci-actions-contract]
 runner = "command"
+execution_environment = "host"
 command = ["python3", "scripts/devtool_actions_contract.py"]
-inputs = [".devtool.toml", ".github/workflows/*.yml", "scripts/devtool_actions_contract.py"]
+inputs = [".devtool.toml", ".github/workflows/**", ".github/actions/**", "scripts/devtool_actions_contract.py"]
 metadata = { read_only = true }
 
 [targets.relatorio_android.workflows]
 ci-preflight = [
+  { id = "wave-b-contract", ref = "job:ci-wave-b-contract", depends_on = [] },
+  { id = "wave-c-contract", ref = "job:ci-wave-c-contract", depends_on = [] },
+  { id = "wave-d-policy", ref = "job:ci-wave-d-policy", depends_on = ["wave-c-contract"] },
   { id = "actions-contract", ref = "job:ci-actions-contract", depends_on = [] },
   { id = "source-contract", ref = "job:ci-source-contract", depends_on = ["actions-contract"] },
+  { id = "wrapper-contract", ref = "job:ci-wrapper-contract", depends_on = ["source-contract"] },
 ]
 ci-local = [
+  { id = "phase4-contract", ref = "job:ci-phase4-contract", depends_on = [] },
+  { id = "phase5-contract", ref = "job:ci-phase5-contract", depends_on = [] },
+  { id = "phase6-contract", ref = "job:ci-phase6-contract", depends_on = [] },
+  { id = "phase7-8-contract", ref = "job:ci-phase7-8-contract", depends_on = [] },
+  { id = "phase2-contract", ref = "job:ci-phase2-contract", depends_on = [] },
+  { id = "phase3-contract", ref = "job:ci-phase3-contract", depends_on = [] },
+  { id = "phase9-10-contract", ref = "job:ci-phase9-10-contract", depends_on = [] },
+  { id = "wave-b-contract", ref = "job:ci-wave-b-contract", depends_on = [] },
+  { id = "wave-c-contract", ref = "job:ci-wave-c-contract", depends_on = [] },
+  { id = "wave-d-policy", ref = "job:ci-wave-d-policy", depends_on = ["wave-c-contract"] },
   { id = "actions-contract", ref = "job:ci-actions-contract", depends_on = [] },
   { id = "source-contract", ref = "job:ci-source-contract", depends_on = ["actions-contract"] },
-  { id = "unit", ref = "runner:android#test", depends_on = ["source-contract"] },
-  { id = "lint", ref = "runner:android#lint", depends_on = ["source-contract"] },
+  { id = "wrapper-contract", ref = "job:ci-wrapper-contract", depends_on = ["source-contract"] },
 ]
 ci-source = [
+  { id = "phase4-contract", ref = "job:ci-phase4-contract", depends_on = [] },
+  { id = "phase5-contract", ref = "job:ci-phase5-contract", depends_on = [] },
+  { id = "phase6-contract", ref = "job:ci-phase6-contract", depends_on = [] },
+  { id = "phase7-8-contract", ref = "job:ci-phase7-8-contract", depends_on = [] },
+  { id = "phase2-contract", ref = "job:ci-phase2-contract", depends_on = [] },
+  { id = "phase3-contract", ref = "job:ci-phase3-contract", depends_on = [] },
+  { id = "phase9-10-contract", ref = "job:ci-phase9-10-contract", depends_on = [] },
+  { id = "wave-b-contract", ref = "job:ci-wave-b-contract", depends_on = [] },
+  { id = "wave-c-contract", ref = "job:ci-wave-c-contract", depends_on = [] },
+  { id = "wave-d-policy", ref = "job:ci-wave-d-policy", depends_on = ["wave-c-contract"] },
   { id = "actions-contract", ref = "job:ci-actions-contract", depends_on = [] },
   { id = "source-contract", ref = "job:ci-source-contract", depends_on = ["actions-contract"] },
+  { id = "wrapper-contract", ref = "job:ci-wrapper-contract", depends_on = ["source-contract"] },
 ]
 
 [workspace.scheduler]
@@ -94,49 +129,179 @@ max_dotnet_nodes = 1
 
 [wrapper]
 schema = 2
-default_command = "build"
-
-[wrapper.commands.build]
-description = "build through canonical Devtool and EXO"
-devtool = "build"
-target = "relatorio_android"
-allow_passthrough = true
-
-[wrapper.commands.test]
-description = "test through canonical Devtool and EXO"
-devtool = "test"
-target = "relatorio_android"
-allow_passthrough = true
-
-[wrapper.commands.lint]
-description = "lint through canonical Devtool and EXO"
-devtool = "lint"
-target = "relatorio_android"
-allow_passthrough = true
-
-[wrapper.commands.validate]
-description = "validate through canonical Devtool and EXO"
-devtool = "validate"
-target = "relatorio_android"
-allow_passthrough = true
+default_command = "ci-source"
 
 [wrapper.commands.ci-preflight]
-description = "ci-preflight through canonical Devtool and EXO"
+description = "Read-only GitHub workflow/source contract checks"
 workflow = "ci-preflight"
 target = "relatorio_android"
 
 [wrapper.commands.ci-local]
-description = "ci-local through canonical Devtool and EXO"
+description = "Portable Python-only source validation; never runs Gradle"
 workflow = "ci-local"
+target = "relatorio_android"
+
+[wrapper.commands.ci-source]
+description = "Default local source and wrapper contract checks (no Gradle)"
+workflow = "ci-source"
+target = "relatorio_android"
+
+[wrapper.commands.validate]
+description = "Alias for source-only validation (not native Android Gradle validation)"
+workflow = "ci-source"
 target = "relatorio_android"
 
 [targets.relatorio_android.jobs.ci-source-contract]
 runner = "command"
+execution_environment = "host"
 command = ["python3", "scripts/verify_relatorio_actions.py", "--static"]
-inputs = [".devtool.toml", "scripts/verify_relatorio_actions.py", ".github/workflows/*.yml"]
+inputs = [".devtool.toml", "scripts/verify_relatorio_actions.py", "scripts/verify_wave_c.py", ".github/actions/**", ".github/workflows/**", "app/**", "settings.gradle.kts", "build.gradle.kts"]
 metadata = { read_only = true }
 
-[wrapper.commands.ci-source]
-description = "Read-only project-specific source and CI contract with EXO evidence"
-workflow = "ci-source"
-target = "relatorio_android"
+[targets.relatorio_android.jobs.ci-wrapper-contract]
+runner = "command"
+execution_environment = "host"
+command = ["python3", "scripts/verify_devtool_wave_a.py"]
+inputs = [".devtool.toml", "scripts/verify_devtool_wave_a.py", "build-android-app.sh", "tools/build_signed_release.sh", "docs/**", "scripts/verify_devtool_wave_b.py"]
+metadata = { read_only = true }
+
+# GitHub-only Gradle: typed Actions shortcuts, no raw shell or passthrough.
+# Default branch is fixed at the audited snapshot: master. For other refs,
+# use `devtool actions plan/run ... --ref YOUR_PUSHED_BRANCH` explicitly.
+[wrapper.commands.remote-debug-plan]
+description = "Read-only GitHub debug APK plan with fixed dispatch inputs"
+devtool = "actions"
+[wrapper.commands.remote-debug-plan.actions]
+operation = "plan"
+workflow_id = "devtool-android-build.yml"
+ref = "master"
+[wrapper.commands.remote-debug-plan.actions.inputs]
+project_dir = "."
+module = "app"
+variant = "debug"
+format = "apk"
+
+[wrapper.commands.remote-debug-build]
+description = "Explicit GitHub debug APK dispatch; requires --yes"
+devtool = "actions"
+[wrapper.commands.remote-debug-build.actions]
+operation = "dispatch"
+workflow_id = "devtool-android-build.yml"
+ref = "master"
+[wrapper.commands.remote-debug-build.actions.inputs]
+project_dir = "."
+module = "app"
+variant = "debug"
+format = "apk"
+[wrapper.commands.remote-debug-build.options.yes]
+type = "boolean"
+description = "Explicitly authorize GitHub workflow dispatch"
+command_argv = ["--yes"]
+
+[wrapper.commands.remote-watch]
+description = "Watch the exact request; does not dispatch a new build"
+devtool = "actions"
+[wrapper.commands.remote-watch.actions]
+operation = "watch"
+[wrapper.commands.remote-watch.options.request_id]
+type = "string"
+required = true
+aliases = ["request-id"]
+command_argv = ["--request-id", "{value}"]
+
+[wrapper.commands.remote-resume]
+description = "Resume an existing dispatch request without a new POST"
+devtool = "actions"
+[wrapper.commands.remote-resume.actions]
+operation = "resume"
+[wrapper.commands.remote-resume.options.request_id]
+type = "string"
+required = true
+aliases = ["request-id"]
+command_argv = ["--request-id", "{value}"]
+
+[wrapper.commands.remote-artifacts]
+description = "List artifacts from the exact recorded dispatch request"
+devtool = "actions"
+[wrapper.commands.remote-artifacts.actions]
+operation = "artifacts"
+[wrapper.commands.remote-artifacts.options.request_id]
+type = "string"
+required = true
+aliases = ["request-id"]
+command_argv = ["--request-id", "{value}"]
+
+
+# Historical Phase 4/5/6/7-8 validators pin obsolete version strings and
+# intentionally stay outside the current source DAG until migrated.
+[targets.relatorio_android.jobs.ci-phase2-contract]
+runner = "command"
+execution_environment = "host"
+command = ["python3", "tools/validate_phase2.py"]
+inputs = ["tools/validate_phase2.py", "core-model/**", "persistence/**", "app/**", "docs/**", "VERSION"]
+metadata = { read_only = true }
+
+[targets.relatorio_android.jobs.ci-phase3-contract]
+runner = "command"
+execution_environment = "host"
+command = ["python3", "tools/validate_phase3.py"]
+inputs = ["tools/validate_phase3.py", "core-model/**", "persistence/**", "app/**", "docs/**", "VERSION"]
+metadata = { read_only = true }
+
+[targets.relatorio_android.jobs.ci-phase4-contract]
+runner = "command"
+execution_environment = "host"
+command = ["python3", "tools/validate_phase4.py"]
+inputs = ["tools/validate_phase4.py", "app/**", "core-model/**", "persistence/**", "docs/**", "VERSION"]
+metadata = { read_only = true }
+
+[targets.relatorio_android.jobs.ci-phase5-contract]
+runner = "command"
+execution_environment = "host"
+command = ["python3", "tools/validate_phase5.py"]
+inputs = ["tools/validate_phase5.py", "app/**", "core-model/**", "persistence/**", "docs/**", "VERSION"]
+metadata = { read_only = true }
+
+[targets.relatorio_android.jobs.ci-phase6-contract]
+runner = "command"
+execution_environment = "host"
+command = ["python3", "tools/validate_phase6.py"]
+inputs = ["tools/validate_phase6.py", "app/**", "core-model/**", "persistence/**", "docs/**", "VERSION"]
+metadata = { read_only = true }
+
+[targets.relatorio_android.jobs.ci-phase7-8-contract]
+runner = "command"
+execution_environment = "host"
+command = ["python3", "tools/validate_phase7_8.py"]
+inputs = ["tools/validate_phase7_8.py", "app/**", "core-model/**", "persistence/**", "docs/**", "VERSION"]
+metadata = { read_only = true }
+
+[targets.relatorio_android.jobs.ci-phase9-10-contract]
+runner = "command"
+execution_environment = "host"
+command = ["python3", "tools/validate_phase9_10.py"]
+inputs = ["tools/validate_phase9_10.py", "core-model/**", "persistence/**", "app/**", "docs/**", "VERSION", "tools/build_signed_release.sh"]
+metadata = { read_only = true }
+
+[targets.relatorio_android.jobs.ci-wave-b-contract]
+runner = "command"
+execution_environment = "host"
+command = ["python3", "scripts/verify_devtool_wave_b.py"]
+inputs = [".devtool.toml", "scripts/verify_devtool_wave_b.py", "scripts/verify_devtool_wave_a.py", "docs/ci/**"]
+metadata = { read_only = true }
+
+# Wave C: a strictly host-only, read-only contract for hosted shared builds.
+[targets.relatorio_android.jobs.ci-wave-c-contract]
+runner = "command"
+execution_environment = "host"
+command = ["python3", "scripts/test_wave_c.py"]
+inputs = [".github/workflows/**", ".github/actions/**", "scripts/verify_wave_c.py", "scripts/test_wave_c.py", "scripts/verify_wave_c_artifact.py", "scripts/verify_relatorio_actions.py"]
+metadata = { read_only = true }
+
+# Wave D: enforce hosted-only source policy through an additional host-only check.
+[targets.relatorio_android.jobs.ci-wave-d-policy]
+runner = "command"
+execution_environment = "host"
+command = ["python3", "scripts/verify_devtool_wave_d.py"]
+inputs = [".devtool.toml", "scripts/verify_devtool_wave_d.py", "docs/ci/WAVE_D_HOSTED_POLICY.md"]
+metadata = { read_only = true }

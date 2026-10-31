@@ -1,0 +1,84 @@
+name: Verified Relatorio debug build
+description: Shared hosted Gradle/test/lint and package provenance; never releases or signs release APKs
+runs:
+  using: composite
+  steps:
+    - name: Verify exact source and repository contracts
+      id: source-contract
+      shell: bash
+      run: |
+        set -euo pipefail
+        test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+        test -f gradle/wrapper/gradle-wrapper.jar
+        test -f gradle/wrapper/gradle-wrapper.properties
+        python3 scripts/verify_relatorio_actions.py --static
+        python3 tools/validate_phase9_10.py
+        python3 tools/validate_phase4.py
+        python3 tools/validate_phase5.py
+        python3 tools/validate_phase6.py
+        python3 tools/validate_phase7_8.py
+    - name: Configure Java 17
+      id: setup-java
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: '17'
+    - name: Prepare Android SDK
+      id: setup-sdk
+      uses: android-actions/setup-android@v4
+    - name: Install pinned Android SDK
+      id: install-sdk
+      shell: bash
+      run: |
+        set -euo pipefail
+        sdkmanager --install 'platforms;android-36' 'build-tools;36.0.0' 'platform-tools'
+    - name: Configure Gradle caching
+      id: gradle-cache
+      uses: gradle/actions/setup-gradle@v4
+    - name: Build and validate Android modules on GitHub only
+      id: gradle-build
+      shell: bash
+      run: |
+        set -euo pipefail
+        chmod +x ./gradlew
+        ./gradlew --no-daemon --max-workers=2 \
+          :core-model:test \
+          :persistence:testDebugUnitTest \
+          :app:testDebugUnitTest \
+          :persistence:compileDebugAndroidTestKotlin \
+          :app:compileDebugAndroidTestKotlin \
+          :app:lintDebug \
+          :app:assembleDebug
+    - name: Check APK identity and create evidence
+      id: package
+      shell: bash
+      run: |
+        set -euo pipefail
+        apk=app/build/outputs/apk/debug/app-debug.apk
+        test -f "$apk" && test ! -L "$apk" && test -s "$apk"
+        "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --print-certs "$apk"
+        "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$apk" | grep -F "package: name='com.mikeyphw.relatorio.android.debug'"
+        stage="$RUNNER_TEMP/relatorio-debug-verified"
+        mkdir -p "$stage"
+        cp -- "$apk" "$stage/relatorio-mensal-ad-debug.apk"
+        python3 scripts/verify_relatorio_actions.py --evidence "$stage/relatorio-mensal-ad-debug.apk" "$stage/build-evidence.json"
+        sha256sum "$stage/relatorio-mensal-ad-debug.apk"
+    - name: Upload verified APK and receipt
+      id: upload-apk
+      uses: actions/upload-artifact@v4
+      with:
+        name: relatorio-android-debug-apk-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/relatorio-debug-verified/
+        if-no-files-found: error
+        retention-days: 7
+    - name: Preserve test and lint reports
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: relatorio-debug-test-reports-${{ github.run_id }}-${{ github.run_attempt }}
+        path: |
+          **/build/test-results/**/*.xml
+          **/build/reports/tests/**
+          **/build/reports/lint-results-*.html
+        if-no-files-found: ignore
+        retention-days: 7

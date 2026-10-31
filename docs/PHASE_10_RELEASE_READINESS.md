@@ -18,3 +18,7 @@
 ## Limite de entrega
 
 O repositório não contém chave de assinatura. A assinatura final depende da chave privada do responsável pelo aplicativo. O comando `bash tools/build_signed_release.sh` usa a chave indicada no ambiente e verifica o APK assinado.
+
+
+> Wave A (2026-10-30): o script local `tools/build_signed_release.sh` não executa
+> Gradle nem produz release; o workflow de release hospedado ainda não foi implementado.

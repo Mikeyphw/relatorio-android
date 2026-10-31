@@ -1,11 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
-cd "$(dirname "$0")"
-./gradlew \
-  --no-daemon \
-  --max-workers=1 \
-  :core-model:test \
-  :persistence:testDebugUnitTest \
-  :app:testDebugUnitTest \
-  :app:assembleDebug
-printf '\nAPK: %s\n' "$PWD/app/build/outputs/apk/debug/app-debug.apk"
+printf '%s\n' 'HOSTED_GRADLE_ONLY: local APK build disabled. Run ./devtoolw remote-debug-plan, then ./devtoolw remote-debug-build --yes after committing and pushing.' >&2
+exit 2
